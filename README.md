@@ -7,7 +7,7 @@
 
 # API Documentation
 
-#### 1️⃣ Backend delpoyed at [🚫name service here](🚫add URL here) <br>
+#### 1️⃣ Backend delpoyed at [🚫Heroku](🚫add URL here) <br>
 
 ## 1️⃣ Getting started
 
