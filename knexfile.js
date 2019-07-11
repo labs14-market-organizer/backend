@@ -4,7 +4,7 @@ require('dotenv').config();
 // object for local development/testing environments
 const localPG = db => ({
   host: process.env.HOST,
-  database: db,
+  database: db, // Name of database cluster
   user: process.env.USER,
   password: process.env.PSWD
 });
@@ -36,6 +36,6 @@ const dbSettings = (connection) => ({
 module.exports = {
   testing: dbSettings(pgTest),
   development: dbSettings(pgDev),
-  staging: dbSettings(process.env.BE_STAGING),
-  production: dbSettings(process.env.BE_PRODUCTION)
+  staging: dbSettings(process.env.BE_SERVER),
+  production: dbSettings(process.env.BE_SERVER)
 };
