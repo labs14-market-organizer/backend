@@ -28,9 +28,9 @@ async function google(provided) {
       }
     })
   } else {
-    const [rtrn] = await db('users')
+    const rtrn = await db('users')
       .where({email})
       .returning('*');
-    return rtrn;
+    return rtrn[0];
   }
 }

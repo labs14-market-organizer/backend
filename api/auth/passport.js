@@ -25,7 +25,7 @@ module.exports = (passport) => {
   //   callbackURL: `${BE_URL}/auth/square/callback`
   // },
   // function(accessToken, refreshToken, profile, done) {
-  //   return done(null, user);
+  //   return done(null, profile);
   // }));
 
   passport.use(
