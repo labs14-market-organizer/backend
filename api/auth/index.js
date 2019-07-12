@@ -37,27 +37,30 @@ function genToken(user) {
 //   }
 // );
 
+// FE endpoint for redirect to Google
 router.get("/google",
   passport.authenticate("google", {
-    session: false,
+    session: false, // using JWT instead of sessions
     scope: ["openid email profile"]
   })
 );
 
+// Google endpoint for redirect to FE
 router.get("/google/callback",
   passport.authenticate("google", {
-    failureRedirect: `${FE_URL}`,
-    session: false
+    failureRedirect: `${FE_URL}`, // Handle auth failure on Google's side
+    session: false // using JWT instead of sessions
   }),
   async (req, res) => {
     return db.google(req.user)
       .then(user => {
         const jwt = genToken(user);
-        const exp = Date.now() + (1000*60*60*2);
+        const exp = Date.now() + (1000*60*60*2); // provides parallel to JWT exp
         const redirectURL = `${FE_URL}?jwt=${jwt}&exp=${exp}`;
         res.redirect(redirectURL);
       })
       .catch(err => {
+        // Handle auth failure w/ our user DB
         const redirectURL = `${FE_URL}?err=${err}`;
         res.redirect(redirectURL);
       });
