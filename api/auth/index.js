@@ -50,11 +50,17 @@ router.get("/google/callback",
     session: false
   }),
   async (req, res) => {
-    const user = await db.google(req.user);
-    const jwt = genToken(user);
-    const exp = Date.now() + (1000*60*60*2);
-    const redirectURL = `${FE_URL}?jwt=${jwt}&exp=${exp}`;
-    res.redirect(redirectURL);
+    return db.google(req.user)
+      .then(user => {
+        const jwt = genToken(user);
+        const exp = Date.now() + (1000*60*60*2);
+        const redirectURL = `${FE_URL}?jwt=${jwt}&exp=${exp}`;
+        res.redirect(redirectURL);
+      })
+      .catch(err => {
+        const redirectURL = `${FE_URL}?err=${err}`;
+        res.redirect(redirectURL);
+      });
   }
 );
 
