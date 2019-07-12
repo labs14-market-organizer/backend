@@ -36,9 +36,9 @@ module.exports = (passport) => {
         callbackURL: `${BE_URL}/auth/google/callback`
       },
       function(accessToken, refreshToken, profile, done) {
-        const { provider, _json } = profile;
-        const { sub, email } = _json;
-        const user = { provider, prov_user: sub, email };
+        const { provider, id, emails } = profile;
+        const email = emails[0].value;
+        const user = { provider, prov_user: id, email };
         return done(null, user);
       }
     )
