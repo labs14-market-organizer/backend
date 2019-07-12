@@ -8,6 +8,18 @@ const { FE_URL } = process.env;
 
 const db = require('./model');
 
+// Generate JWT
+function genToken(user) {
+  const { id } = user;
+  const payload = { subject: id };
+  const jwtSecret = process.env.JWT_SECRET;
+  const opt = { expiresIn: "2h" };
+  return {
+    token: jwt.sign(payload, jwtSecret, opt),
+    exp: Date.now() + (1000*60*60*2)
+  }
+}
+
 // router.get("/square",
 //   passport.authenticate("square", {
 //     session: false,

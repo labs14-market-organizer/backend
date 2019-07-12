@@ -28,10 +28,9 @@ async function google(provided) {
       }
     })
   } else {
-    const rtrn = await db('users')
-      .insert({email})
+    const [rtrn] = await db('users')
+      .where({email})
       .returning('*');
-    console.log(rtrn);
     return rtrn;
   }
 }
