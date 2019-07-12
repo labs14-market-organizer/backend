@@ -14,10 +14,7 @@ function genToken(user) {
   const payload = { subject: id };
   const jwtSecret = process.env.JWT_SECRET;
   const opt = { expiresIn: "2h" };
-  return {
-    token: jwt.sign(payload, jwtSecret, opt),
-    exp: Date.now() + (1000*60*60*2)
-  }
+  return jwt.sign(payload, jwtSecret, opt);
 }
 
 // router.get("/square",
@@ -52,12 +49,11 @@ router.get("/google/callback",
     failureRedirect: `${FE_URL}`,
     session: false
   }),
-  (req, res) => {
-    console.log("GOOGLE CALLBACK", req.user)
-    db.google(req.user)
-      .then(user => console.log('THEN', user))
-      .catch(err => console.log('CATCH', err))
-    const redirectURL = `${FE_URL}?jwt=${jwt}`;
+  async (req, res) => {
+    const user = await db.google(req.user);
+    const jwt = genToken(user);
+    const exp = Date.now() + (1000*60*60*2);
+    const redirectURL = `${FE_URL}?jwt=${jwt}&exp=${exp}`;
     res.redirect(redirectURL);
   }
 );
