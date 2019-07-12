@@ -1,6 +1,10 @@
 const SquareStrategy = require("passport-square").Strategy;
 const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
-const { SQUARE_ID, SQUARE_SECRET } = process.env;
+const {
+  BE_URL,
+  SQUARE_ID, SQUARE_SECRET,
+  GOOGLE_ID, GOOGLE_SECRET
+} = process.env;
 
 module.exports = (passport) => {
   // passport.serializeUser((user, done)=>{
@@ -18,7 +22,7 @@ module.exports = (passport) => {
   // passport.use(new SquareStrategy({
   //   clientID: SQUARE_ID,
   //   clientSecret: SQUARE_SECRET,
-  //   callbackURL: `${process.env.BE_URL}/auth/square/callback`
+  //   callbackURL: `${BE_URL}/auth/square/callback`
   // },
   // function(accessToken, refreshToken, profile, done) {
   //   return done(null, user);
@@ -27,9 +31,9 @@ module.exports = (passport) => {
   passport.use(
     new GoogleStrategy(
       {
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${process.env.BE_URL}/auth/google/callback`
+        clientID: GOOGLE_ID,
+        clientSecret: GOOGLE_SECRET,
+        callbackURL: `${BE_URL}/auth/google/callback`
       },
       function(accessToken, refreshToken, profile, done) {
         const { provider, _json } = profile;
