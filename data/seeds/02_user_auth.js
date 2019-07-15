@@ -5,8 +5,9 @@ const generateSeeds = () => {
 
   for (let i = 0; i < numOfUsers; i++) {
     arr.push({
+      user_id: i + 1,
       provider: 'google',
-      prov_user: `${900000000000000000000 + i }`
+      prov_user: `${900000000 + i}`
     });
   }
   return arr;
@@ -18,9 +19,9 @@ exports.seed = async function(knex, Promise) {
   return (
     knex
       // Deletes ALL existing entries for users table
-      .raw("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
+      .raw("TRUNCATE TABLE user_auth RESTART IDENTITY CASCADE")
       .then(function() {
-        return knex("users").insert(users);
+        return knex("user_auth").insert(users);
       })
   );
 };
