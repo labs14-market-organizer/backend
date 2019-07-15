@@ -62,7 +62,7 @@ router.get("/google/callback",
       .catch(err => {
         console.log(err);
         // Handle auth failure w/ our user DB
-        const redirectURL = `${FE_URL}?err=500`;
+        const redirectURL = `${FE_URL}/auth/token?err=500`;
         res.redirect(redirectURL);
       });
   }
