@@ -1,8 +1,7 @@
 
-exports.seed = function(knex) {
-  // Deletes ALL existing entries
   const generateSeeds = () => {
     const numOfUsers = 500;
+    let arr = [];
     for (let i = 0; i < numOfUsers; i++) {
       arr.push({
         email: `user${i}@email.com`
@@ -23,4 +22,3 @@ exports.seed = function(knex) {
         })
     );
   };
-};
