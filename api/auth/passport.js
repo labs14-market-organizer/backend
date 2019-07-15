@@ -25,7 +25,7 @@ module.exports = (passport) => {
   //   callbackURL: `${BE_URL}/auth/square/callback`
   // },
   // function(accessToken, refreshToken, profile, done) {
-  //   return done(null, user);
+  //   return done(null, profile);
   // }));
 
   passport.use(
@@ -33,13 +33,13 @@ module.exports = (passport) => {
       {
         clientID: GOOGLE_ID,
         clientSecret: GOOGLE_SECRET,
-        callbackURL: `${BE_URL}/auth/google/callback`
+        callbackURL: `${BE_URL}/auth/google/callback` // BE endpoint that Google redirects to
       },
       function(accessToken, refreshToken, profile, done) {
-        const { provider, _json } = profile;
-        const { sub, email } = _json;
-        const user = { provider, prov_user: sub, email };
-        return done(null, user);
+        const { provider, id, emails } = profile;
+        const email = emails[0].value;
+        const user = { provider, prov_user: id, email };
+        return done(null, user); // pass user data to callback
       }
     )
   );

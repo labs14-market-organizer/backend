@@ -5,16 +5,16 @@ module.exports = {
 }
 
 async function google(provided) {
-  const { email, ...auth } = provided;
-  let user;
+  const { email, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
     .where(auth)
     .returning('id');
-  if(!id.length) {
+  if(!id.length) { // Check if a user doesn't exist w/ specified auth data
+    // Use a transaction to prevent partial inserts
     return new Promise(async (resolve, reject) => {
       try{
         await db.transaction(async t => {
-          [user] = await db('users')
+          const [user] = await db('users')
             .insert({email})
             .returning('*')
             .transacting(t);
@@ -27,10 +27,10 @@ async function google(provided) {
         reject(err);
       }
     })
-  } else {
-    const [rtrn] = await db('users')
+  } else { // If user already exists, return user
+    const rtrn = await db('users')
       .where({email})
       .returning('*');
-    return rtrn;
+    return rtrn[0];
   }
 }
