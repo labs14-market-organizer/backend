@@ -56,7 +56,7 @@ router.get("/google/callback",
       .then(user => {
         const jwt = genToken(user);
         const exp = Date.now() + (1000*60*60*2); // provides parallel to JWT exp
-        const redirectURL = `${FE_URL}?jwt=${jwt}&exp=${exp}`;
+        const redirectURL = `${FE_URL}/auth/token?jwt=${jwt}&exp=${exp}`;
         res.redirect(redirectURL);
       })
       .catch(err => {
