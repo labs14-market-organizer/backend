@@ -4,10 +4,11 @@ const generateSeeds = () => {
   let arr = [];
 
   for (let i = 0; i < numOfUsers; i++) {
+    const end = `${i}`.padStart(3,0);
     arr.push({
       user_id: i + 1,
       provider: 'google',
-      prov_user: `${900000000 + i}`
+      prov_user: `900000000000000000${end}`
     });
   }
   return arr;
