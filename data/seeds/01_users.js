@@ -4,7 +4,7 @@
     let arr = [];
     for (let i = 0; i < numOfUsers; i++) {
       arr.push({
-        email: `user${i}@email.com`
+        email: `user${i+1}@email.com`
       });
     }
     return arr;

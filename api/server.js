@@ -5,7 +5,7 @@ const passport = require("passport");
 
 const server = express();
 
-const userRouter = require('./users/user-router')
+const userRouter = require('./users')
 const authRouter = require('./auth');
 
 server.use(helmet());

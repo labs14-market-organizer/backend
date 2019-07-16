@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const Users = require("./routes-model"); 
+const Users = require("./model"); 
 
 router.get('/', (req, res ) => {
    Users.find()
@@ -11,8 +11,6 @@ router.get('/', (req, res ) => {
             res
                 .status(500).json({ message: 'This is a error message' });
         });
-
-
 });
 
 router.get('/:id', (req, res ) => {
@@ -25,8 +23,6 @@ router.get('/:id', (req, res ) => {
             res
                 .status(500).json({ message: 'This is a error message' });
         });
-
-
 });
 
 router.post('/', (req,res) => {
