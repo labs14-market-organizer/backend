@@ -26,3 +26,4 @@ module.exports = {
   development: dbSettings(process.env.DB_DEV),
   production: dbSettings(process.env.DATABASE_URL)
 };
+
