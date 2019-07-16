@@ -9,12 +9,13 @@ async function google(provided) {
   let id = await db('user_auth')
     .where(auth)
     .returning('id');
+  let user;
   if(!id.length) { // Check if a user doesn't exist w/ specified auth data
     // Use a transaction to prevent partial inserts
     return new Promise(async (resolve, reject) => {
       try{
         await db.transaction(async t => {
-          const [user] = await db('users')
+          [user] = await db('users')
             .insert({email})
             .returning('*')
             .transacting(t);

@@ -9,12 +9,16 @@ module.exports = {
 };
 
 function find() {
-    return db('users');
-}
-
-function findById(id) {
-    return db('users')
-        .where({ id: id })
+    return db('users as u')
+        .join('user_auth as ua', {'u.id': 'ua.user_id'})
+        .select('u.id', 'u.email', 'ua.provider', 'ua.prov_user');
+    }
+    
+    function findById(id) {
+    return db('users as u')
+        .select('u.id', 'u.email', 'ua.provider', 'ua.prov_user')
+        .where({'u.id': id})
+        .join('user_auth as ua', {'u.id': 'ua.user_id'})
         .first();
 }
 

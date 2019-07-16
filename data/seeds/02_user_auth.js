@@ -4,11 +4,11 @@ const generateSeeds = () => {
   let arr = [];
 
   for (let i = 0; i < numOfUsers; i++) {
-    const end = `${i}`.padStart(3,0);
+    const end = `${i+1}`.padStart(3,0); // pads string to always have a length of 3
     arr.push({
-      user_id: i + 1,
+      user_id: i+1,
       provider: 'google',
-      prov_user: `900000000000000000${end}`
+      prov_user: `900000000000000000${end}` // can't use integer math because id is FAR larger than MAX_SAFE_INTEGER
     });
   }
   return arr;
