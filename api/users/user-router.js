@@ -15,6 +15,20 @@ router.get('/', (req, res ) => {
 
 });
 
+router.get('/:id', (req, res ) => {
+    const id = req.params.id
+   Users.findById(id)
+        .then(users => {
+            res.status(200).json(users);
+        })
+        .catch(err => {
+            res
+                .status(500).json({ message: 'This is a error message' });
+        });
+
+
+});
+
 router.post('/', (req,res) => {
    Users.add(req.body)
         .then(added => {
