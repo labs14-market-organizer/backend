@@ -31,7 +31,7 @@ module.exports = (passport) => {
   passport.use(
     new GoogleStrategy(
       {
-        clientID: GOOGLE_ID || 'fallback',
+        clientID: GOOGLE_ID || 'test', // Fallback to prevent tests from failing
         clientSecret: GOOGLE_SECRET,
         callbackURL: `${BE_URL}/auth/google/callback` // BE endpoint that Google redirects to
       },
