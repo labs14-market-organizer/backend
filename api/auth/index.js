@@ -8,7 +8,8 @@ const { FE_URL } = process.env;
 
 const db = require('./model');
 
-const expire = 1000*60*60*2; // Sets common expiration for JWT and FE in ms
+// Sets common expiration for JWT and FE in ms
+const expire = 1000*60*60*2; // 2 hours
 // Generate JWT
 function genToken(user) {
   const { id } = user;
