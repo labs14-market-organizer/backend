@@ -1,6 +1,5 @@
-const request = require('supertest');
 const server = require('./server.js');
-const db = require('../data/dbConfig');
+const request = require('supertest')(server);
 
 describe('test environment', () => {
   it('runs', () => {
@@ -11,9 +10,14 @@ describe('test environment', () => {
 describe('server', () => {
   describe('/ GET', () => {
     it('should return 200 status', () => {
-      return request(server)
-        .get('/')
+      return request.get('/')
         .expect(200);
+    })
+
+    it('should return provided welcome message', () => {
+      const expected = {"message": "Hello from CloudStands."};
+      return request.get('/')
+        .then(res => expect(res.body).toEqual(expected));
     })
   })
 })

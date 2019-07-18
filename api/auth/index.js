@@ -8,12 +8,14 @@ const { FE_URL } = process.env;
 
 const db = require('./model');
 
+// Sets common expiration for JWT and FE in ms
+const expire = 1000*60*60*2; // 2 hours
 // Generate JWT
 function genToken(user) {
   const { id } = user;
   const payload = { subject: id };
   const jwtSecret = process.env.JWT_SECRET;
-  const opt = { expiresIn: "2h" };
+  const opt = { expiresIn: `${expire}ms` };
   return jwt.sign(payload, jwtSecret, opt);
 }
 
@@ -55,7 +57,7 @@ router.get("/google/callback",
     return db.google(req.user)
       .then(user => {
         const jwt = genToken(user);
-        const exp = Date.now() + (1000*60*60*2); // provides parallel to JWT exp
+        const exp = Date.now() + expire; // provides parallel to JWT exp
         const redirectURL = `${FE_URL}/auth/token?jwt=${jwt}&exp=${exp}`;
         res.redirect(redirectURL);
       })
