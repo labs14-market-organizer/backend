@@ -37,6 +37,16 @@ To get the server running locally:
 | GET    | `/userlist`     | admins (eventually) | Returns info on all users.     |
 | GET    | `/userlist/:id` | none                | Returns info on specific user. |
 
+#### Vendor Routes
+
+| Method | Endpoint       | Access Control      | Description                      |
+| ------ | -------------- | ------------------- | -------------------------------- |
+| GET    | `/vendors`     | none                | Returns info on all vendors.     |
+| GET    | `/vendors/:id` | none                | Returns info on specific vendor. |
+| POST   | `/vendors/`    | none                | Creates new vendor.              |
+| PUT    | `/vendors/:id` | none                | Updates specific vendor.         |
+| DELETE | `/vendors/:id` | none                | Deletes specific user.           |
+
 # Data Model
 
 #### USER_AUTH
@@ -66,6 +76,31 @@ Top-level information on user accounts
 }
 ```
 
+#### VENDORS
+Vendor profile data
+
+---
+
+```
+{
+  id: INTEGER, auto-incrementing
+  admin_id: INTEGER, foreign key to USERS table
+  name: STRING
+  description: TEXT 
+  items: TEXT
+  electricity: BOOLEAN
+  ventilation: BOOLEAN
+  loud: BOOLEAN
+  other_special: TEXT
+  website: STRING
+  facebook: STRING
+  twitter: STRING
+  instagram: STRING
+  created_at: TIMESTAMP WITH TIMEZONE
+  updated_at: TIMESTAMP WITH TIMEZONE
+}
+```
+
 ## Actions
 
 ### Auth
@@ -76,6 +111,14 @@ Top-level information on user accounts
 
 `find()` -> Returns all users
 `findById(id)` -> Returns user with specified ID in the `users` table
+
+### Vendors
+
+`find()` -> Returns all vendors
+`findById()` -> Returns vendor with specified ID in the `vendors` table
+`add()` -> Adds vendor to `vendor` table
+`update()` -> Updates vendor with specified ID in the `vendors` table
+`remove()` -> Deletes vendor with specified ID in the `vendors` table
 
 ## 3️⃣ Environment Variables
 
