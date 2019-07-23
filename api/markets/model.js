@@ -33,7 +33,7 @@ function update(id, changes) {
       .update(changes, '*');
   }
 
-function remove() {
+function remove(id) {
     return db('markets')
         .where({id})
         .del();
