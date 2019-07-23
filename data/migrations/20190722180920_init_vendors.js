@@ -20,9 +20,12 @@ exports.up = function(knex) {
       vendors.string('facebook');
       vendors.string('twitter');
       vendors.string('instagram');
-      vendors.timestamps();
-      
-
+      vendors.timestamp("created_at", { useTz: true })
+        .notNullable()
+        .defaultTo(knex.fn.now());
+      vendors.timestamp("updated_at", { useTz: true })
+        .notNullable()
+        .defaultTo(knex.fn.now());
     })
    }
    exports.down = function(knex, Promise) {
