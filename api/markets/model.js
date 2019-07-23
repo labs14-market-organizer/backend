@@ -27,21 +27,14 @@ function add(markets) {
     
 }
 
-function update() {
+function update(id, changes) {
     return db('markets')
-        .where({ id })
-        .update(changes)
-        .then(count => {
-            if (count > 0) {
-                return findById(id)
-            } else {
-                return null
-            }
-        });
-}
+      .where({ id })
+      .update(changes, '*');
+  }
 
 function remove() {
     return db('markets')
-        .where(id)
+        .where({id})
         .del();
 }
