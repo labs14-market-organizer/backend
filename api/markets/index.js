@@ -38,10 +38,11 @@ router.post('/', (req,res) => {
 });
 
 router.put('/:id', async (req, res) => {
+    req.body.updated_at = new Date();
     try {
       const market = await Markets.update(req.params.id, req.body);
       if (market) {
-        res.status(200).json(market);
+      res.status(200).json(market);
       } else {
         res.status(404).json({ message: 'The market could not be found' });
       }
