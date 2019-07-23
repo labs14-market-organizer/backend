@@ -3,12 +3,12 @@ exports.up = function(knex) {
     return knex.schema.createTable("vendors", vendors => {
       vendors.increments();
       vendors.integer("admin_id")
-      .unsigned()
-      .notNullable()
-      .references('id')
-      .inTable('users')
-      .onDelete('CASCADE')
-      .onUpdate('CASCADE');
+        .unsigned()
+        .notNullable()
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE')
+        .onUpdate('CASCADE');
       vendors.string('name');
       vendors.text('description');
       vendors.text('items');
