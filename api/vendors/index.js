@@ -47,6 +47,7 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   const {id} = req.params;
+  req.body.updated_at = new Date();
   Vendors.update(id, req.body)
     .then(updated => {
       !updated.length
