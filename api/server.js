@@ -2,6 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const passport = require("passport");
+const {verifyJWT} = require('./middleware')
 
 const server = express();
 
@@ -13,8 +14,8 @@ server.use(express.json());
 server.use(cors());
 server.use(passport.initialize());
 
-server.use("/auth", authRouter);
-server.use("/userlist", userRouter)
+server.use("/auth", verifyJWT, authRouter);
+server.use("/userlist", verifyJWT, userRouter)
 
 //Server Test Message
 server.get('/', (req, res) => {

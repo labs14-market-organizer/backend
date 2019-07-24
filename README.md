@@ -7,7 +7,7 @@
 
 # API Documentation
 
-#### Backend delpoyed on [Heroku](https://cloudstands.herokuapp.com).<br>
+#### Backend deployed on [Heroku](https://cloudstands.herokuapp.com).<br>
 
 ## Getting started
 

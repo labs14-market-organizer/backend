@@ -40,7 +40,7 @@ function onlyCols(allowed) {
   return (req, res, next) => {
     const flagged = Object.keys(req.body)
       .filter(prop => !allowed.includes(prop))
-      .join(', ')
+      .join(', ');
     if (!!flagged.length) {
       return res.status(400).json({
         error: `You are not permitted to submit any of the following fields in the body of this request: ${flagged}`
