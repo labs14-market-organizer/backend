@@ -33,7 +33,6 @@ function update(id, changes) {
     .returning('*');
 }
 
-
 function remove(id) {
   return db('vendors')
       .where({id})

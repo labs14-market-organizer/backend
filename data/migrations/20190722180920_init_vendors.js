@@ -1,4 +1,3 @@
-
 exports.up = function(knex) {
     return knex.schema.createTable("vendors", vendors => {
       vendors.increments();

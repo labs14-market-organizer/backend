@@ -9,7 +9,7 @@ describe('/vendors', () => {
     await knex.raw("TRUNCATE TABLE vendors RESTART IDENTITY CASCADE");
   })
 
-  describe('/ POST', async () => {
+  describe('/ POST', () => {
     it('should return 201 status', () => {
       const vendor = { admin_id: 1 }
       return request.post('/vendors')
@@ -30,6 +30,16 @@ describe('/vendors', () => {
         .send(vendor)
         .then(res => expect(res.body.id).toBe(3));
     })
+    
+    it('should return an object w/ items array', () => {
+      const vendor = {
+        "admin_id": 4,
+        "items": ["something","something else"]
+      }
+      return request.post('/vendors')
+        .send(vendor)
+        .then(res => expect(getType(res.body.items)).toBe('array'));
+    })
   })
 
   describe('/ GET', () => {
@@ -45,7 +55,7 @@ describe('/vendors', () => {
     
     it('should return an array w/ next ID', () => {
       return request.get('/vendors')
-        .then(res => expect(res.body).toHaveLength(3));
+        .then(res => expect(res.body).toHaveLength(4));
     })
   })
 
