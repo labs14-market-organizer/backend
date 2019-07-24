@@ -11,7 +11,7 @@ exports.up = function(knex) {
         .onUpdate('CASCADE');
       vendors.string('name');
       vendors.text('description');
-      vendors.text('items');
+      vendors.specificType('items', 'varchar[]') // create an array of strings
       vendors.boolean('electricity');
       vendors.boolean('ventilation');
       vendors.boolean('loud');
@@ -20,9 +20,9 @@ exports.up = function(knex) {
       vendors.string('facebook');
       vendors.string('twitter');
       vendors.string('instagram');
-      vendors.timestamp("created_at", { useTz: true })
+      vendors.timestamp("created_at", { useTz: true }) // use timestamps with timezones
         .notNullable()
-        .defaultTo(knex.fn.now());
+        .defaultTo(knex.fn.now()); // default value to current time at creation
       vendors.timestamp("updated_at", { useTz: true })
         .notNullable()
         .defaultTo(knex.fn.now());
