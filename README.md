@@ -87,7 +87,7 @@ Vendor profile data
   admin_id: INTEGER, foreign key to USERS table
   name: STRING
   description: TEXT 
-  items: TEXT
+  items: ARRAY of STRINGs
   electricity: BOOLEAN
   ventilation: BOOLEAN
   loud: BOOLEAN
