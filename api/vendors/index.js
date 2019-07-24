@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Vendors = require("./model");
+const {reqCols, onlyCols} = require('../middleware');
 
 router.get('/', (req, res) => {
   Vendors.find()
@@ -32,17 +33,27 @@ router.get('/:id', (req, res) => {
     })
 });
 
-router.post('/', (req, res) => {
-  Vendors.add(req.body)
-    .then(added => {
-      res.status(201).json(added[0]);
-    })
-    .catch(err => {
-      res.status(500).json({
-        knex: err,
-        message: 'The vendor could not be added to our database.'
+const postReq = ['items']
+const postOnly = ['admin_id', 'items']
+router.post('/', 
+  reqCols(postReq, true, 'admin_id'),
+  onlyCols(postOnly),
+  (req, res) => {
+    console.log(req.user_id);
+    if(!!req.user_id) {
+      req.body.admin_id = req.user_id;
+    }
+    Vendors.add(req.body)
+      .then(added => {
+        res.status(201).json(added[0]);
       })
-    })
+      .catch(err => {
+        console.log(err);
+        res.status(500).json({
+          knex: err,
+          message: 'The vendor could not be added to our database.'
+        })
+      })
 })
 
 router.put('/:id', (req, res) => {
