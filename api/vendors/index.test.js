@@ -6,6 +6,7 @@ const knex = require('../../data/dbConfig');
 
 describe('/vendors', () => {
   beforeAll(async () => {
+    // Reset vendors table before running tests
     await knex.raw("TRUNCATE TABLE vendors RESTART IDENTITY CASCADE");
   })
 
