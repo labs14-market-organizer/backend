@@ -29,8 +29,7 @@ function verifyJWT(req, res, next) {
 function reqCols(required, reqID = false, colID = 'id') {
   return (req, res, next) => {
     // filters through array of required columns to flag any missing fields
-    let 
-     = required
+    let missing = required
       .filter(prop => !Object.keys(req.body).includes(prop));
     // checks if ID is required and if user_id isn't already set on the request
     if(!!reqID && !req.user_id) {

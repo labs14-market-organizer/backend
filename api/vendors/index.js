@@ -33,11 +33,11 @@ router.get('/:id', (req, res) => {
     })
 });
 
-const postReq = ['items']
-const postOnly = ['admin_id', 'items']
+const postReq = ['name']
+const vendorOnly = ['admin_id', 'name', 'description', 'items', 'electricity', 'ventilation', 'loud', 'other_special', 'website', 'facebook', 'instagram']
 router.post('/', 
   reqCols(postReq, true, 'admin_id'),
-  onlyCols(postOnly),
+  onlyCols(vendorOnly),
   (req, res) => {
     console.log(req.user_id);
     if(!!req.user_id) {
@@ -56,21 +56,23 @@ router.post('/',
       })
 })
 
-router.put('/:id', (req, res) => {
-  const {id} = req.params;
-  req.body.updated_at = new Date();
-  Vendors.update(id, req.body)
-    .then(updated => {
-      !updated.length
-        ? res.status(404).json({ message: 'We do not have a vendor with the specified ID in our database.' })
-        : res.status(200).json(updated[0]);
-    })
-    .catch(err => {
-      res.status(500).json({
-        knex: err,
-        message: 'The specified vendor could not be updated in our database.'
+router.put('/:id',
+  onlyCols(vendorOnly),
+  (req, res) => {
+    const {id} = req.params;
+    req.body.updated_at = new Date();
+    Vendors.update(id, req.body)
+      .then(updated => {
+        !updated.length
+          ? res.status(404).json({ message: 'We do not have a vendor with the specified ID in our database.' })
+          : res.status(200).json(updated[0]);
       })
-    })
+      .catch(err => {
+        res.status(500).json({
+          knex: err,
+          message: 'The specified vendor could not be updated in our database.'
+        })
+      })
 })
 
 router.delete('/:id', (req, res) => {
