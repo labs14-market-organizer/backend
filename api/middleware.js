@@ -25,16 +25,21 @@ function verifyJWT(req, res, next) {
   }
 }
 
-function onlyOwner(table, paramID = 'id', tableID = 'id') {
+// "table" = the table of the target entry
+// "tableID" = the column name of the associated user ID in that table
+// "paramID" = the name of the request parameter that maps to the entry ID in the target table
+function onlyOwner(table, tableID = 'id', paramID = 'id') {
   return async (req, res, next) => {
-    const {user_id} = req;
-    const param = req.params[paramID];
-    const id = await db(table)
-      .where({[tableID]: param})
-      .first();
-    id === user_id
+    const {user_id} = req; // grab user ID from request
+    const id = req.params[paramID]; // grab ID from URL
+    // find user ID on target entry
+    const [result] = await db(table)
+      .select(tableID)
+      .where({id});
+    !result && next(); // let routes handle 404s
+    result[tableID] === user_id // determine if IDs match
       ? next()
-      : res.status(403).json({ message: 'This request can only be made by the user associated with the entry.' })
+      : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
   }
 }
 
@@ -44,10 +49,11 @@ function onlyOwner(table, paramID = 'id', tableID = 'id') {
 function reqCols(required, reqID = false, colID = 'id') {
   return (req, res, next) => {
     // filters through array of required columns to flag any missing fields
+    const body = Object.keys(req.body);
     let missing = required
-      .filter(prop => !Object.keys(req.body).includes(prop));
+      .filter(prop => !body.includes(prop));
     // checks if ID is required and if user_id isn't already set on the request
-    if(!!reqID && !req.user_id) {
+    if(!!reqID && !req.user_id && !body.includes(colID)) {
       missing = [...missing, colID];
       // if ID is required, but user_id isn't already on request, then adds colID field name to the array of missing values
     }
