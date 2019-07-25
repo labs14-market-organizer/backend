@@ -3,29 +3,36 @@ const db = require('../data/dbConfig');
 
 module.exports = {
   verifyJWT,
+  protect,
   onlyOwner,
   reqCols,
   onlyCols,
 }
 
-// "protected" = whether or not the route(s) are protected, requiring a valid JWT
-function verifyJWT(protected = true) {
-  return (req, res, next) => {
-    const jwtSecret = process.env.JWT_SECRET;
-    const token = req.headers.authorization;
-    if(!!protected && !token) {
-      res.status(401).json({ message: 'Authorization token required, but not provided.' })
-    } else {
-      jwt.verify(token, jwtSecret, (err, decoded) => {
-        if(!err) {
-          req.user_id = decoded.subject;
-          next();
-        } else {
-          res.status(403).json({ message: 'Invalid authorization token.' })
-        }
-      })
-    }
+// Verifies JWT and stores subject on request as "user_id"
+function verifyJWT(req, res, next) {
+  const jwtSecret = process.env.JWT_SECRET;
+  const token = req.headers.authorization;
+  if(!token) {
+    next();
+  } else {
+    jwt.verify(token, jwtSecret, (err, decoded) => {
+      if(!err) {
+        req.user_id = decoded.subject;
+        next();
+      } else {
+        res.status(403).json({ message: 'Invalid authorization token.' })
+      }
+    })
   }
+}
+
+// Protects route by requiring JWT
+// Always use after verifyJWT
+function protect(req, res, next) {
+  !req.headers.authorization
+    ? res.status(401).json({ message: 'Authorization token required, but not provided.' })
+    : next();
 }
 
 // "table" = the table of the target entry

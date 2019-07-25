@@ -14,8 +14,8 @@ server.use(express.json());
 server.use(cors());
 server.use(passport.initialize());
 
-server.use("/auth", verifyJWT(false), authRouter);
-server.use("/userlist", verifyJWT(false), userRouter)
+server.use("/auth", verifyJWT, authRouter);
+server.use("/userlist", verifyJWT, userRouter)
 
 //Server Test Message
 server.get('/', (req, res) => {
