@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
+const db = require('../data/dbConfig');
 
 module.exports = {
   verifyJWT,
+  onlyOwner,
   reqCols,
   onlyCols,
 }
@@ -20,6 +22,19 @@ function verifyJWT(req, res, next) {
         res.status(403).json({ message: 'Invalid authorization token.' })
       }
     })
+  }
+}
+
+function onlyOwner(table, paramID = 'id', tableID = 'id') {
+  return async (req, res, next) => {
+    const {user_id} = req;
+    const param = req.params[paramID];
+    const id = await db(table)
+      .where({[tableID]: param})
+      .first();
+    id === user_id
+      ? next()
+      : res.status(403).json({ message: 'This request can only be made by the user associated with the entry.' })
   }
 }
 
