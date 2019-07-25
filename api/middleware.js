@@ -6,6 +6,7 @@ module.exports = {
   protect,
   onlyOwner,
   reqCols,
+  reqNestCols,
   onlyCols,
 }
 
@@ -28,7 +29,7 @@ function verifyJWT(req, res, next) {
 }
 
 // Protects route by requiring JWT
-// Always use after verifyJWT()
+// *** Always use after verifyJWT() ***
 function protect(req, res, next) {
   !req.headers.authorization
     ? res.status(401).json({ message: 'Authorization token missing.' })
@@ -70,6 +71,37 @@ function reqCols(required, reqID = false, colID = 'id') {
     // rejects request if there are missing columns
     !!missing.length
       ? res.status(400).json({ message: `Your request is missing the following required fields: ${missing.join(', ')}`})
+      : next();
+  }
+}
+
+// Requires sub-fields if parent fields are present
+// *** Use reqCols() to require the parent fields themselves ***
+// "reqObjs" = object w/ keys equal to parent fields in request body
+// and values equal to array of strings representing required fields
+function reqNestCols(reqObjs) {
+  return (req, res, next) => {
+    const body = Object.keys(req.body);
+    // Compares request body to specified parents to see which parent fields are available to check
+    const checkParents = body
+      .filter(prop => Object.keys(reqObjs).includes(prop));
+    // Moves on to next middleware if there are no parent fields to check
+    if(!checkParents.length) {
+      return next()
+    }
+    let missing = [];
+    checkParents.forEach(parent => {
+      const absent = reqObjs[parent]
+        // Filter out fields that are included
+        .filter(prop => !body.includes(prop))
+        // Prepend the name of parent field for better error message
+        .map(prop => `${parent}.${prop}`);
+      // Add any missing fields to collection
+      missing = [...missing, ...absent];
+    })
+    // Reject request if required sub-fields are missing
+    !!missing.length
+      ? res.status(400).json({ message: `Your request is missing the following required sub-fields: ${missing.join(', ')}`})
       : next();
   }
 }
