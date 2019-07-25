@@ -25,7 +25,7 @@ function verifyJWT(req, res, next) {
   }
 }
 
-function onlyOwner(table, tableID = 'id', paramID = 'id') {
+function onlyOwner(table, paramID = 'id', tableID = 'id') {
   return async (req, res, next) => {
     const {user_id} = req;
     const param = req.params[paramID];
