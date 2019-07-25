@@ -19,7 +19,7 @@ server.use(passport.initialize());
 server.use("/auth", verifyJWT, authRouter);
 server.use("/userlist", verifyJWT, userRouter);
 server.use("/vendors", verifyJWT, vendorRouter);
-server.use("/markets", verifyJWT, marketRouter);
+server.use("/markets", verifyJWT, marketsRouter);
 
 //Server Test Message
 server.get('/', (req, res) => {
