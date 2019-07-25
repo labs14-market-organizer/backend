@@ -36,8 +36,8 @@ router.get('/:id', (req, res) => {
 const postReq = ['name']
 const vendorOnly = ['admin_id', 'name', 'description', 'items', 'electricity', 'ventilation', 'loud', 'other_special', 'website', 'facebook', 'instagram']
 router.post('/', 
-  reqCols(postReq, true, 'admin_id'),
-  onlyCols(vendorOnly),
+  // reqCols(postReq, true, 'admin_id'),
+  // onlyCols(vendorOnly),
   (req, res) => {
     console.log(req.user_id);
     if(!!req.user_id) {
@@ -57,8 +57,8 @@ router.post('/',
 })
 
 router.put('/:id',
-  onlyOwner('vendors', 'admin_id'),
-  onlyCols(vendorOnly),
+  // onlyOwner('vendors', 'admin_id'),
+  // onlyCols(vendorOnly),
   (req, res) => {
     const {id} = req.params;
     req.body.updated_at = new Date();
@@ -77,7 +77,7 @@ router.put('/:id',
 })
 
 router.delete('/:id',
-  onlyOwner('vendors', 'admin_id'),
+  // onlyOwner('vendors', 'admin_id'),
   (req, res) => {
     const {id} = req.params;
     Vendors.remove(id)
