@@ -9,7 +9,6 @@ const server = express();
 const userRouter = require('./users');
 const authRouter = require('./auth');
 const vendorRouter = require('./vendors');
-
 const marketsRouter = require('./markets/index');
 
 server.use(helmet());
@@ -20,6 +19,7 @@ server.use(passport.initialize());
 server.use("/auth", verifyJWT, authRouter);
 server.use("/userlist", verifyJWT, userRouter);
 server.use("/vendors", verifyJWT, vendorRouter);
+server.use("/markets", verifyJWT, marketRouter);
 
 //Server Test Message
 server.get('/', (req, res) => {
