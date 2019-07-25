@@ -28,7 +28,7 @@ function verifyJWT(req, res, next) {
 }
 
 // Protects route by requiring JWT
-// Always use after verifyJWT()
+// *** Always use after verifyJWT() ***
 function protect(req, res, next) {
   !req.headers.authorization
     ? res.status(401).json({ message: 'Authorization token missing.' })
