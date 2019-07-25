@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const db = require('../data/dbConfig');
 
 module.exports = {
   verifyJWT,
@@ -23,14 +24,26 @@ function verifyJWT(req, res, next) {
   }
 }
 
+async function onlyOwner(table, paramID = 'id', tableID = 'id') {
+  return (req, res, next) => {
+    const {user_id} = req;
+    const param = req.params[paramID];
+    const id = await db(table)
+      .where({[tableID]: param})
+      .first();
+    id === user_id
+      ? next()
+      : res.status(403).json({ message: 'This request can only be made by the user associated with the entry.' })
+  }
+}
+
 // "required" = array of required columns
 // "reqID" = whether or not some field should match the user ID of the user making the request
 // "colID" = the name of the field in the request body that should match the user ID of the user making the request
 function reqCols(required, reqID = false, colID = 'id') {
   return (req, res, next) => {
     // filters through array of required columns to flag any missing fields
-    let 
-     = required
+    let missing = required
       .filter(prop => !Object.keys(req.body).includes(prop));
     // checks if ID is required and if user_id isn't already set on the request
     if(!!reqID && !req.user_id) {
