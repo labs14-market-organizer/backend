@@ -9,7 +9,7 @@ module.exports = {
 };
 
 function find() {
-    return db('markets as m')
+    return db('markets')
         
     }
     
