@@ -3,6 +3,7 @@ const db = require('../data/dbConfig');
 
 module.exports = {
   verifyJWT,
+  onlyOwner,
   reqCols,
   onlyCols,
 }
@@ -24,8 +25,8 @@ function verifyJWT(req, res, next) {
   }
 }
 
-async function onlyOwner(table, paramID = 'id', tableID = 'id') {
-  return (req, res, next) => {
+function onlyOwner(table, paramID = 'id', tableID = 'id') {
+  return async (req, res, next) => {
     const {user_id} = req;
     const param = req.params[paramID];
     const id = await db(table)
