@@ -8,20 +8,23 @@ module.exports = {
   onlyCols,
 }
 
-function verifyJWT(req, res, next) {
-  const jwtSecret = process.env.JWT_SECRET;
-  const token = req.headers.authorization;
-  if(!token) {
-    next(); // Temporary fix until everything uses JWT's subject as user_id
-  } else {
-    jwt.verify(token, jwtSecret, (err, decoded) => {
-      if(!err) {
-        req.user_id = decoded.subject;
-        next();
-      } else {
-        res.status(403).json({ message: 'Invalid authorization token.' })
-      }
-    })
+// "protected" = whether or not the route(s) are protected, requiring a valid JWT
+function verifyJWT(protected = true) {
+  return (req, res, next) => {
+    const jwtSecret = process.env.JWT_SECRET;
+    const token = req.headers.authorization;
+    if(!!protected && !token) {
+      res.status(401).json({ message: 'Authorization token required, but not provided.' })
+    } else {
+      jwt.verify(token, jwtSecret, (err, decoded) => {
+        if(!err) {
+          req.user_id = decoded.subject;
+          next();
+        } else {
+          res.status(403).json({ message: 'Invalid authorization token.' })
+        }
+      })
+    }
   }
 }
 
