@@ -2,11 +2,13 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const passport = require("passport");
+const {verifyJWT} = require('./middleware');
 
 const server = express();
 
-const userRouter = require('./users')
+const userRouter = require('./users');
 const authRouter = require('./auth');
+const vendorRouter = require('./vendors');
 
 const marketsRouter = require('./markets/index');
 
@@ -15,10 +17,9 @@ server.use(express.json());
 server.use(cors());
 server.use(passport.initialize());
 
-server.use("/auth", authRouter);
-server.use("/userlist", userRouter);
-
-server.use("/markets", marketsRouter);
+server.use("/auth", verifyJWT, authRouter);
+server.use("/userlist", verifyJWT, userRouter);
+server.use("/vendors", verifyJWT, vendorRouter);
 
 //Server Test Message
 server.get('/', (req, res) => {

@@ -30,7 +30,7 @@ function add(users) {
         })
 }
 
-function update() {
+function update(id, user) {
     return db('users')
         .where({ id })
         .update(changes)
@@ -43,7 +43,7 @@ function update() {
         });
 }
 
-function remove() {
+function remove(id) {
     return db('users')
         .where(id)
         .del();
