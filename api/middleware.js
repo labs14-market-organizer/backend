@@ -14,7 +14,7 @@ function verifyJWT(req, res, next) {
   const jwtSecret = process.env.JWT_SECRET;
   const token = req.headers.authorization;
   if(!token) {
-    next();
+    next(); // let protect() handle route protection
   } else {
     jwt.verify(token, jwtSecret, (err, decoded) => {
       if(!err) {
@@ -28,10 +28,10 @@ function verifyJWT(req, res, next) {
 }
 
 // Protects route by requiring JWT
-// Always use after verifyJWT
+// Always use after verifyJWT()
 function protect(req, res, next) {
   !req.headers.authorization
-    ? res.status(401).json({ message: 'Authorization token required, but not provided.' })
+    ? res.status(401).json({ message: 'Authorization token missing.' })
     : next();
 }
 
