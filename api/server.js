@@ -10,6 +10,8 @@ const userRouter = require('./users');
 const authRouter = require('./auth');
 const vendorRouter = require('./vendors');
 
+const marketsRouter = require('./markets/index');
+
 server.use(helmet());
 server.use(express.json());
 server.use(cors());
