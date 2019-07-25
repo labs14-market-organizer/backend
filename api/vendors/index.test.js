@@ -44,7 +44,7 @@ describe('/vendors', () => {
   })
 
   describe('/ GET', () => {
-    it('should return 200 status', async () => {
+    it('should return 200 status', () => {
       return request.get('/vendors')
        .expect(200);
     })
@@ -61,7 +61,7 @@ describe('/vendors', () => {
   })
 
   describe('/:id GET', () => {
-    it('should return 200 status', async () => {
+    it('should return 200 status', () => {
       return request.get('/vendors/1')
        .expect(200);
     })
@@ -78,7 +78,7 @@ describe('/vendors', () => {
   })
 
   describe('/:id PUT', () => {
-    it('should return 200 status', async () => {
+    it('should return 200 status', () => {
       const vendor = { admin_id: 4 }
       return request.put('/vendors/1')
        .send(vendor)
@@ -105,7 +105,7 @@ describe('/vendors', () => {
   })
 
   describe('/:id DELETE', () => {
-    it('should return 200 status', async () => {
+    it('should return 200 status', () => {
       return request.delete('/vendors/1')
        .expect(200);
     })
@@ -116,7 +116,7 @@ describe('/vendors', () => {
     })
     
     it('should return 404 status', () => {
-      return request.get('/vendors/1')
+      return request.delete('/vendors/1')
         .expect(404);
     })
   })
