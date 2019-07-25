@@ -28,7 +28,7 @@ router.get('/:id', (req, res ) => {
 router.post('/', (req,res) => {
    Markets.add(req.body)
         .then(added => {
-            res.status(200).json(added);
+            res.status(201).json(added[0]);
         })
         .catch(err => {
             res
@@ -42,7 +42,7 @@ router.put('/:id', async (req, res) => {
     try {
       const market = await Markets.update(req.params.id, req.body);
       if (market) {
-      res.status(200).json(market);
+      res.status(200).json(market[0]);
       } else {
         res.status(404).json({ message: 'The market could not be found' });
       }
@@ -56,9 +56,9 @@ router.put('/:id', async (req, res) => {
   
   router.delete('/:id', (req, res) => {
     Markets.remove(req.params.id)
-      .then(count => {
-        if (count > 0) {
-          res.status(204).end();
+      .then(deleted => {
+        if (!!deleted.length) {
+          res.status(200).json(deleted[0]);
         } else {
           res.status(404).json({
             message: 'That Market does not exist, perhaps it was deleted already',

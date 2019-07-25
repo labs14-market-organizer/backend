@@ -36,5 +36,7 @@ function update(id, changes) {
 function remove(id) {
     return db('markets')
         .where({id})
-        .del();
+        .del()
+        .returning('*');
+
 }
