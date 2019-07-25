@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Vendors = require("./model");
-const {reqCols, onlyCols} = require('../middleware');
+const {onlyOwner, reqCols, onlyCols} = require('../middleware');
 
 router.get('/', (req, res) => {
   Vendors.find()
@@ -57,6 +57,7 @@ router.post('/',
 })
 
 router.put('/:id',
+  onlyOwner('vendors', 'admin_id'),
   onlyCols(vendorOnly),
   (req, res) => {
     const {id} = req.params;
@@ -75,20 +76,22 @@ router.put('/:id',
       })
 })
 
-router.delete('/:id', (req, res) => {
-  const {id} = req.params;
-  Vendors.remove(id)
-    .then(deleted => {
-      !deleted.length
-        ? res.status(404).json({ message: 'We do not have a vendor with the specified ID in our database.' })
-        : res.status(200).json(deleted[0]);
-    })
-    .catch(err => {
-      res.status(500).json({
-        knex: err,
-        message: 'The specified vendor could not be removed from our database.'
+router.delete('/:id',
+  onlyOwner('vendors', 'admin_id'),
+  (req, res) => {
+    const {id} = req.params;
+    Vendors.remove(id)
+      .then(deleted => {
+        !deleted.length
+          ? res.status(404).json({ message: 'We do not have a vendor with the specified ID in our database.' })
+          : res.status(200).json(deleted[0]);
       })
-    })
+      .catch(err => {
+        res.status(500).json({
+          knex: err,
+          message: 'The specified vendor could not be removed from our database.'
+        })
+      })
 })
 
 module.exports = router;
