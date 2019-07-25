@@ -2,7 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const passport = require("passport");
-const {verifyJWT} = require('./middleware')
+const {verifyJWT} = require('./middleware');
 
 const server = express();
 

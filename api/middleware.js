@@ -3,16 +3,18 @@ const db = require('../data/dbConfig');
 
 module.exports = {
   verifyJWT,
+  protect,
   onlyOwner,
   reqCols,
   onlyCols,
 }
 
+// Verifies JWT and stores subject on request as "user_id"
 function verifyJWT(req, res, next) {
   const jwtSecret = process.env.JWT_SECRET;
   const token = req.headers.authorization;
   if(!token) {
-    next(); // Temporary fix until everything uses JWT's subject as user_id
+    next();
   } else {
     jwt.verify(token, jwtSecret, (err, decoded) => {
       if(!err) {
@@ -23,6 +25,14 @@ function verifyJWT(req, res, next) {
       }
     })
   }
+}
+
+// Protects route by requiring JWT
+// Always use after verifyJWT
+function protect(req, res, next) {
+  !req.headers.authorization
+    ? res.status(401).json({ message: 'Authorization token required, but not provided.' })
+    : next();
 }
 
 // "table" = the table of the target entry
