@@ -51,13 +51,17 @@ function onlyOwner(table, tableID = 'id', paramID = 'id') {
     const [result] = await db(table)
       .select(tableID)
       .where({id});
-    !result && next(); // Let routes handle 404s
+    if(!result){
+      return next(); // Let routes handle 404s
+    }
     result[tableID] === user_id // Determine if IDs match
       ? next()
       : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
   }
 }
 
+// Handles any invalid fields in request body via express-validator
+// *** Pass immediately following an array of validator checks ***
 function validate(req, res, next)  {
   const errors = validationResult(req);
   !errors.isEmpty()

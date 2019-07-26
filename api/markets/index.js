@@ -29,6 +29,7 @@ router.get('/:id', (req, res ) => {
 const postReq = ['name']
 const marketOnly = ['admin_id', 'name', 'description', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'instagram']
 router.post('/',
+  reqCols(postReq, true, 'admin_id'),
   onlyCols(marketOnly),
   spec, validate,
   (req,res) => {
@@ -47,6 +48,7 @@ router.post('/',
 });
 
 router.put('/:id',
+  onlyOwner('markets', 'admin_id'),
   onlyCols(marketOnly),
   spec, validate,
   async (req, res) => {
@@ -65,22 +67,24 @@ router.put('/:id',
       }
   });
   
-router.delete('/:id', (req, res) => {
-  Markets.remove(req.params.id)
-    .then(deleted => {
-      if (!!deleted.length) {
-        res.status(200).json(deleted[0]);
-      } else {
-        res.status(404).json({
-          message: 'That Market does not exist, perhaps it was deleted already',
-        });
-      }
-    })
-    .catch(error => {
-      res
-        .status(500)
-        .json({ message: 'We ran into an error removing the Market' });
-    })
+router.delete('/:id',
+  onlyOwner('markets', 'admin_id'),
+  (req, res) => {
+    Markets.remove(req.params.id)
+      .then(deleted => {
+        if (!!deleted.length) {
+          res.status(200).json(deleted[0]);
+        } else {
+          res.status(404).json({
+            message: 'That Market does not exist, perhaps it was deleted already',
+          });
+        }
+      })
+      .catch(error => {
+        res
+          .status(500)
+          .json({ message: 'We ran into an error removing the Market' });
+      })
 });
 
 module.exports = router;

@@ -37,7 +37,7 @@ router.get('/:id', (req, res) => {
 const postReq = ['name']
 const vendorOnly = ['admin_id', 'name', 'description', 'items', 'electricity', 'ventilation', 'loud', 'other_special', 'website', 'facebook', 'instagram']
 router.post('/',
-  // reqCols(postReq, true, 'admin_id'),
+  reqCols(postReq, true, 'admin_id'),
   onlyCols(vendorOnly),
   spec, validate,
   (req, res) => {
@@ -57,7 +57,7 @@ router.post('/',
 })
 
 router.put('/:id',
-  // onlyOwner('vendors', 'admin_id'),
+  onlyOwner('vendors', 'admin_id'),
   onlyCols(vendorOnly),
   spec, validate,
   (req, res) => {
@@ -78,7 +78,7 @@ router.put('/:id',
 })
 
 router.delete('/:id',
-  // onlyOwner('vendors', 'admin_id'),
+  onlyOwner('vendors', 'admin_id'),
   (req, res) => {
     const {id} = req.params;
     Vendors.remove(id)

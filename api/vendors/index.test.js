@@ -3,6 +3,12 @@ const request = require('supertest')(server);
 const getType = require('jest-get-type');
 // const db = require('./model');
 const knex = require('../../data/dbConfig');
+const genToken = require('../auth/genToken');
+
+const tkn1 = genToken({id: 1}, 1000*60*60*2);
+const tkn2 = genToken({id: 2}, 1000*60*60*2);
+const tkn3 = genToken({id: 3}, 1000*60*60*2);
+const tkn4 = genToken({id: 4}, 1000*60*60*2);
 
 describe('/vendors', () => {
   beforeAll(async () => {
@@ -12,33 +18,37 @@ describe('/vendors', () => {
 
   describe('/ POST', () => {
     it('should return 201 status', () => {
-      const vendor = { admin_id: 1 }
+      const vendor = { name: "Leigh's" }
       return request.post('/vendors')
        .send(vendor)
+       .set({authorization: tkn1})
        .expect(201);
     })
     
     it('should return an object', () => {
-      const vendor = { admin_id: 2 }
+      const vendor = { name: "Mindy's" }
       return request.post('/vendors')
         .send(vendor)
+        .set({authorization: tkn2})
         .then(res => expect(getType(res.body)).toBe('object'));
     })
     
     it('should return an object w/ next ID', () => {
-      const vendor = { admin_id: 3 }
+      const vendor = { name: "Matt's" }
       return request.post('/vendors')
         .send(vendor)
+        .set({authorization: tkn3})
         .then(res => expect(res.body.id).toBe(3));
     })
     
     it('should return an object w/ items array', () => {
       const vendor = {
-        "admin_id": 4,
-        "items": ["something","something else"]
+        name: "Lajawanti's",
+        items: ["something","something else"]
       }
       return request.post('/vendors')
         .send(vendor)
+        .set({authorization: tkn4})
         .then(res => expect(getType(res.body.items)).toBe('array'));
     })
   })
@@ -79,27 +89,30 @@ describe('/vendors', () => {
 
   describe('/:id PUT', () => {
     it('should return 200 status', () => {
-      const vendor = { admin_id: 4 }
+      const vendor = { name: "TEST 1" }
       return request.put('/vendors/1')
-       .send(vendor)
-       .expect(200);
+        .send(vendor)
+        .set({authorization: tkn1})
+        .expect(200);
     })
     
     it('should return an object', () => {
-      const vendor = { admin_id: 5 }
+      const vendor = { name: "TEST 2" }
       return request.put('/vendors/2')
         .send(vendor)
+        .set({authorization: tkn2})
         .then(res => {
           expect(getType(res.body)).toBe('object');
         });
     })
     
     it('should return an object', () => {
-      const vendor = { admin_id: 6 }
+      const vendor = { name: "TEST 3" }
       return request.put('/vendors/3')
         .send(vendor)
+        .set({authorization: tkn3})
         .then(res => {
-          expect(res.body.admin_id).toBe(6);
+          expect(res.body.name).toBe("TEST 3");
         });
     })
   })
@@ -107,16 +120,19 @@ describe('/vendors', () => {
   describe('/:id DELETE', () => {
     it('should return 200 status', () => {
       return request.delete('/vendors/1')
+       .set({authorization: tkn1})
        .expect(200);
     })
     
     it('should return an object', () => {
       return request.delete('/vendors/2')
+        .set({authorization: tkn2})
         .then(res => expect(getType(res.body)).toBe('object'));
     })
     
     it('should return 404 status', () => {
       return request.delete('/vendors/1')
+        .set({authorization: tkn1})
         .expect(404);
     })
   })
