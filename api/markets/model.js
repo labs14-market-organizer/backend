@@ -8,23 +8,52 @@ module.exports = {
     remove,
 };
 
-function find() {
-    return db('markets')
-        
-    }
+async function find() {
+    const markets = await db('markets');
+    // Map hours of operation onto markets
+    const final = await markets.map(async market => {
+        const operation = await db('market_days')
+            .where({market_id: market.id})
+        return { ...market, operation };
+    })
+    // Return after all DB queries finish
+    return Promise.all(final);
+}
     
-    function findById(id) {
-    return db('markets as m')
-        .where({'m.id': id})
-         .first();
+async function findById(id) {
+    const [market] = await db('markets')
+        .where({id});
+    // If the market doesn't exist return empty result to trigger 404
+    if(!market) { return market };
+    operation = await db('market_days')
+        .where({market_id: id});
+    return {...market, operation};
 }
 
-function add(markets) {
-    return db('markets')
-        .insert(markets)
-        .returning('*')
-        
-    
+function add(market) {
+    let {operation, ...rest} = market;
+    let resMarket, resHours;
+    return new Promise(async (resolve, reject) => {
+        try{
+            // Wrap inserts in a transaction to avoid partial creation
+            await db.transaction(async t => {
+                [resMarket] = await db('markets')
+                    .insert(rest)
+                    .returning('*')
+                    .transacting(t);
+                operation = await operation.map(day => {
+                    return {...day, market_id: resMarket.id}
+                })
+                resHours = await db('market_days')
+                    .insert(operation)
+                    .returning('*')
+                    .transacting(t);
+            })
+            resolve({...resMarket, operation: resHours})
+        } catch(err) {
+            reject(err);
+        }
+    });
 }
 
 function update(id, changes) {
@@ -38,5 +67,4 @@ function remove(id) {
         .where({id})
         .del()
         .returning('*');
-
 }

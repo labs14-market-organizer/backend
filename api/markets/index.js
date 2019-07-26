@@ -17,17 +17,19 @@ router.get('/', (req, res ) => {
 router.get('/:id', (req, res ) => {
     const id = req.params.id
    Markets.findById(id)
-        .then(markets => {
-            res.status(200).json(markets);
+        .then(market => {
+            !market
+              ? res.status(404).json({message: 'The specified market does not exist.'})
+              : res.status(200).json(market);
         })
         .catch(err => {
             res
-                .status(500).json({ message: 'This is a error message' });
+                .status(500).json({ knex: err, message: 'This is a error message' });
         });
 });
 
 const postReq = ['name']
-const marketOnly = ['admin_id', 'name', 'description', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'instagram']
+const marketOnly = ['admin_id', 'name', 'description', 'operation', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'instagram']
 router.post('/',
   protect,
   reqCols(postReq, true, 'admin_id'),
@@ -38,9 +40,7 @@ router.post('/',
         req.body.admin_id = req.user_id;
       }
     Markets.add(req.body)
-          .then(added => {
-              res.status(201).json(added[0]);
-          })
+          .then(added => res.status(201).json(added))
           .catch(err => {
               res
                   .status(500)

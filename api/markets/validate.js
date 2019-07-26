@@ -10,6 +10,9 @@ module.exports = [
   body('description').isString()
     .withMessage("'description must be a string")
     .optional(),
+  body('operation').isArray()
+    .withMessage("'operation' must be an array")
+    .optional(),
   body('address').isAlphanumeric()
     .withMessage("'address' must be a string of numbers and letters")
     .optional(),
