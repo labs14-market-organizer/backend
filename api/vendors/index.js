@@ -39,7 +39,7 @@ const vendorOnly = ['admin_id', 'name', 'description', 'items', 'electricity', '
 router.post('/',
   spec, validate,
   // reqCols(postReq, true, 'admin_id'),
-  // onlyCols(vendorOnly),
+  onlyCols(vendorOnly),
   (req, res) => {
     if(!!req.user_id) {
       req.body.admin_id = req.user_id;
@@ -59,7 +59,7 @@ router.post('/',
 router.put('/:id',
   spec, validate,
   // onlyOwner('vendors', 'admin_id'),
-  // onlyCols(vendorOnly),
+  onlyCols(vendorOnly),
   (req, res) => {
     const {id} = req.params;
     req.body.updated_at = new Date();
