@@ -37,9 +37,9 @@ router.get('/:id', (req, res) => {
 const postReq = ['name']
 const vendorOnly = ['admin_id', 'name', 'description', 'items', 'electricity', 'ventilation', 'loud', 'other_special', 'website', 'facebook', 'instagram']
 router.post('/',
+  onlyCols(vendorOnly),
   spec, validate,
   // reqCols(postReq, true, 'admin_id'),
-  onlyCols(vendorOnly),
   (req, res) => {
     if(!!req.user_id) {
       req.body.admin_id = req.user_id;
