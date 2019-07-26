@@ -1,10 +1,12 @@
 const jwt = require('jsonwebtoken');
 const db = require('../data/dbConfig');
+const {validationResult} = require('express-validator');
 
 module.exports = {
   verifyJWT,
   protect,
   onlyOwner,
+  validate,
   reqCols,
   reqNestCols,
   onlyCols,
@@ -54,6 +56,13 @@ function onlyOwner(table, tableID = 'id', paramID = 'id') {
       ? next()
       : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
   }
+}
+
+function validate(req, res, next)  {
+  const errors = validationResult(req);
+  !errors.isEmpty()
+    ? res.status(400).json({invalid: errors.array()})
+    : next();
 }
 
 // "required" = array of required columns
