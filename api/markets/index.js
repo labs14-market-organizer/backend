@@ -55,7 +55,6 @@ router.put('/:id',
           res.status(404).json({ message: 'The market could not be found' });
         }
       } catch (error) {
-        console.log(error);
         res.status(500).json({
           message: 'Error updating the market',
         });

@@ -41,7 +41,6 @@ router.post('/',
   // reqCols(postReq, true, 'admin_id'),
   // onlyCols(vendorOnly),
   (req, res) => {
-    console.log(req.user_id);
     if(!!req.user_id) {
       req.body.admin_id = req.user_id;
     }
@@ -50,7 +49,6 @@ router.post('/',
         res.status(201).json(added[0]);
       })
       .catch(err => {
-        console.log(err);
         res.status(500).json({
           knex: err,
           message: 'The vendor could not be added to our database.'
