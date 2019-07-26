@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Markets = require("./model"); 
-const {onlyOwner, reqCols, validate, onlyCols} = require('../middleware');
+const {protect, onlyOwner, reqCols, validate, onlyCols} = require('../middleware');
 const spec = require('./validate');
 
 router.get('/', (req, res ) => {
@@ -29,6 +29,7 @@ router.get('/:id', (req, res ) => {
 const postReq = ['name']
 const marketOnly = ['admin_id', 'name', 'description', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'instagram']
 router.post('/',
+  protect,
   reqCols(postReq, true, 'admin_id'),
   onlyCols(marketOnly),
   spec, validate,
@@ -48,6 +49,7 @@ router.post('/',
 });
 
 router.put('/:id',
+  protect,
   onlyOwner('markets', 'admin_id'),
   onlyCols(marketOnly),
   spec, validate,
@@ -68,6 +70,7 @@ router.put('/:id',
   });
   
 router.delete('/:id',
+  protect,
   onlyOwner('markets', 'admin_id'),
   (req, res) => {
     Markets.remove(req.params.id)

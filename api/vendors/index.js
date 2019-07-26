@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Vendors = require("./model");
-const {onlyOwner, reqCols, validate, onlyCols} = require('../middleware');
+const {protect, onlyOwner, reqCols, validate, onlyCols} = require('../middleware');
 const spec = require('./validate');
 
 router.get('/', (req, res) => {
@@ -37,6 +37,7 @@ router.get('/:id', (req, res) => {
 const postReq = ['name']
 const vendorOnly = ['admin_id', 'name', 'description', 'items', 'electricity', 'ventilation', 'loud', 'other_special', 'website', 'facebook', 'instagram']
 router.post('/',
+  protect,
   reqCols(postReq, true, 'admin_id'),
   onlyCols(vendorOnly),
   spec, validate,
@@ -57,6 +58,7 @@ router.post('/',
 })
 
 router.put('/:id',
+  protect,
   onlyOwner('vendors', 'admin_id'),
   onlyCols(vendorOnly),
   spec, validate,
@@ -78,6 +80,7 @@ router.put('/:id',
 })
 
 router.delete('/:id',
+  protect,
   onlyOwner('vendors', 'admin_id'),
   (req, res) => {
     const {id} = req.params;
