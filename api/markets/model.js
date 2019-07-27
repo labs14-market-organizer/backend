@@ -63,6 +63,27 @@ function update(id, changes) {
   }
 
 function remove(id) {
+    return new Promise(async (resolve, reject) => {
+        try{
+            let operation, market;
+            // Wrap deletions in a transaction to avoid partial creation
+            await db.transaction(async t => {
+                operation = await db('market_days')
+                    .where({market_id: id})
+                    .del()
+                    .returning('*')
+                    .transacting(t);
+                [market] = await db('markets')
+                    .where({id})
+                    .del()
+                    .returning('*')
+                    .transacting(t);
+            })
+            resolve({...market, operation})
+        } catch(err) {
+            reject(err);
+        }
+    });
     return db('markets')
         .where({id})
         .del()

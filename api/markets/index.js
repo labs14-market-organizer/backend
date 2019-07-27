@@ -75,8 +75,8 @@ router.delete('/:id',
   (req, res) => {
     Markets.remove(req.params.id)
       .then(deleted => {
-        if (!!deleted.length) {
-          res.status(200).json(deleted[0]);
+        if (!!deleted) {
+          res.status(200).json(deleted);
         } else {
           res.status(404).json({
             message: 'That Market does not exist, perhaps it was deleted already',
@@ -86,7 +86,7 @@ router.delete('/:id',
       .catch(error => {
         res
           .status(500)
-          .json({ message: 'We ran into an error removing the Market' });
+          .json({ error, message: 'We ran into an error removing the Market' });
       })
 });
 
