@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Vendors = require("./model");
-const {onlyOwner, reqCols, onlyCols} = require('../middleware');
+const {protect, onlyOwner, reqCols, validate, onlyCols} = require('../middleware');
+const spec = require('./validate');
 
 router.get('/', (req, res) => {
   Vendors.find()
@@ -35,11 +36,12 @@ router.get('/:id', (req, res) => {
 
 const postReq = ['name']
 const vendorOnly = ['admin_id', 'name', 'description', 'items', 'electricity', 'ventilation', 'loud', 'other_special', 'website', 'facebook', 'instagram']
-router.post('/', 
-  // reqCols(postReq, true, 'admin_id'),
-  // onlyCols(vendorOnly),
+router.post('/',
+  protect,
+  reqCols(postReq, true, 'admin_id'),
+  onlyCols(vendorOnly),
+  spec, validate,
   (req, res) => {
-    console.log(req.user_id);
     if(!!req.user_id) {
       req.body.admin_id = req.user_id;
     }
@@ -48,7 +50,6 @@ router.post('/',
         res.status(201).json(added[0]);
       })
       .catch(err => {
-        console.log(err);
         res.status(500).json({
           knex: err,
           message: 'The vendor could not be added to our database.'
@@ -57,8 +58,10 @@ router.post('/',
 })
 
 router.put('/:id',
-  // onlyOwner('vendors', 'admin_id'),
-  // onlyCols(vendorOnly),
+  protect,
+  onlyOwner('vendors', 'admin_id'),
+  onlyCols(vendorOnly),
+  spec, validate,
   (req, res) => {
     const {id} = req.params;
     req.body.updated_at = new Date();
@@ -77,7 +80,8 @@ router.put('/:id',
 })
 
 router.delete('/:id',
-  // onlyOwner('vendors', 'admin_id'),
+  protect,
+  onlyOwner('vendors', 'admin_id'),
   (req, res) => {
     const {id} = req.params;
     Vendors.remove(id)

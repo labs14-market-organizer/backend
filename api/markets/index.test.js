@@ -1,8 +1,14 @@
 const server = require('../server');
 const request = require('supertest')(server);
 const getType = require('jest-get-type');
-const db = require('./index');
+// const db = require('./index');
 const knex = require('../../data/dbConfig');
+const genToken = require('../auth/genToken');
+
+const tkn1 = genToken({id: 1}, 1000*60*60*2);
+const tkn2 = genToken({id: 2}, 1000*60*60*2);
+const tkn3 = genToken({id: 3}, 1000*60*60*2);
+const tkn4 = genToken({id: 4}, 1000*60*60*2);
 
 describe('/markets', () => {
   beforeAll(async () => {
@@ -12,24 +18,27 @@ describe('/markets', () => {
 
   describe('/ POST', () => {
     it('should return 201 status', () => {
-      const market = { admin_id: 1 }
+      const market = { name: "Leigh's" }
       return request.post('/markets')
        .send(market)
+       .set({authorization: tkn1})
        .expect(201);
     })
     
     it('should return an object', () => {
-      const market = { admin_id: 2 }
+      const market = { name: "Mindy's" }
       return request.post('/markets')
         .send(market)
+        .set({authorization: tkn2})
         .then(res => expect(getType(res.body)).toBe('object'));
     })
     
     it('should return an object w/ next ID', () => {
-      const market = { admin_id: 3 }
+      const market = { name: "Matt's" }
       return request.post('/markets')
         .send(market)
-        .then(res => expect(res.body.id).toBe(3));
+        .set({authorization: tkn3})
+        .then(res => expect(res.body.name).toBe("Matt's"));
     })
   })
 
@@ -69,27 +78,30 @@ describe('/markets', () => {
 
   describe('/:id PUT', () => {
     it('should return 200 status', () => {
-      const market = { admin_id: 4 }
+      const market = { name: "TEST 1" }
       return request.put('/markets/1')
        .send(market)
+       .set({authorization: tkn1})
        .expect(200);
     })
     
     it('should return an object', () => {
-      const market = { admin_id: 5 }
+      const market = { name: "TEST 2" }
       return request.put('/markets/2')
         .send(market)
+        .set({authorization: tkn2})
         .then(res => {
           expect(getType(res.body)).toBe('object');
         });
     })
     
     it('should return an object', () => {
-      const market = { admin_id: 6 }
+      const market = { name: "TEST 3" }
       return request.put('/markets/3')
         .send(market)
+        .set({authorization: tkn3})
         .then(res => {
-          expect(res.body.admin_id).toBe(6);
+          expect(res.body.admin_id).toBe(3);
         });
     })
   })
@@ -97,16 +109,19 @@ describe('/markets', () => {
   describe('/:id DELETE', () => {
     it('should return 200 status', () => {
       return request.delete('/markets/1')
+       .set({authorization: tkn1})
        .expect(200);
     })
     
     it('should return an object', () => {
       return request.delete('/markets/2')
+        .set({authorization: tkn2})
         .then(res => expect(getType(res.body)).toBe('object'));
     })
     
     it('should return 404 status after deleting', () => {
       return request.delete('/markets/1')
+        .set({authorization: tkn1})
         .expect(404);
     })
   })
