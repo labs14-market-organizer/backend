@@ -33,30 +33,30 @@ To get the server running locally:
 
 #### User Routes
 
-| Method | Endpoint        | Access Control      | Description                    |
-| ------ | --------------- | ------------------- | ------------------------------ |
-| GET    | `/user`     | logged in user | Returns info on logged in user.     |
-| GET    | `/user/:id` | none                | Returns info on specific user. |
+| Method | Endpoint    | Access Control | Description                     |
+| ------ | ----------- | -------------- | ------------------------------  |
+| GET    | `/user`     | logged in user | Returns info on logged in user. |
+| GET    | `/user/:id` | none           | Returns info on specific user.  |
 
 #### Market Routes
 
-| Method | Endpoint       | Access Control      | Description                      |
-| ------ | -------------- | ------------------- | -------------------------------- |
-| GET    | `/markets`     | none                | Returns info on all markets.     |
-| GET    | `/markets/:id` | none                | Returns info on specific market. |
-| POST   | `/markets/`    | market admin                | Creates new market.              |
-| PUT    | `/markets/:id` | market admin                | Updates specific market.         |
-| DELETE | `/markets/:id` | market admin                | Deletes specific market.           |
+| Method | Endpoint       | Access Control | Description                      |
+| ------ | -------------- | -------------- | -------------------------------- |
+| GET    | `/markets`     | none           | Returns info on all markets.     |
+| GET    | `/markets/:id` | none           | Returns info on specific market. |
+| POST   | `/markets/`    | logged in user | Creates new market.              |
+| PUT    | `/markets/:id` | market admin   | Updates specific market.         |
+| DELETE | `/markets/:id` | market admin   | Deletes specific market.         |
 
 #### Vendor Routes
 
-| Method | Endpoint       | Access Control      | Description                      |
-| ------ | -------------- | ------------------- | -------------------------------- |
-| GET    | `/vendors`     | none                | Returns info on all vendors.     |
-| GET    | `/vendors/:id` | none                | Returns info on specific vendor. |
-| POST   | `/vendors/`    | vendor admin                | Creates new vendor.              |
-| PUT    | `/vendors/:id` | vendor admin                | Updates specific vendor.         |
-| DELETE | `/vendors/:id` | vendor admin                | Deletes specific vendor.           |
+| Method | Endpoint       | Access Control | Description                      |
+| ------ | -------------- | -------------- | -------------------------------- |
+| GET    | `/vendors`     | none           | Returns info on all vendors.     |
+| GET    | `/vendors/:id` | none           | Returns info on specific vendor. |
+| POST   | `/vendors/`    | logged in user | Creates new vendor.              |
+| PUT    | `/vendors/:id` | vendor admin   | Updates specific vendor.         |
+| DELETE | `/vendors/:id` | vendor admin   | Deletes specific vendor.         |
 
 # Data Model
 
