@@ -14,6 +14,20 @@ router.get('/', (req, res ) => {
         });
 });
 
+router.get('/search', (req, res)  => {
+  const query = req.query.q;
+  Markets.search(query)
+  .then(markets => {
+    res.status(200).json(markets);
+})
+.catch(err => {
+    res
+        .status(500).json({err, message: 'This is a error message' });
+});
+
+}
+)
+
 router.get('/:id', (req, res ) => {
     const id = req.params.id
    Markets.findById(id)
