@@ -17,10 +17,12 @@ module.exports = [
     .withMessage("'day' under 'operation' must be a string")
     .optional(),
   body('operation.*.start').isString()
-    .withMessage("'day' under 'operation' must be a string")
+    .matches(`^(0[0-9]|1[0-9]|2[0-3]|[0-9])(:[0-5][0-9]){1,2}$`)
+    .withMessage("'start' under 'operation' must be a string in the format 'hh:mm' or 'hh:mm:ss'")
     .optional(),
   body('operation.*.end').isString()
-    .withMessage("'day' under 'operation' must be a string")
+    .matches(`^(0[0-9]|1[0-9]|2[0-3]|[0-9])(:[0-5][0-9]){1,2}$`)
+    .withMessage("'end' under 'operation' must be a string in the format 'hh:mm' or 'hh:mm:ss'")
     .optional(),
   body('address').isString()
     .withMessage("'address' must be a string")
