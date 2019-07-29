@@ -37,8 +37,8 @@ router.post('/',
   spec, validate,
   (req,res) => {
     if(!!req.user_id) {
-        req.body.admin_id = req.user_id;
-      }
+      req.body.admin_id = req.user_id;
+    }
     Markets.add(req.body)
           .then(added => res.status(201).json(added))
           .catch(err => {
