@@ -55,6 +55,7 @@ router.put('/:id',
   protect,
   onlyOwner('markets', 'admin_id'),
   onlyCols(marketOnly),
+  onlyNestCols(marketNestOnly),
   spec, validate,
   async (req, res) => {
       req.body.updated_at = new Date();
