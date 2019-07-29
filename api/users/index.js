@@ -1,7 +1,7 @@
 const router = require('express').Router();
-​
+
 const Users = require("./model"); 
-​
+
 router.get('/', (req, res ) => {
     const id = req.user_id;
     Users.findById(id)
@@ -13,7 +13,7 @@ router.get('/', (req, res ) => {
             .status(500).json({ message: 'This is a error message' });
     });
 });
-​
+
 router.get('/:id', (req, res ) => {
     const {id} = req.params;
    Users.findById(id)
@@ -25,7 +25,7 @@ router.get('/:id', (req, res ) => {
                 .status(500).json({ message: 'This is a error message' });
         });
 });
-​
+
 router.post('/', (req,res) => {
    Users.add(req.body)
         .then(added => {
@@ -37,5 +37,5 @@ router.post('/', (req,res) => {
                 .json({ message: 'We have an Error' });
         });
 });
-​
+
 module.exports = router;
