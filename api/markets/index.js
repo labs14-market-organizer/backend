@@ -23,8 +23,7 @@ router.get('/:id', (req, res ) => {
               : res.status(200).json(market);
         })
         .catch(err => {
-            res
-                .status(500).json({ knex: err, message: 'This is a error message' });
+            res.status(500).json({ knex: err, message: 'This is a error message' });
         });
 });
 
@@ -35,7 +34,7 @@ const marketNestOnly = {operation: ['day', 'start', 'end']};
 router.post('/',
   protect,
   reqCols(postReq, true, 'admin_id'),
-  // reqNestCols(postNestReq),
+  reqNestCols(postNestReq),
   onlyCols(marketOnly),
   onlyNestCols(marketNestOnly),
   spec, validate,

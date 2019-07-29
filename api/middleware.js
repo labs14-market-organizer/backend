@@ -108,13 +108,15 @@ function reqNestCols(reqObjs) {
     }
     let missing = [];
     checkParents.forEach(parent => {
-      const absent = reqObjs[parent]
-        // Filter out fields that are included
-        .filter(prop => !body.includes(prop))
-        // Prepend the name of parent field for better error message
-        .map(prop => `${parent}.${prop}`);
-      // Add any missing fields to collection
-      missing = [...missing, ...absent];
+      req.body[parent].forEach(child => {
+        const absent = reqObjs[parent]
+          // Filter out fields that are included
+          .filter(prop => !Object.keys(child).includes(prop))
+          // Prepend the name of parent field for better error message
+          .map(prop => `${parent}.${prop}`);
+        // Add any missing fields to collection
+        missing = [...missing, ...absent];
+      })
     })
     // Reject request if required sub-fields are missing
     !!missing.length
@@ -157,9 +159,8 @@ function onlyNestCols(allowObjs) {
     }
     let flagged = [];
     checkParents.forEach(parent => {
-      console.log(req.body[parent])
-        req.body[parent].forEach(day => {
-          subflags = Object.keys(day)
+        req.body[parent].forEach(child => {
+          subflags = Object.keys(child)
           // Filter down to subfields that shouldn't be included
           .filter(prop => !allowObjs[parent].includes(prop))
           // Prepend the name of parent field for better error message
