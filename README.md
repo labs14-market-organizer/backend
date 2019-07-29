@@ -1,3 +1,4 @@
+
 # backend
 🚫 Note: All lines that start with 🚫 are instructions and should be deleted before this is posted to your portfolio. This is intended to be a guideline. Feel free to add your own flare to it.
 
@@ -34,8 +35,18 @@ To get the server running locally:
 
 | Method | Endpoint        | Access Control      | Description                    |
 | ------ | --------------- | ------------------- | ------------------------------ |
-| GET    | `/userlist`     | admins (eventually) | Returns info on all users.     |
-| GET    | `/userlist/:id` | none                | Returns info on specific user. |
+| GET    | `/user`     | logged in user | Returns info on logged in user.     |
+| GET    | `/user/:id` | none                | Returns info on specific user. |
+
+#### Market Routes
+
+| Method | Endpoint       | Access Control      | Description                      |
+| ------ | -------------- | ------------------- | -------------------------------- |
+| GET    | `/markets`     | none                | Returns info on all markets.     |
+| GET    | `/markets/:id` | none                | Returns info on specific market. |
+| POST   | `/markets/`    | market admin                | Creates new market.              |
+| PUT    | `/markets/:id` | market admin                | Updates specific market.         |
+| DELETE | `/markets/:id` | market admin                | Deletes specific market.           |
 
 #### Vendor Routes
 
@@ -43,9 +54,9 @@ To get the server running locally:
 | ------ | -------------- | ------------------- | -------------------------------- |
 | GET    | `/vendors`     | none                | Returns info on all vendors.     |
 | GET    | `/vendors/:id` | none                | Returns info on specific vendor. |
-| POST   | `/vendors/`    | none                | Creates new vendor.              |
-| PUT    | `/vendors/:id` | none                | Updates specific vendor.         |
-| DELETE | `/vendors/:id` | none                | Deletes specific user.           |
+| POST   | `/vendors/`    | vendor admin                | Creates new vendor.              |
+| PUT    | `/vendors/:id` | vendor admin                | Updates specific vendor.         |
+| DELETE | `/vendors/:id` | vendor admin                | Deletes specific vendor.           |
 
 # Data Model
 

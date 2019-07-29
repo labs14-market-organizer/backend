@@ -17,7 +17,7 @@ server.use(cors());
 server.use(passport.initialize());
 
 server.use("/auth", verifyJWT, authRouter);
-server.use("/userlist", verifyJWT, userRouter);
+server.use("/user", verifyJWT, userRouter);
 server.use("/vendors", verifyJWT, vendorRouter);
 server.use("/markets", verifyJWT, marketsRouter);
 

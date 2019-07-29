@@ -1,25 +1,25 @@
 const db = require('../../data/dbConfig');
 
 module.exports = {
-    find,
     findById,
     add,
     update,
     remove,
 };
 
-function find() {
-    return db('users as u')
-        .join('user_auth as ua', {'u.id': 'ua.user_id'})
-        .select('u.id', 'u.email', 'ua.provider', 'ua.prov_user');
-    }
-    
-    function findById(id) {
-    return db('users as u')
-        .select('u.id', 'u.email', 'ua.provider', 'ua.prov_user')
-        .where({'u.id': id})
-        .join('user_auth as ua', {'u.id': 'ua.user_id'})
+async function findById(id) {
+    const user = await db('users')
+        .where({id})
         .first();
+    const vendors = await db('vendors')
+        .where({admin_id: user.id});
+    const markets = await db('markets')
+        .where({admin_id: user.id});
+    return {
+        ...user,
+        vendors,
+        markets
+    }
 }
 
 function add(users) {
