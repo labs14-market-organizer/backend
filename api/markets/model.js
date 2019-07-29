@@ -32,7 +32,8 @@ async function findById(id) {
 
 function add(market) {
     let {operation, ...rest} = market;
-    let resMarket, resHours;
+    let resMarket;
+    let resHours = [];
     return new Promise(async (resolve, reject) => {
         try{
             // Wrap inserts in a transaction to avoid partial creation
@@ -41,13 +42,15 @@ function add(market) {
                     .insert(rest)
                     .returning('*')
                     .transacting(t);
-                operation = await operation.map(day => {
-                    return {...day, market_id: resMarket.id}
-                })
-                resHours = await db('market_days')
-                    .insert(operation)
-                    .returning('*')
-                    .transacting(t);
+                if(operation && operation.length) {
+                    operation = await operation.map(day => {
+                        return {...day, market_id: resMarket.id}
+                    })
+                    resHours = await db('market_days')
+                        .insert(operation)
+                        .returning('*')
+                        .transacting(t);
+                }
             })
             resolve({...resMarket, operation: resHours})
         } catch(err) {
@@ -84,8 +87,4 @@ function remove(id) {
             reject(err);
         }
     });
-    return db('markets')
-        .where({id})
-        .del()
-        .returning('*');
 }

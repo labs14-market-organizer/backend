@@ -29,7 +29,7 @@ router.get('/:id', (req, res ) => {
 });
 
 const postReq = ['name']
-const marketOnly = ['admin_id', 'name', 'description', 'operation', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'instagram']
+const marketOnly = ['admin_id', 'name', 'description', 'operation', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'twitter', 'instagram']
 router.post('/',
   protect,
   reqCols(postReq, true, 'admin_id'),
