@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Markets = require("./model"); 
-const {protect, onlyOwner, reqCols, validate, onlyCols} = require('../middleware');
+const {protect, onlyOwner, validate, reqCols, reqNestCols, onlyCols, onlyNestCols} = require('../middleware');
 const spec = require('./validate');
 
 router.get('/', (req, res ) => {
@@ -30,10 +30,14 @@ router.get('/:id', (req, res ) => {
 
 const postReq = ['name']
 const marketOnly = ['admin_id', 'name', 'description', 'operation', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'twitter', 'instagram']
+const postNestReq = {operation: ['day', 'start', 'end']};
+const marketNestOnly = {operation: ['day', 'start', 'end']};
 router.post('/',
   protect,
   reqCols(postReq, true, 'admin_id'),
+  // reqNestCols(postNestReq),
   onlyCols(marketOnly),
+  onlyNestCols(marketNestOnly),
   spec, validate,
   (req,res) => {
     if(!!req.user_id) {

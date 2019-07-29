@@ -13,10 +13,13 @@ module.exports = [
   body('operation').isArray()
     .withMessage("'operation' must be an array")
     .optional(),
-  body('operation.*').isJSON()
-    .withMessage("'operation' must be an array of objects")
-    .optional(),
   body('operation.*.day').isString()
+    .withMessage("'day' under 'operation' must be a string")
+    .optional(),
+  body('operation.*.start').isString()
+    .withMessage("'day' under 'operation' must be a string")
+    .optional(),
+  body('operation.*.end').isString()
     .withMessage("'day' under 'operation' must be a string")
     .optional(),
   body('address').isString()

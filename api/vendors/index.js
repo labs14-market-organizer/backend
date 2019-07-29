@@ -35,7 +35,7 @@ router.get('/:id', (req, res) => {
 });
 
 const postReq = ['name']
-const vendorOnly = ['admin_id', 'name', 'description', 'items', 'electricity', 'ventilation', 'loud', 'other_special', 'website', 'facebook', 'instagram']
+const vendorOnly = ['admin_id', 'name', 'description', 'items', 'electricity', 'ventilation', 'loud', 'other_special', 'website', 'facebook', 'twitter', 'instagram']
 router.post('/',
   protect,
   reqCols(postReq, true, 'admin_id'),

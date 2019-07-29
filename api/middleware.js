@@ -150,20 +150,23 @@ function onlyNestCols(allowObjs) {
     // Compares request body to specified parents
     // to see which parent fields are available to check
     const checkParents = body
-      .filter(prop => Object.keys(reqObjs).includes(prop));
+      .filter(prop => Object.keys(allowObjs).includes(prop));
     // Moves on to next middleware if there are no parent fields to check
     if(!checkParents.length) {
       return next()
     }
     let flagged = [];
     checkParents.forEach(parent => {
-      const subflags = body
-        // Filter down to subfields that shouldn't be included
-        .filter(prop => !allowObjs[parent].includes(prop))
-        // Prepend the name of parent field for better error message
-        .map(prop => `${parent}.${prop}`)
-      // Add any missing fields to collection
-      flagged = [...flagged, ...subflags];
+      console.log(req.body[parent])
+        req.body[parent].forEach(day => {
+          subflags = Object.keys(day)
+          // Filter down to subfields that shouldn't be included
+          .filter(prop => !allowObjs[parent].includes(prop))
+          // Prepend the name of parent field for better error message
+          .map(prop => `${parent}.${prop}`);
+        // Add any missing fields to collection
+        flagged = [...flagged, ...subflags];
+        })
     })
     // Rejects request if there are any unallowed subfields
     if (!!flagged.length) {
