@@ -13,6 +13,7 @@ const tkn4 = genToken({id: 4}, 1000*60*60*2);
 describe('/markets', () => {
   beforeAll(async () => {
     // Reset markets table before running tests
+    await knex.raw("TRUNCATE TABLE market_days RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE markets RESTART IDENTITY CASCADE");
   })
 
@@ -40,6 +41,14 @@ describe('/markets', () => {
         .set({authorization: tkn3})
         .then(res => expect(res.body.name).toBe("Matt's"));
     })
+
+    it("should return an object w/ 'operation' array", () => {
+      const market = { name: "Lajawanti's" }
+      return request.post('/markets')
+        .send(market)
+        .set({authorization: tkn4})
+        .then(res => expect(getType(res.body.operation)).toBe('array'));
+    })
   })
 
   describe('/ GET', () => {
@@ -55,7 +64,7 @@ describe('/markets', () => {
     
     it('should return an array w/ proper length', () => {
       return request.get('/markets')
-        .then(res => expect(res.body).toHaveLength(3));
+        .then(res => expect(res.body).toHaveLength(4));
     })
   })
 
@@ -95,13 +104,30 @@ describe('/markets', () => {
         });
     })
     
-    it('should return an object', () => {
+    it('should return an object w/ new name', () => {
       const market = { name: "TEST 3" }
       return request.put('/markets/3')
         .send(market)
         .set({authorization: tkn3})
         .then(res => {
-          expect(res.body.admin_id).toBe(3);
+          expect(res.body.name).toBe(market.name);
+        });
+    })
+    
+    it('should return an object w/ new hours of operation', () => {
+      const market = {
+        name: "TEST 4",
+        operation: [{
+          day: "sunday",
+          start: "08:00:00",
+          end: "17:00:00"
+        }]
+      }
+      return request.put('/markets/4')
+        .send(market)
+        .set({authorization: tkn4})
+        .then(res => {
+          expect(res.body.operation[0]).toEqual(expect.objectContaining(market.operation[0]));
         });
     })
   })
