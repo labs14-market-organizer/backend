@@ -2,7 +2,7 @@ const router = require('express').Router();
 const Markets = require("./model");
 const {protect, parseQueryAddr, onlyOwner, reqCols, validate, onlyCols} = require('../middleware');
 const spec = require('./validate');
-​
+
 router.get('/', (req, res ) => {
    Markets.find()
         .then(markets => {
@@ -13,7 +13,7 @@ router.get('/', (req, res ) => {
                 .status(500).json({err, message: 'This is a error message' });
         });
 });
-​
+
 router.get('/search',
   parseQueryAddr,
   (req, res)  => {
@@ -28,7 +28,7 @@ router.get('/search',
     });
   }
 )
-​
+
 router.get('/:id', (req, res ) => {
     const id = req.params.id
    Markets.findById(id)
@@ -42,10 +42,9 @@ router.get('/:id', (req, res ) => {
                 .status(500).json({ knex: err, message: 'This is a error message' });
         });
 });
-​
+
 const postReq = ['name']
 const marketOnly = ['admin_id', 'name', 'description', 'operation', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'twitter', 'instagram']
-​
 router.post('/',
   protect,
   reqCols(postReq, true, 'admin_id'),
@@ -63,7 +62,7 @@ router.post('/',
                   .json({err, message: 'We have an Error' });
           });
 });
-​
+
 router.put('/:id',
   protect,
   onlyOwner('markets', 'admin_id'),
@@ -84,7 +83,7 @@ router.put('/:id',
         });
       }
   });
-  
+
 router.delete('/:id',
   protect,
   onlyOwner('markets', 'admin_id'),
@@ -105,5 +104,5 @@ router.delete('/:id',
           .json({ error, message: 'We ran into an error removing the Market' });
       })
 });
-​
+
 module.exports = router;
