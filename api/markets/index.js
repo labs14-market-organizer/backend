@@ -5,26 +5,27 @@ const spec = require('./validate');
 
 router.get('/', (req, res ) => {
    Markets.find()
-        .then(markets => {
-            res.status(200).json(markets);
-        })
-        .catch(err => {
-            res
-                .status(500).json({err, message: 'This is a error message' });
-        });
+    .then(markets => {
+      !markets.length
+        ? res.status(404).json({ message: 'No markets could be found in our database.' })
+        : res.status(200).json(markets);
+    })
+    .catch(err => {
+      res.status(500).json({knex: err, message: 'An error occurred while accessing the markets database.' });
+    });
 });
 
 router.get('/:id', (req, res ) => {
     const id = req.params.id
    Markets.findById(id)
-        .then(market => {
-            !market
-              ? res.status(404).json({message: 'The specified market does not exist.'})
-              : res.status(200).json(market);
-        })
-        .catch(err => {
-            res.status(500).json({ knex: err, message: 'This is a error message' });
-        });
+    .then(market => {
+      !market
+        ? res.status(404).json({message: 'We do not have a market with the specified ID in our database.'})
+        : res.status(200).json(market);
+    })
+    .catch(err => {
+      res.status(500).json({ knex: err, message: 'An error occurred while accessing the markets database.' });
+    });
 });
 
 const postReq = ['name']
@@ -38,41 +39,40 @@ router.post('/',
   onlyCols(marketOnly),
   onlyNestCols(postNestOnly),
   spec, validate,
-  (req,res) => {
+  (req, res) => {
     if(!!req.user_id) {
       req.body.admin_id = req.user_id;
     }
     Markets.add(req.body)
-          .then(added => res.status(201).json(added))
-          .catch(err => {
-              res
-                  .status(500)
-                  .json({err, message: 'We have an Error' });
-          });
+      .then(added => res.status(201).json(added))
+      .catch(err => {
+          res.status(500)
+            .json({knex: err, message: 'The market could not be added to our database.' });
+      });
 });
 
-const putNestOnly = {operation: ['id','day', 'start', 'end']};
+const putNestOnly = {operation: ['id','day','start','end']};
 router.put('/:id',
   protect,
   onlyOwner('markets', 'admin_id'),
   onlyCols(marketOnly),
   onlyNestCols(putNestOnly),
   spec, validate,
-  async (req, res) => {
-      req.body.updated_at = new Date();
-      try {
-        const market = await Markets.update(req.params.id, req.body);
-        if (market) {
-        res.status(200).json(market);
+  (req, res) => {
+    req.body.updated_at = new Date();
+    Markets.update(req.params.id, req.body)
+      .then(updated => {
+        if (!!updated) {
+        res.status(200).json(updated);
         } else {
-          res.status(404).json({ message: 'The market could not be found' });
+          res.status(404).json({ message: 'We do not have a market with the specified ID in our database.' });
         }
-      } catch (error) {
+      })
+      .catch(err => {
         res.status(500).json({
-          error,
-          message: 'Error updating the market',
+          knex: err, message: 'The specified market could not be updated in our database.',
         });
-      }
+      })
   });
   
 router.delete('/:id',
@@ -85,14 +85,13 @@ router.delete('/:id',
           res.status(200).json(deleted);
         } else {
           res.status(404).json({
-            message: 'That Market does not exist, perhaps it was deleted already',
+            message: 'We do not have a market with the specified ID in our database.',
           });
         }
       })
-      .catch(error => {
-        res
-          .status(500)
-          .json({ error, message: 'We ran into an error removing the Market' });
+      .catch(err => {
+        res.status(500)
+          .json({ knex: err, message: 'The specified market could not be removed from our database.' });
       })
 });
 

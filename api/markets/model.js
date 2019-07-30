@@ -59,55 +59,76 @@ function add(market) {
     });
 }
 
+// This could probably be simplified
 async function update(id, changes) {
+    // Separate changes in hours of operation from all others
     const {operation, ...market} = changes;
+    // Grab existing market
     const oldMarket = await findById(id);
+    // If the market doesn't exist return empty result to trigger 404
+    if(!oldMarket) { return oldMarket };
+    // Create array of market_days entries to create, based on not having an id
     const hoursToCreate = operation.filter(day => !day.id)
         .map(day => ({...day, market_id: id}));
+    // Create array of IDs from existing hours of operation within market_days
     const existingOps = oldMarket.operation.map(day => day.id);
+    // Create array of updates to hours of operation based on already existing ids in market_days
     const hoursToUpdate = operation.filter(day => existingOps.includes(day.id));
+    // Create simple array of IDs of market_days entries that won't be deleted
     const safeOps = hoursToUpdate.map(day => day.id);
+    // Create array of IDs of existing market_days entries that will no longer exist
     const hoursToDelete = oldMarket.operation.reduce((days, day) => {
         return !safeOps.includes(day.id)
             ? [...days, day.id]
             : days;
     }, []);
-    return new Promise(async (resolve, reject) => {
-        let updated;
-        const opsArr = [];
-        try {
-            await db.transaction(async t => {
-                [updated] = await db('markets')
-                    .where({id})
-                    .update(market)
-                    .returning('*')
-                    .transacting(t);
-                const hoursCreated = await db('market_days')
+    
+    // Start transaction on the database to ensure there are no partial updates (everything succeeds or fails together)
+    const trx = await db.transaction();
+    return trx('markets')
+        .where({id})
+        .update(market)
+        .returning('*')
+        .then(async updated => {
+            // Create empty array that will be final 'operation' field returned to user
+            let opsArr = [];
+            // Create any market_days entries that need to be created
+            if(!!hoursToCreate.length) {
+                const hoursCreated = await trx('market_days')
                     .insert(hoursToCreate)
-                    .returning('*')
-                    .transacting(t);
+                    .returning('*');
+                // Push newly created entries to holding array
                 opsArr.push(...hoursCreated);
-                await hoursToUpdate.forEach(async day => {
+            }
+            // Update any market_days entries that need to be updated
+            if(!!hoursToUpdate.length) {
+                const updates = await Promise.all(hoursToUpdate.map(day => {
                     const {id: opID, ...rest} = day;
-                    const [result] = await db('market_days')
+                    return trx('market_days')
                         .where({id: opID})
                         .update(rest)
-                        .returning('*')
-                        .transacting(t);
-                    opsArr.push(result);
-                })
-                await db('market_days')
+                        .returning('*');
+                }))
+                // Add updated entries to holding array
+                opsArr = [...opsArr,...updates]
+                console.log('OPS ARR',opsArr);
+            }
+            // Delete any market_days entries that need to be deleted
+            if(!!hoursToDelete.length) {
+                await trx('market_days')
                     .whereIn('id', hoursToDelete)
                     .del();
-            })
-            resolve({
-                ...updated,
-                operation: opsArr
-            });
-        } catch(err) {
-            reject(err);
-        }
-    })
+            }
+            // Destructure market object out of its wrapping array
+            [updated] = updated;
+            // Return market object with updated hours of operation
+            return {...updated, operation: opsArr}
+        })
+        // Commit all updates if everything's successful
+        .then(async updated => {
+            await trx.commit();
+            return updated;
+        });
 }
 
 function remove(id) {
