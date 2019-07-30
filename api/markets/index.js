@@ -30,13 +30,13 @@ router.get('/:id', (req, res ) => {
 const postReq = ['name']
 const marketOnly = ['admin_id', 'name', 'description', 'operation', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'twitter', 'instagram']
 const postNestReq = {operation: ['day', 'start', 'end']};
-const marketNestOnly = {operation: ['day', 'start', 'end']};
+const postNestOnly = {operation: ['day', 'start', 'end']};
 router.post('/',
   protect,
   reqCols(postReq, true, 'admin_id'),
   reqNestCols(postNestReq),
   onlyCols(marketOnly),
-  onlyNestCols(marketNestOnly),
+  onlyNestCols(postNestOnly),
   spec, validate,
   (req,res) => {
     if(!!req.user_id) {
@@ -51,23 +51,25 @@ router.post('/',
           });
 });
 
+const putNestOnly = {operation: ['id','day', 'start', 'end']};
 router.put('/:id',
   protect,
   onlyOwner('markets', 'admin_id'),
   onlyCols(marketOnly),
-  onlyNestCols(marketNestOnly),
+  onlyNestCols(putNestOnly),
   spec, validate,
   async (req, res) => {
       req.body.updated_at = new Date();
       try {
         const market = await Markets.update(req.params.id, req.body);
         if (market) {
-        res.status(200).json(market[0]);
+        res.status(200).json(market);
         } else {
           res.status(404).json({ message: 'The market could not be found' });
         }
       } catch (error) {
         res.status(500).json({
+          error,
           message: 'Error updating the market',
         });
       }

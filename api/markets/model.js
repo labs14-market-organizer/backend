@@ -59,11 +59,56 @@ function add(market) {
     });
 }
 
-function update(id, changes) {
-    return db('markets')
-      .where({ id })
-      .update(changes, '*');
-  }
+async function update(id, changes) {
+    const {operation, ...market} = changes;
+    const oldMarket = await findById(id);
+    const hoursToCreate = operation.filter(day => !day.id)
+        .map(day => ({...day, market_id: id}));
+    const existingOps = oldMarket.operation.map(day => day.id);
+    const hoursToUpdate = operation.filter(day => existingOps.includes(day.id));
+    const safeOps = hoursToUpdate.map(day => day.id);
+    const hoursToDelete = oldMarket.operation.reduce((days, day) => {
+        return !safeOps.includes(day.id)
+            ? [...days, day.id]
+            : days;
+    }, []);
+    return new Promise(async (resolve, reject) => {
+        let updated;
+        const opsArr = [];
+        try {
+            await db.transaction(async t => {
+                [updated] = await db('markets')
+                    .where({id})
+                    .update(market)
+                    .returning('*')
+                    .transacting(t);
+                const hoursCreated = await db('market_days')
+                    .insert(hoursToCreate)
+                    .returning('*')
+                    .transacting(t);
+                opsArr.push(...hoursCreated);
+                await hoursToUpdate.forEach(async day => {
+                    const {id: opID, ...rest} = day;
+                    const [result] = await db('market_days')
+                        .where({id: opID})
+                        .update(rest)
+                        .returning('*')
+                        .transacting(t);
+                    opsArr.push(result);
+                })
+                await db('market_days')
+                    .whereIn('id', hoursToDelete)
+                    .del();
+            })
+            resolve({
+                ...updated,
+                operation: opsArr
+            });
+        } catch(err) {
+            reject(err);
+        }
+    })
+}
 
 function remove(id) {
     return new Promise(async (resolve, reject) => {
