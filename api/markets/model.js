@@ -1,5 +1,5 @@
 const db = require('../../data/dbConfig');
-
+​
 module.exports = {
     find,
     search,
@@ -8,7 +8,7 @@ module.exports = {
     update,
     remove,
 };
-
+​
 async function find() {
     const markets = await db('markets');
     // Map hours of operation onto markets
@@ -20,16 +20,19 @@ async function find() {
     // Return after all DB queries finish
     return Promise.all(final);
 }
-
-
+​
 //searches city, state and zipcode by search query
 async function search(query) {
-    query=query.toLowerCase()
+    // Filter out unspecified fields
+    query = Object.entries(query).filter(pair => pair[1] !== null);
     const markets = await db('markets')
-    .where('city', 'like', `%${query}%`)
-    .orWhere('state', 'like', `%${query}%`)
-    .orWhere('zipcode', 'like', `%${query}%`)
-    
+    .where(builder => {
+            // Create query builder on available fields
+            query.forEach(pair => {
+                // Compare case-insensitive values set in parseQueryAddr middleware
+                builder.andWhere(pair[0],'ilike',`%${pair[1]}%`)
+            })
+        })
     // Map hours of operation onto markets
     const final = await markets.map(async market => {
         const operation = await db('market_days')
@@ -39,11 +42,6 @@ async function search(query) {
     // Return after all DB queries finish
     return Promise.all(final);
 }
-
-
-
-
-
     
 async function findById(id) {
     const [market] = await db('markets')
@@ -54,7 +52,7 @@ async function findById(id) {
         .where({market_id: id});
     return {...market, operation};
 }
-
+​
 function add(market) {
     let {operation, ...rest} = market;
     let resMarket;
@@ -83,13 +81,13 @@ function add(market) {
         }
     });
 }
-
+​
 function update(id, changes) {
     return db('markets')
       .where({ id })
       .update(changes, '*');
   }
-
+​
 function remove(id) {
     return new Promise(async (resolve, reject) => {
         try{

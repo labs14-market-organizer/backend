@@ -1,10 +1,12 @@
 const jwt = require('jsonwebtoken');
 const db = require('../data/dbConfig');
+const parseAddr = require("parse-address-string");
 const {validationResult} = require('express-validator');
-
+​
 module.exports = {
   verifyJWT,
   protect,
+  parseQueryAddr,
   onlyOwner,
   validate,
   reqCols,
@@ -12,7 +14,7 @@ module.exports = {
   onlyCols,
   onlyNestCols
 }
-
+​
 // Verifies JWT and stores subject on request as "user_id"
 function verifyJWT(req, res, next) {
   const jwtSecret = process.env.JWT_SECRET;
@@ -30,7 +32,7 @@ function verifyJWT(req, res, next) {
     })
   }
 }
-
+​
 // Protects route by requiring JWT
 // *** Always use after verifyJWT() ***
 function protect(req, res, next) {
@@ -38,7 +40,31 @@ function protect(req, res, next) {
     ? res.status(401).json({ message: 'Authorization token missing.' })
     : next();
 }
-
+​
+// Parses query string as address
+async function parseQueryAddr(req, res, next) {
+  // Parse address using 'parse-address-string' package
+  await parseAddr(req.query.q, (err, addr) => {
+    // If there's an error, kick it down to ternary below
+    if(err) {
+      req.query = null;
+    } else {
+      // Pull city, state, and zipcode from addr object
+      const {city, state, postal_code} = addr;
+      // Pass them into the request's query object
+      if (city === null && state === null && postal_code === null) {
+        req.query = null
+      } else {
+        req.query = {city, state, zipcode: postal_code};
+      }
+    }
+  })
+  // If the query couldn't be parsed, return a 400
+  req.query === null
+    ? res.status(400).json({message: "Could not parse the query properly. Try formatting as 'City, ST zipcode' or any combination."})
+    : next();
+}
+​
 // "table" = the table of the target entry
 // "tableID" = the column name of the associated user ID in that table
 // "paramID" = the name of the request parameter that
@@ -59,7 +85,7 @@ function onlyOwner(table, tableID = 'id', paramID = 'id') {
       : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
   }
 }
-
+​
 // Handles any invalid fields in request body via express-validator
 // *** Pass immediately following an array of validator checks ***
 function validate(req, res, next)  {
@@ -68,7 +94,7 @@ function validate(req, res, next)  {
     ? res.status(400).json({invalid: errors.array()})
     : next();
 }
-
+​
 // "required" = array of required columns
 // "reqID" = whether or not some field should match
 //      the user ID of the user making the request
@@ -91,7 +117,7 @@ function reqCols(required, reqID = false, colID = 'id') {
       : next();
   }
 }
-
+​
 // Requires sub-fields if parent fields are present
 // *** Use reqCols() to require the parent fields themselves ***
 // "reqObjs" = object w/ keys equal to parent fields in request body
@@ -122,7 +148,7 @@ function reqNestCols(reqObjs) {
       : next();
   }
 }
-
+​
 // "allowed" = array of columns that the user is allowed to specify in the request body
 function onlyCols(allowed) {
   return (req, res, next) => {
@@ -140,7 +166,7 @@ function onlyCols(allowed) {
     }
   }
 }
-
+​
 // "allowObjs" = object w/ keys equal to parent fields
 //     in request body and values equal to array of strings
 //     representing allowed subfields
