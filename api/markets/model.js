@@ -26,9 +26,9 @@ async function find() {
 async function search(query) {
     query=query.toLowerCase()
     const markets = await db('markets')
-    .where({city: query})
-    .orWhere({state:query})
-    .orWhere({zipcode:query})
+    .where('city', 'like', `%${query}%`)
+    .orWhere('state', 'like', `%${query}%`)
+    .orWhere('zipcode', 'like', `%${query}%`)
     
     // Map hours of operation onto markets
     const final = await markets.map(async market => {
