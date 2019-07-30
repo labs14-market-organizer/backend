@@ -92,7 +92,7 @@ async function update(id, changes) {
         hoursToDelete = existingOps;
     }
     
-    // Start transaction on the database to ensure there are no partial updates (everything succeeds or fails together)
+    // Start thenable transaction on the database to ensure there are no partial updates (everything succeeds or fails together)
     const trx = await db.transaction();
     return trx('markets')
         .where({id})
