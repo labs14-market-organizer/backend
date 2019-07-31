@@ -26,8 +26,7 @@ router.get('/search',
         : res.status(200).json(markets);
     })
     .catch(err => {
-        res
-            .status(500).json({err, message: 'This is a error message' });
+        res.status(500).json({knex: err, message: 'This is a error message' });
     });
   }
 )
@@ -41,7 +40,7 @@ router.get('/:id', (req, res ) => {
         : res.status(200).json(market);
     })
     .catch(err => {
-      res.status(500).json({ knex: err, message: 'An error occurred while accessing the markets database.' });
+      res.status(500).json({knex: err, message: 'An error occurred while accessing the markets database.'});
     });
 });
 
@@ -86,9 +85,7 @@ router.put('/:id',
         }
       })
       .catch(err => {
-        res.status(500).json({
-          knex: err, message: 'The specified market could not be updated in our database.',
-        });
+        res.status(500).json({knex: err, message: 'The specified market could not be updated in our database.'});
       })
   });
 
@@ -108,7 +105,7 @@ router.delete('/:id',
       })
       .catch(err => {
         res.status(500)
-          .json({ knex: err, message: 'The specified market could not be removed from our database.' });
+          .json({knex: err, message: 'The specified market could not be removed from our database.'});
       })
 });
 
