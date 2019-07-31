@@ -94,7 +94,7 @@ function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
       if(!result){
         return next(); // Let routes handle 404s
       }
-      console.log(result, tableID);
+      console.log(result[tableID], user_id);
       result[tableID] === user_id // Determine if IDs match
         ? next()
         : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })

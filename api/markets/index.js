@@ -131,17 +131,41 @@ router.put('/:id/booths/:bID',
   onlyOwner('markets', 'admin_id')
     ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
   (req, res) => {
-    res.status(500).json({message: 'Work In Progress'})
+    req.body.market_id = req.params.id;
+    Markets.updateBooth(req.params.id, req.body)
+    .then(updated => {
+      if (!!updated) {
+      res.status(200).json(updated);
+      } else {
+        res.status(404).json({ message: 'We do not have a booth type with the specified ID in our database.' });
+      }
+    })
+    .catch(err => {
+      res.status(500).json({knex: err, message: 'The specified booth type could not be updated in our database.'});
+    })
   }
 )
 
 // ***
 router.delete('/:id/booths/:bID',
   protect,
-  onlyOwner('markets as m', 'admin_id')
-    ('market_booths as mb', {"m.id": "mb.market_id"}, 'bID'),
+  onlyOwner('markets', 'admin_id')
+    ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
   (req, res) => {
-    res.status(500).json({message: 'Work In Progress'})
+    Markets.removeBooth(req.params.bID)
+      .then(deleted => {
+        if (!!deleted) {
+          res.status(200).json(deleted);
+        } else {
+          res.status(404).json({
+            message: 'We do not have a market with the specified ID in our database.',
+          });
+        }
+      })
+      .catch(err => {
+        res.status(500)
+          .json({knex: err, message: 'The specified market could not be removed from our database.'});
+      })
   }
 )
 
