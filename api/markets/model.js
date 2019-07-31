@@ -7,23 +7,20 @@ module.exports = {
     add,
     update,
     remove,
+    addBooth,
+    updateBooth,
+    removeBooth,
 };
 
 async function find() {
     const markets = await db('markets');
-    // Map hours of operation onto markets
-    const withOps = await markets.map(async market => {
+    // Map hours of operation and booths onto markets
+    const final = await markets.map(async market => {
         const operation = await db('market_days')
             .where({market_id: market.id})
-        return { ...market, operation };
-    })
-    // Wait for all DB queries to finish
-    await Promise.all(withOps);
-    // Map booths onto markets
-    const final = await withOps.map(async market => {
         const booths = await db('market_booths')
             .where({market_id: market.id})
-        return { ...market, booths };
+        return { ...market, operation, booths };
     })
     // Return after all DB queries finish
     return Promise.all(final);
@@ -41,19 +38,13 @@ async function search(query) {
                 builder.andWhere(pair[0],'ilike',`%${pair[1]}%`)
             })
         })
-    // Map hours of operation onto markets
-    const withOps = await markets.map(async market => {
+    // Map hours of operation and booths onto markets
+    const final = await markets.map(async market => {
         const operation = await db('market_days')
             .where({market_id: market.id})
-        return { ...market, operation };
-    })
-    // Wait for all DB queries to finish
-    await Promise.all(withOps);
-    // Map booths onto markets
-    const final = await withOps.map(async market => {
         const booths = await db('market_booths')
             .where({market_id: market.id})
-        return { ...market, booths };
+        return { ...market, operation, booths };
     })
     // Return after all DB queries finish
     return Promise.all(final);
@@ -211,4 +202,24 @@ function remove(id) {
             reject(err);
         }
     });
+}
+
+function addBooth(booth) {
+    return db('market_booths')
+        .insert(booth)
+        .returning('*');
+}
+
+function updateBooth(id, changes) {
+    return db('market_booths')
+        .where({id})
+        .update(changes)
+        .returning('*');
+}
+
+function removeBooth(id) {
+    return db('market_booths')
+        .where({id})
+        .debug()
+        .returning('*');
 }
