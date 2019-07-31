@@ -1,11 +1,13 @@
 const SquareStrategy = require("passport-square").Strategy;
 const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
 const {
   BE_URL,
   SQUARE_ID, SQUARE_SECRET,
-  GOOGLE_ID, GOOGLE_SECRET
+  GOOGLE_ID, GOOGLE_SECRET,
+  FACEBOOK_ID, FACEBOOK_SECRET,
 } = process.env;
-
+​
 module.exports = (passport) => {
   // passport.serializeUser((user, done)=>{
     //   console.log('SERIALIZE')
@@ -18,7 +20,7 @@ module.exports = (passport) => {
       // });
       
   // ^^^ SERIALIZE/DESERIALIZE ONLY SEEMS TO BE USED W/ SESSIONS
-
+​
   // passport.use(new SquareStrategy({
   //   clientID: SQUARE_ID,
   //   clientSecret: SQUARE_SECRET,
@@ -27,7 +29,7 @@ module.exports = (passport) => {
   // function(accessToken, refreshToken, profile, done) {
   //   return done(null, profile);
   // }));
-
+​
   passport.use(
     new GoogleStrategy(
       {
@@ -39,6 +41,24 @@ module.exports = (passport) => {
         const { provider, id, emails } = profile;
         const email = emails[0].value;
         const user = { provider, prov_user: id, email };
+        return done(null, user); // pass user data to callback
+      }
+    )
+  );
+​
+  passport.use(
+    new FacebookStrategy(
+      {
+        clientID: FACEBOOK_ID || 'test', // Fallback to prevent tests from failing
+        clientSecret: FACEBOOK_SECRET,
+        callbackURL: `${BE_URL}/auth/facebook/callback`, // BE endpoint that Facebook redirects to
+        profileFields: ['id', 'email']
+      },
+      function(accessToken, refreshToken, profile, done) {
+        console.log(profile)
+        // const { provider, id, emails } = profile;
+        // const email = emails[0].value;
+        // const user = { provider, prov_user: id, email };
         return done(null, user); // pass user data to callback
       }
     )

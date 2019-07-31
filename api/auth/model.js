@@ -1,10 +1,43 @@
 const db = require('../../data/dbConfig');
-
+​
 module.exports = {
   google,
+  facebook
 }
-
+​
 async function google(provided) {
+  const { email, ...auth } = provided; // separate email from user_auth data
+  let id = await db('user_auth')
+    .where(auth)
+    .returning('id');
+  let user;
+  if(!id.length) { // Check if a user doesn't exist w/ specified auth data
+    // Use a transaction to prevent partial inserts
+    return new Promise(async (resolve, reject) => {
+      try{
+        await db.transaction(async t => {
+          [user] = await db('users')
+            .insert({email})
+            .returning('*')
+            .transacting(t);
+          await db('user_auth')
+            .insert({ ...auth, user_id: user.id })
+            .transacting(t);
+        });
+        resolve(user)
+      } catch(err) {
+        reject(err);
+      }
+    })
+  } else { // If user already exists, return user
+    const rtrn = await db('users')
+      .where({email})
+      .returning('*');
+    return rtrn[0];
+  }
+}
+​
+async function facebook(provided) {
   const { email, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
     .where(auth)
