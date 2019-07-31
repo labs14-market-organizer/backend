@@ -139,7 +139,7 @@ router.put('/:id/booths/:bID',
   spec.booth, validate,
   (req, res) => {
     req.body.market_id = req.params.id;
-    Markets.updateBooth(req.params.id, req.body)
+    Markets.updateBooth(req.params.bID, req.body)
     .then(updated => {
       if (!!updated) {
       res.status(200).json(updated);

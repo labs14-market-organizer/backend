@@ -53,6 +53,25 @@ module.exports = {
       .withMessage("'instagram' must be a string")
       .optional(),
   ],
-  booth: []
+  booth: [
+    body('type').isString()
+      .withMessage("'type' must be a string")
+      .optional(),
+    body('number').isInt()
+      .withMessage("'number' must be an integer")
+      .optional(),
+    body('price').isNumeric()
+      .withMessage("'price' must be numeric")
+      .optional(),
+    body('size').custom(val => Array.isArray(val) && val.length === 2)
+      .withMessage("'size' must be an array with exactly two entries")
+      .optional(),
+    body('size.*').isInt()
+      .withMessage("'size' must be an array of integers")
+      .optional(),
+    body('description').isString()
+      .withMessage("'description' must be a string")
+      .optional(),
+  ]
 }
 
