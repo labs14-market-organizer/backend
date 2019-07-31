@@ -3,14 +3,15 @@ const router = require('express').Router();
 const Users = require("./model"); 
 
 router.get('/', (req, res ) => {
-   Users.find()
-        .then(users => {
-            res.status(200).json(users);
-        })
-        .catch(err => {
-            res
-                .status(500).json({ message: 'This is a error message' });
-        });
+    const id = req.user_id;
+    Users.findById(id)
+    .then(users => {
+        res.status(200).json(users);
+    })
+    .catch(err => {
+        res
+            .status(500).json({ message: 'This is a error message' });
+    });
 });
 
 router.get('/:id', (req, res ) => {

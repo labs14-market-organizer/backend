@@ -2,6 +2,7 @@ const db = require('../../data/dbConfig');
 
 module.exports = {
     find,
+    search,
     findById,
     add,
     update,
@@ -19,7 +20,29 @@ async function find() {
     // Return after all DB queries finish
     return Promise.all(final);
 }
-    
+
+//searches city, state and zipcode by search query
+async function search(query) {
+    // Filter out unspecified fields
+    query = Object.entries(query).filter(pair => pair[1] !== null);
+    const markets = await db('markets')
+    .where(builder => {
+            // Create query builder on available fields
+            query.forEach(pair => {
+                // Compare case-insensitive values set in parseQueryAddr middleware
+                builder.andWhere(pair[0],'ilike',`%${pair[1]}%`)
+            })
+        })
+    // Map hours of operation onto markets
+    const final = await markets.map(async market => {
+        const operation = await db('market_days')
+            .where({market_id: market.id})
+        return { ...market, operation };
+    })
+    // Return after all DB queries finish
+    return Promise.all(final);
+}
+
 async function findById(id) {
     const [market] = await db('markets')
         .where({id});

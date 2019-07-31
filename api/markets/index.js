@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const Markets = require("./model"); 
-const {protect, onlyOwner, validate, reqCols, reqNestCols, onlyCols, onlyNestCols} = require('../middleware');
+const Markets = require("./model");
+const {protect, parseQueryAddr, onlyOwner, reqCols, validate, onlyCols} = require('../middleware');
 const spec = require('./validate');
 
 router.get('/', (req, res ) => {
@@ -14,6 +14,23 @@ router.get('/', (req, res ) => {
       res.status(500).json({knex: err, message: 'An error occurred while accessing the markets database.' });
     });
 });
+
+router.get('/search',
+  parseQueryAddr,
+  (req, res)  => {
+      const {query} = req;
+      Markets.search(query)
+      .then(markets => {
+        !markets.length
+        ? res.status(404).json({ message: 'No markets could be found in our database that matched the search criteria.' })
+        : res.status(200).json(markets);
+    })
+    .catch(err => {
+        res
+            .status(500).json({err, message: 'This is a error message' });
+    });
+  }
+)
 
 router.get('/:id', (req, res ) => {
     const id = req.params.id
@@ -74,7 +91,7 @@ router.put('/:id',
         });
       })
   });
-  
+
 router.delete('/:id',
   protect,
   onlyOwner('markets', 'admin_id'),
