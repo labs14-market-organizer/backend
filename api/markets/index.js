@@ -70,7 +70,7 @@ router.post('/',
 const putNestOnly = {operation: ['id','day','start','end']};
 router.put('/:id',
   protect,
-  onlyOwner('markets', 'admin_id'),
+  onlyOwner('markets', 'admin_id')(),
   onlyCols(marketOnly),
   onlyNestCols(putNestOnly),
   spec, validate,
@@ -87,11 +87,11 @@ router.put('/:id',
       .catch(err => {
         res.status(500).json({knex: err, message: 'The specified market could not be updated in our database.'});
       })
-  });
+});
 
 router.delete('/:id',
   protect,
-  onlyOwner('markets', 'admin_id'),
+  onlyOwner('markets', 'admin_id')(),
   (req, res) => {
     Markets.remove(req.params.id)
       .then(deleted => {
@@ -108,5 +108,41 @@ router.delete('/:id',
           .json({knex: err, message: 'The specified market could not be removed from our database.'});
       })
 });
+
+// ***
+router.post('/:id/booths',
+  protect,
+  onlyOwner('markets', 'admin_id')(),
+  (req, res) => {
+    req.body.market_id = req.params.id;
+    Markets.addBooth(req.body)
+      .then(added => {
+        res.status(201).json(added);
+      })
+      .catch(err => {
+        res.status(500).json({knex: err, message: 'The booth type could not be added to our database.'})
+      })
+  }
+)
+
+// ***
+router.put('/:id/booths/:bID',
+  protect,
+  onlyOwner('markets', 'admin_id')
+    ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
+  (req, res) => {
+    res.status(500).json({message: 'Work In Progress'})
+  }
+)
+
+// ***
+router.delete('/:id/booths/:bID',
+  protect,
+  onlyOwner('markets as m', 'admin_id')
+    ('market_booths as mb', {"m.id": "mb.market_id"}, 'bID'),
+  (req, res) => {
+    res.status(500).json({message: 'Work In Progress'})
+  }
+)
 
 module.exports = router;

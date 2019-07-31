@@ -69,20 +69,36 @@ async function parseQueryAddr(req, res, next) {
 // "tableID" = the column name of the associated user ID in that table
 // "paramID" = the name of the request parameter that
 //     maps to the entry ID in the target table
-function onlyOwner(table, tableID = 'id', paramID = 'id') {
-  return async (req, res, next) => {
-    const {user_id} = req; // Grab user ID from request
-    const id = req.params[paramID]; // Grab ID from URL
-    // Find user ID on target entry
-    const [result] = await db(table)
-      .select(tableID)
-      .where({id});
-    if(!result){
-      return next(); // Let routes handle 404s
+function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
+  return (joinTbl = null, joinID = null, joinOn = {[`${table}.id`]: `${joinTbl}.${table}_id`}, paramID2 = 'oID') => {
+    return async (req, res, next) => {
+      const {user_id} = req; // Grab user ID from request
+      const id1 = req.params[paramID1]; // Grab ID from URL
+      const id2 = req.params[paramID2]; // Grab ID from URL
+      let result;
+      console.log('FOO')
+      if(!joinTbl || !joinID) {
+        // Find user ID on target entry
+        result = await db(table)
+          .select(tableID)
+          .where({id: id1})
+          .first();
+      } else {
+        result = await db(table)
+          .select(`${table}.${tableID}`)
+          .where({[`${joinTbl}.${joinID}`]: id2})
+          .join(joinTbl, joinOn)
+          .first();
+      }
+      console.log('BAR')
+      if(!result){
+        return next(); // Let routes handle 404s
+      }
+      console.log(result, tableID);
+      result[tableID] === user_id // Determine if IDs match
+        ? next()
+        : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
     }
-    result[tableID] === user_id // Determine if IDs match
-      ? next()
-      : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
   }
 }
 
