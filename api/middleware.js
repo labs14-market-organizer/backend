@@ -134,13 +134,15 @@ function reqNestCols(reqObjs) {
     }
     let missing = [];
     checkParents.forEach(parent => {
-      const absent = reqObjs[parent]
-        // Filter out fields that are included
-        .filter(prop => !body.includes(prop))
-        // Prepend the name of parent field for better error message
-        .map(prop => `${parent}.${prop}`);
-      // Add any missing fields to collection
-      missing = [...missing, ...absent];
+      req.body[parent].forEach(child => {
+        const absent = reqObjs[parent]
+          // Filter out fields that are included
+          .filter(prop => !Object.keys(child).includes(prop))
+          // Prepend the name of parent field for better error message
+          .map(prop => `${parent}.${prop}`);
+        // Add any missing fields to collection
+        missing = [...missing, ...absent];
+      })
     })
     // Reject request if required sub-fields are missing
     !!missing.length
@@ -176,20 +178,22 @@ function onlyNestCols(allowObjs) {
     // Compares request body to specified parents
     // to see which parent fields are available to check
     const checkParents = body
-      .filter(prop => Object.keys(reqObjs).includes(prop));
+      .filter(prop => Object.keys(allowObjs).includes(prop));
     // Moves on to next middleware if there are no parent fields to check
     if(!checkParents.length) {
       return next()
     }
     let flagged = [];
     checkParents.forEach(parent => {
-      const subflags = body
-        // Filter down to subfields that shouldn't be included
-        .filter(prop => !allowObjs[parent].includes(prop))
-        // Prepend the name of parent field for better error message
-        .map(prop => `${parent}.${prop}`)
-      // Add any missing fields to collection
-      flagged = [...flagged, ...subflags];
+        req.body[parent].forEach(child => {
+          subflags = Object.keys(child)
+          // Filter down to subfields that shouldn't be included
+          .filter(prop => !allowObjs[parent].includes(prop))
+          // Prepend the name of parent field for better error message
+          .map(prop => `${parent}.${prop}`);
+        // Add any missing fields to collection
+        flagged = [...flagged, ...subflags];
+        })
     })
     // Rejects request if there are any unallowed subfields
     if (!!flagged.length) {

@@ -13,11 +13,16 @@ module.exports = [
   body('operation').isArray()
     .withMessage("'operation' must be an array")
     .optional(),
-  body('operation.*').isJSON()
-    .withMessage("'operation' must be an array of objects")
-    .optional(),
   body('operation.*.day').isString()
     .withMessage("'day' under 'operation' must be a string")
+    .optional(),
+  body('operation.*.start').isString()
+    .matches(`^(0[0-9]|1[0-9]|2[0-3]|[0-9])(:[0-5][0-9]){1,2}$`)
+    .withMessage("'start' under 'operation' must be a string in the format 'hh:mm' or 'hh:mm:ss'")
+    .optional(),
+  body('operation.*.end').isString()
+    .matches(`^(0[0-9]|1[0-9]|2[0-3]|[0-9])(:[0-5][0-9]){1,2}$`)
+    .withMessage("'end' under 'operation' must be a string in the format 'hh:mm' or 'hh:mm:ss'")
     .optional(),
   body('address').isString()
     .withMessage("'address' must be a string")
