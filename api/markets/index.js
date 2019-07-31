@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Markets = require("./model");
-const {protect, parseQueryAddr, onlyOwner, reqCols, validate, onlyCols} = require('../middleware');
+const {protect, parseQueryAddr, onlyOwner, reqCols, reqNestCols, validate, onlyCols, onlyNestCols} = require('../middleware');
 const spec = require('./validate');
 
 router.get('/', (req, res ) => {
