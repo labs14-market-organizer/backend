@@ -105,6 +105,8 @@ function remove(id) {
                     .returning('*')
                     .transacting(t);
             })
+            // If no market existed, let route handle 404
+            if(!market) { resolve(market) }
             resolve({...market, operation})
         } catch(err) {
             reject(err);
