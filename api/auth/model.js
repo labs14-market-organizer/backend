@@ -1,10 +1,10 @@
 const db = require('../../data/dbConfig');
-​
+
 module.exports = {
   google,
   facebook
 }
-​
+
 async function google(provided) {
   const { email, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
@@ -36,7 +36,7 @@ async function google(provided) {
     return rtrn[0];
   }
 }
-​
+
 async function facebook(provided) {
   const { email, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
