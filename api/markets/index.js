@@ -44,17 +44,17 @@ router.get('/:id', (req, res ) => {
     });
 });
 
-const postReq = ['name']
+const marketReq = ['name']
 const marketOnly = ['admin_id', 'name', 'description', 'operation', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'twitter', 'instagram']
-const postNestReq = {operation: ['day', 'start', 'end']};
-const postNestOnly = {operation: ['day', 'start', 'end']};
+const marketNestReq = {operation: ['day', 'start', 'end']};
+const marketPostNestOnly = {operation: ['day', 'start', 'end']};
 router.post('/',
   protect,
-  reqCols(postReq, true, 'admin_id'),
-  reqNestCols(postNestReq),
+  reqCols(marketReq, true, 'admin_id'),
+  reqNestCols(marketNestReq),
   onlyCols(marketOnly),
-  onlyNestCols(postNestOnly),
-  spec, validate,
+  onlyNestCols(marketPostNestOnly),
+  spec.market, validate,
   (req, res) => {
     if(!!req.user_id) {
       req.body.admin_id = req.user_id;
@@ -67,13 +67,13 @@ router.post('/',
       });
 });
 
-const putNestOnly = {operation: ['id','day','start','end']};
+const marketPutNestOnly = {operation: ['id','day','start','end']};
 router.put('/:id',
   protect,
   onlyOwner('markets', 'admin_id')(),
   onlyCols(marketOnly),
-  onlyNestCols(putNestOnly),
-  spec, validate,
+  onlyNestCols(marketPutNestOnly),
+  spec.market, validate,
   (req, res) => {
     req.body.updated_at = new Date();
     Markets.update(req.params.id, req.body)
@@ -110,9 +110,14 @@ router.delete('/:id',
 });
 
 // ***
+const boothReq = ['type', 'number']
+const boothOnly = ['type', 'number', 'price', 'size', 'description']
 router.post('/:id/booths',
   protect,
   onlyOwner('markets', 'admin_id')(),
+  reqCols(boothReq),
+  onlyCols(boothOnly),
+  spec.booth, validate,
   (req, res) => {
     req.body.market_id = req.params.id;
     Markets.addBooth(req.body)
@@ -130,6 +135,8 @@ router.put('/:id/booths/:bID',
   protect,
   onlyOwner('markets', 'admin_id')
     ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
+  onlyCols(boothOnly),
+  spec.booth, validate,
   (req, res) => {
     req.body.market_id = req.params.id;
     Markets.updateBooth(req.params.id, req.body)

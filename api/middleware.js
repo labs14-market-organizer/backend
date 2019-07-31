@@ -76,7 +76,6 @@ function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
       const id1 = req.params[paramID1]; // Grab ID from URL
       const id2 = req.params[paramID2]; // Grab ID from URL
       let result;
-      console.log('FOO')
       if(!joinTbl || !joinID) {
         // Find user ID on target entry
         result = await db(table)
@@ -90,11 +89,9 @@ function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
           .join(joinTbl, joinOn)
           .first();
       }
-      console.log('BAR')
       if(!result){
         return next(); // Let routes handle 404s
       }
-      console.log(result[tableID], user_id);
       result[tableID] === user_id // Determine if IDs match
         ? next()
         : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
