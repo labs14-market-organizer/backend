@@ -18,7 +18,12 @@ describe('/markets', () => {
 
   describe('/ POST', () => {
     it('should return 201 status', () => {
-      const market = { name: "Leigh's" }
+      const market = {
+        name: "Leigh's",
+        city: "Forest Park",
+        state: "GA",
+        zipcode: "30298"
+      }
       return request.post('/markets')
        .send(market)
        .set({authorization: tkn1})
@@ -26,7 +31,12 @@ describe('/markets', () => {
     })
     
     it('should return an object', () => {
-      const market = { name: "Mindy's" }
+      const market = {
+        name: "Mindy's",
+        city: "Atlanta",
+        state: "GA",
+        zipcode: "30301"
+      }
       return request.post('/markets')
         .send(market)
         .set({authorization: tkn2})
@@ -34,7 +44,12 @@ describe('/markets', () => {
     })
     
     it('should return an object w/ next ID', () => {
-      const market = { name: "Matt's" }
+      const market = {
+        name: "Matt's",
+        city: "Atlanta",
+        state: "GA",
+        zipcode: "30302"
+      }
       return request.post('/markets')
         .send(market)
         .set({authorization: tkn3})
@@ -55,6 +70,28 @@ describe('/markets', () => {
     
     it('should return an array w/ proper length', () => {
       return request.get('/markets')
+        .then(res => expect(res.body).toHaveLength(3));
+    })
+  })
+
+  describe('/search GET', () => {
+    it('should return 200 status', () => {
+      return request.get('/markets/search?q=30298')
+        .expect(200);
+    })
+
+    it('should return w/ proper length when searching by zipcode', () => {
+      return request.get('/markets/search?q=30298')
+        .then(res => expect((res.body)).toHaveLength(1));
+    })
+    
+    it('should return w/ proper length when searching by city', () => {
+      return request.get('/markets/search?q=Atlanta')
+        .then(res => expect(res.body).toHaveLength(2));
+    })
+    
+    it('should return w/ proper length when searching by state', () => {
+      return request.get('/markets/search?q=GA')
         .then(res => expect(res.body).toHaveLength(3));
     })
   })

@@ -10,14 +10,23 @@ module.exports = [
   body('description').isString()
     .withMessage("'description must be a string")
     .optional(),
-  body('address').isAlphanumeric()
-    .withMessage("'address' must be a string of numbers and letters")
+  body('operation').isArray()
+    .withMessage("'operation' must be an array")
     .optional(),
-  body('city').isAlpha()
-    .withMessage("'city' must be a string of letters")
+  body('operation.*').isJSON()
+    .withMessage("'operation' must be an array of objects")
     .optional(),
-  body('state').isAlpha()
-    .withMessage("'state' must be a string of letters")
+  body('operation.*.day').isString()
+    .withMessage("'day' under 'operation' must be a string")
+    .optional(),
+  body('address').isString()
+    .withMessage("'address' must be a string")
+    .optional(),
+  body('city').isString()
+    .withMessage("'city' must be a string")
+    .optional(),
+  body('state').isString()
+    .withMessage("'state' must be a string")
     .optional(),
   body('zipcode').isNumeric()
     .withMessage("'zipcode' must be a string of numbers")

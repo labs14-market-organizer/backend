@@ -1,10 +1,12 @@
 const jwt = require('jsonwebtoken');
 const db = require('../data/dbConfig');
+const parseAddr = require("parse-address-string");
 const {validationResult} = require('express-validator');
 
 module.exports = {
   verifyJWT,
   protect,
+  parseQueryAddr,
   onlyOwner,
   validate,
   reqCols,
@@ -36,6 +38,30 @@ function verifyJWT(req, res, next) {
 function protect(req, res, next) {
   !req.headers.authorization
     ? res.status(401).json({ message: 'Authorization token missing.' })
+    : next();
+}
+
+// Parses query string as address
+async function parseQueryAddr(req, res, next) {
+  // Parse address using 'parse-address-string' package
+  await parseAddr(req.query.q, (err, addr) => {
+    // If there's an error, kick it down to ternary below
+    if(err) {
+      req.query = null;
+    } else {
+      // Pull city, state, and zipcode from addr object
+      const {city, state, postal_code} = addr;
+      // Pass them into the request's query object
+      if (city === null && state === null && postal_code === null) {
+        req.query = null
+      } else {
+        req.query = {city, state, zipcode: postal_code};
+      }
+    }
+  })
+  // If the query couldn't be parsed, return a 400
+  req.query === null
+    ? res.status(400).json({message: "Could not parse the query properly. Try formatting as 'City, ST zipcode' or any combination."})
     : next();
 }
 

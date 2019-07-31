@@ -2,29 +2,84 @@ const db = require('../../data/dbConfig');
 
 module.exports = {
     find,
+    search,
     findById,
     add,
     update,
     remove,
 };
 
-function find() {
-    return db('markets')
-        
-    }
-    
-    function findById(id) {
-    return db('markets as m')
-        .where({'m.id': id})
-         .first();
+async function find() {
+    const markets = await db('markets');
+    // Map hours of operation onto markets
+    const final = await markets.map(async market => {
+        const operation = await db('market_days')
+            .where({market_id: market.id})
+        return { ...market, operation };
+    })
+    // Return after all DB queries finish
+    return Promise.all(final);
 }
 
-function add(markets) {
-    return db('markets')
-        .insert(markets)
-        .returning('*')
-        
-    
+//searches city, state and zipcode by search query
+async function search(query) {
+    // Filter out unspecified fields
+    query = Object.entries(query).filter(pair => pair[1] !== null);
+    const markets = await db('markets')
+    .where(builder => {
+            // Create query builder on available fields
+            query.forEach(pair => {
+                // Compare case-insensitive values set in parseQueryAddr middleware
+                builder.andWhere(pair[0],'ilike',`%${pair[1]}%`)
+            })
+        })
+    // Map hours of operation onto markets
+    const final = await markets.map(async market => {
+        const operation = await db('market_days')
+            .where({market_id: market.id})
+        return { ...market, operation };
+    })
+    // Return after all DB queries finish
+    return Promise.all(final);
+}
+
+async function findById(id) {
+    const [market] = await db('markets')
+        .where({id});
+    // If the market doesn't exist return empty result to trigger 404
+    if(!market) { return market };
+    operation = await db('market_days')
+        .where({market_id: id});
+    return {...market, operation};
+}
+
+function add(market) {
+    let {operation, ...rest} = market;
+    let resMarket;
+    let resHours = [];
+    return new Promise(async (resolve, reject) => {
+        try{
+            // Wrap inserts in a transaction to avoid partial creation
+            await db.transaction(async t => {
+                [resMarket] = await db('markets')
+                    .insert(rest)
+                    .returning('*')
+                    .transacting(t);
+                if(operation && operation.length) {
+                    operation = await operation.map(day => {
+                        return {...day, market_id: resMarket.id}
+                    })
+                    resHours = await db('market_days')
+                        .insert(operation)
+                        .returning('*')
+                        .transacting(t);
+                }
+            })
+            resolve({...resMarket, operation: resHours})
+        } catch(err) {
+            reject(err);
+        }
+    });
 }
 
 function update(id, changes) {
@@ -34,9 +89,27 @@ function update(id, changes) {
   }
 
 function remove(id) {
-    return db('markets')
-        .where({id})
-        .del()
-        .returning('*');
-
+    return new Promise(async (resolve, reject) => {
+        try{
+            let operation, market;
+            // Wrap deletions in a transaction to avoid partial creation
+            await db.transaction(async t => {
+                operation = await db('market_days')
+                    .where({market_id: id})
+                    .del()
+                    .returning('*')
+                    .transacting(t);
+                [market] = await db('markets')
+                    .where({id})
+                    .del()
+                    .returning('*')
+                    .transacting(t);
+            })
+            // If no market existed, let route handle 404
+            if(!market) { resolve(market) }
+            resolve({...market, operation})
+        } catch(err) {
+            reject(err);
+        }
+    });
 }
