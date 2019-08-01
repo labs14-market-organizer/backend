@@ -100,16 +100,20 @@ function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
         return res.status(500).json({message: 'The middleware for this endpoint is missing data on its dependent table in the database.'})
       } else {
         result = await db(table)
-          .select(`${table}.${tableID}`)
+          .select(`${table}.${tableID}`,`${joinTbl}.${joinID}`)
           .where({[`${joinTbl}.id`]: id2})
           .join(joinTbl, joinOn);
       }
       if(!result.length){
         return next(); // Let routes handle 404s
       }
-      result[0][tableID] === user_id // Determine if IDs match
-        ? next()
-        : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
+      if(result[0][tableID] !== user_id) { // Determine if IDs match
+        res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
+      } else if(`${result[0][joinID]}` !== id1) {
+        res.status(400).json({message: "The parent ID in the URL does not match the ID of the child entry's parent"})
+      } else {
+        next()
+      }
     }
   }
 }
