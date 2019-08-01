@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Markets = require("./model");
-const {protect, parseQueryAddr, onlyOwner, reqCols, reqNestCols, validate, onlyCols, onlyNestCols} = require('../middleware');
+const {protect, parseQueryAddr, parentExists, onlyOwner, reqCols, reqNestCols, validate, onlyCols, onlyNestCols} = require('../middleware');
 const spec = require('./validate');
 
 router.get('/', (req, res ) => {
@@ -114,6 +114,7 @@ const boothReq = ['type', 'number']
 const boothOnly = ['type', 'number', 'price', 'size', 'description']
 router.post('/:id/booths',
   protect,
+  parentExists('markets'),
   onlyOwner('markets', 'admin_id')(),
   reqCols(boothReq),
   onlyCols(boothOnly),
@@ -133,6 +134,7 @@ router.post('/:id/booths',
 // ***
 router.put('/:id/booths/:bID',
   protect,
+  parentExists('markets'),
   onlyOwner('markets', 'admin_id')
     ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
   onlyCols(boothOnly),
@@ -156,6 +158,7 @@ router.put('/:id/booths/:bID',
 // ***
 router.delete('/:id/booths/:bID',
   protect,
+  parentExists('markets'),
   onlyOwner('markets', 'admin_id')
     ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
   (req, res) => {
@@ -165,13 +168,13 @@ router.delete('/:id/booths/:bID',
           res.status(200).json(deleted);
         } else {
           res.status(404).json({
-            message: 'We do not have a market with the specified ID in our database.',
+            message: 'We do not have a booth type with the specified ID in our database.',
           });
         }
       })
       .catch(err => {
         res.status(500)
-          .json({knex: err, message: 'The specified market could not be removed from our database.'});
+          .json({knex: err, message: 'The specified booth type could not be removed from our database.'});
       })
   }
 )

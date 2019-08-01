@@ -7,6 +7,7 @@ module.exports = {
   verifyJWT,
   protect,
   parseQueryAddr,
+  parentExists,
   onlyOwner,
   validate,
   reqCols,
@@ -65,6 +66,19 @@ async function parseQueryAddr(req, res, next) {
     : next();
 }
 
+function parentExists(table, param = 'id') {
+  return async (req, res, next) => {
+    const id = req.params[param];
+    const result = await db(table)
+      .select('id')
+      .where({id})
+      .first();
+    !result
+      ? res.status(400).json({message: 'No market exists with the specified market ID.'})
+      : next();
+  }
+}
+
 // "table" = the table of the target entry
 // "tableID" = the column name of the associated user ID in that table
 // "paramID" = the name of the request parameter that
@@ -85,7 +99,7 @@ function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
       } else {
         result = await db(table)
           .select(`${table}.${tableID}`)
-          .where({[`${joinTbl}.${joinID}`]: id2})
+          .where({[`${joinTbl}.${joinID}`]: id1, [`${joinTbl}.id`]: id2})
           .join(joinTbl, joinOn)
           .first();
       }

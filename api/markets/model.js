@@ -18,8 +18,10 @@ async function find() {
     const final = await markets.map(async market => {
         const operation = await db('market_days')
             .where({market_id: market.id})
+            .returning('*');
         const booths = await db('market_booths')
             .where({market_id: market.id})
+            .returning('*');
         return { ...market, operation, booths };
     })
     // Return after all DB queries finish
@@ -31,19 +33,22 @@ async function search(query) {
     // Filter out unspecified fields
     query = Object.entries(query).filter(pair => pair[1] !== null);
     const markets = await db('markets')
-    .where(builder => {
+        .where(builder => {
             // Create query builder on available fields
             query.forEach(pair => {
                 // Compare case-insensitive values set in parseQueryAddr middleware
                 builder.andWhere(pair[0],'ilike',`%${pair[1]}%`)
             })
         })
+        .returning('*');
     // Map hours of operation and booths onto markets
     const final = await markets.map(async market => {
         const operation = await db('market_days')
             .where({market_id: market.id})
+            .returning('*');
         const booths = await db('market_booths')
             .where({market_id: market.id})
+            .returning('*');
         return { ...market, operation, booths };
     })
     // Return after all DB queries finish
@@ -56,15 +61,19 @@ async function findById(id) {
     // If the market doesn't exist return empty result to trigger 404
     if(!market) { return market };
     operation = await db('market_days')
-        .where({market_id: id});
+        .where({market_id: id})
+        .returning('*');
+        console.log('FOO')
     booths = await db('market_booths')
-        .where({market_id: id});
+        .where({market_id: id})
+        .returning('*');
+    console.log('BAR')
     return {...market, operation, booths};
 }
 
 function add(market) {
-    let {operation, ...rest} = market;
-    let resMarket;
+    let {operation, booths, ...rest} = market;
+    let resMarket, resBooths;
     let resHours = [];
     return new Promise(async (resolve, reject) => {
         try{
@@ -83,8 +92,12 @@ function add(market) {
                         .returning('*')
                         .transacting(t);
                 }
+                resBooths = await db('market_booths')
+                    .where({market_id: resMarket.id})
+                    .transacting(t)
+                    .returning('*');
             })
-            resolve({...resMarket, operation: resHours})
+            resolve({...resMarket, operation: resHours, booths: resBooths})
         } catch(err) {
             reject(err);
         }
@@ -94,7 +107,7 @@ function add(market) {
 // This could probably be simplified
 async function update(id, changes) {
     // Separate changes in hours of operation from all others
-    const {operation, ...market} = changes;
+    const {operation, booths, ...market} = changes;
     // Grab existing market
     const oldMarket = await findById(id);
     // If the market doesn't exist return empty result to trigger 404
@@ -166,10 +179,12 @@ async function update(id, changes) {
                 opsArr = await trx('market_days')
                     .where({market_id: id});
             }
+            resBooths = await trx('market_booths')
+                .where({market_id: id});
             // Destructure market object out of its wrapping array
             [updated] = updated;
             // Return market object with updated hours of operation
-            return {...updated, operation: opsArr}
+            return {...updated, operation: opsArr, booths: resBooths}
         })
         // Commit all updates if everything's successful
         .then(async updated => {
@@ -181,9 +196,14 @@ async function update(id, changes) {
 function remove(id) {
     return new Promise(async (resolve, reject) => {
         try{
-            let operation, market;
+            let booths, operation, market;
             // Wrap deletions in a transaction to avoid partial creation
             await db.transaction(async t => {
+                booths = await db('market_booths')
+                    .where({market_id: id})
+                    .del()
+                    .returning('*')
+                    .transacting(t);
                 operation = await db('market_days')
                     .where({market_id: id})
                     .del()
@@ -197,29 +217,73 @@ function remove(id) {
             })
             // If no market existed, let route handle 404
             if(!market) { resolve(market) }
-            resolve({...market, operation})
+            resolve({...market, operation, booths})
         } catch(err) {
             reject(err);
         }
     });
 }
 
-function addBooth(booth) {
-    return db('market_booths')
-        .insert(booth)
-        .returning('*');
+async function addBooth(booth) {
+    return new Promise(async (resolve, reject) => {
+        try{
+            await db.transaction(async t => {
+                await db('market_booths')
+                    .insert(booth)
+                    .transacting(t);
+                await db('markets')
+                    .where({id: booth.market_id})
+                    .update({updated_at: new Date()})
+                    .transacting(t);
+            });
+            const market = await findById(booth.market_id);
+            resolve(market);
+        } catch(err) {
+            reject(err)
+        }
+    })
 }
 
-function updateBooth(id, changes) {
-    return db('market_booths')
-        .where({id})
-        .update(changes)
-        .returning('*');
+async function updateBooth(id, changes) {
+    return new Promise(async (resolve, reject) => {
+        try{
+            await db.transaction(async t => {
+                await db('market_booths')
+                    .where({id})
+                    .update(changes)
+                    .transacting(t);
+                await db('markets')
+                    .where({id: changes.market_id})
+                    .update({updated_at: new Date()})
+                    .transacting(t);
+            });
+            const market = await findById(changes.market_id);
+            resolve(market);
+        } catch(err) {
+            reject(err)
+        }
+    })
 }
 
-function removeBooth(id) {
-    return db('market_booths')
-        .where({id})
-        .debug()
-        .returning('*');
+async function removeBooth(id) {
+    return new Promise(async (resolve, reject) => {
+        try{
+            let booth;
+            await db.transaction(async t => {
+                booth = await db('market_booths')
+                    .where({id})
+                    .del()
+                    .returning('*')
+                    .transacting(t);
+                await db('markets')
+                    .where({id: booth[0].market_id})
+                    .update({updated_at: new Date()})
+                    .transacting(t);
+            });
+            const market = await findById(booth[0].market_id);
+            resolve(market);
+        } catch(err) {
+            reject(err)
+        }
+    })
 }
