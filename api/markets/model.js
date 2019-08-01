@@ -242,9 +242,10 @@ async function addBooth(booth) {
         try{
             let added;
             await db.transaction(async t => {
-                [added] = await db('market_booths')
+                added = await db('market_booths')
                     .insert(booth)
                     .transacting(t);
+                console.log(added)
                 await db('markets')
                     .where({id: booth.market_id})
                     .update({updated_at: new Date()})
@@ -253,7 +254,7 @@ async function addBooth(booth) {
             const market = await findById(booth.market_id);
             resolve({added, market});
         } catch(err) {
-            reject(err)
+            reject(err);
         }
     })
 }
