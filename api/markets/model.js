@@ -13,7 +13,7 @@ module.exports = {
 };
 
 async function find() {
-    const markets = await db('markets');
+    const markets = await db('markets').orderBy('id');
     // Map hours of operation and booths onto markets
     const final = await markets.map(async market => {
         const operation = await db('market_days')
@@ -116,7 +116,7 @@ async function update(id, changes) {
     // Separate changes in hours of operation from all others
     const {operation, booths, ...market} = changes;
     // Grab existing market
-    const oldMarket = await findById(id).orderBy('id');
+    const oldMarket = await findById(id);
     // If the market doesn't exist return empty result to trigger 404
     if(!oldMarket) { return oldMarket };
     // Create array of market_days entries to create, based on not having an id
@@ -150,7 +150,6 @@ async function update(id, changes) {
         .where({id})
         .update(market)
         .returning('*')
-        .orderBy('id')
         .then(async updated => {
             // Create empty array that will be final 'operation' field returned to user
             let opsArr = [];
@@ -159,9 +158,9 @@ async function update(id, changes) {
                 // Create any market_days entries that need to be created
                 if(!!hoursToCreate && !!hoursToCreate.length) {
                     const hoursCreated = await trx('market_days')
-                    .insert(hoursToCreate)
-                    .returning('*')
-                    .orderBy('id');
+                        .insert(hoursToCreate)
+                        .returning('*')
+                        .orderBy('id');
                     // Push newly created entries to holding array
                     opsArr = [...opsArr,...hoursCreated];
                 }
@@ -170,10 +169,10 @@ async function update(id, changes) {
                     const updates = await Promise.all(hoursToUpdate.map(async day => {
                         const {id: opID, ...rest} = day;
                         const [result] = await trx('market_days')
-                        .where({id: opID})
-                        .update(rest)
-                        .returning('*')
-                        .orderBy('id');
+                            .where({id: opID})
+                            .update(rest)
+                            .returning('*')
+                            .orderBy('id');
                         return result;
                     }))
                     // Add updated entries to holding array
@@ -187,10 +186,12 @@ async function update(id, changes) {
                 }
             } else {
                 opsArr = await trx('market_days')
-                    .where({market_id: id});
+                    .where({market_id: id})
+                    .orderBy('id');
             }
             resBooths = await trx('market_booths')
-                .where({market_id: id});
+                .where({market_id: id})
+                .orderBy('id');
             // Destructure market object out of its wrapping array
             [updated] = updated;
             // Return market object with updated hours of operation
@@ -213,11 +214,13 @@ function remove(id) {
                     .where({market_id: id})
                     .del()
                     .returning('*')
+                    .orderBy('id')
                     .transacting(t);
                 operation = await db('market_days')
                     .where({market_id: id})
                     .del()
                     .returning('*')
+                    .orderBy('id')
                     .transacting(t);
                 [market] = await db('markets')
                     .where({id})
