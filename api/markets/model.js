@@ -242,10 +242,10 @@ async function addBooth(booth) {
         try{
             let added;
             await db.transaction(async t => {
-                added = await db('market_booths')
+                [added] = await db('market_booths')
                     .insert(booth)
+                    .returning('*')
                     .transacting(t);
-                console.log(added)
                 await db('markets')
                     .where({id: booth.market_id})
                     .update({updated_at: new Date()})
