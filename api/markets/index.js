@@ -122,8 +122,8 @@ router.post('/:id/booths',
   (req, res) => {
     req.body.market_id = req.params.id;
     Markets.addBooth(req.body)
-      .then(added => {
-        res.status(201).json(added);
+      .then(booth => {
+        res.status(201).json(booth.market);
       })
       .catch(err => {
         res.status(500).json({knex: err, message: 'The booth type could not be added to our database.'})
@@ -142,9 +142,9 @@ router.put('/:id/booths/:bID',
   (req, res) => {
     req.body.market_id = req.params.id;
     Markets.updateBooth(req.params.bID, req.body)
-    .then(updated => {
-      if (!!updated) {
-      res.status(200).json(updated);
+    .then(booth => {
+      if (!!booth.updated) {
+      res.status(200).json(booth.market);
       } else {
         res.status(404).json({ message: 'We do not have a booth type with the specified ID in our database.' });
       }
@@ -163,9 +163,9 @@ router.delete('/:id/booths/:bID',
     ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
   (req, res) => {
     Markets.removeBooth(req.params.bID)
-      .then(deleted => {
-        if (!!deleted) {
-          res.status(200).json(deleted);
+      .then(booth => {
+        if (!!booth.deleted) {
+          res.status(200).json(booth.market);
         } else {
           res.status(404).json({
             message: 'We do not have a booth type with the specified ID in our database.',

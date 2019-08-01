@@ -67,12 +67,19 @@ async function findById(id) {
     if(!market) { return market };
     operation = await db('market_days')
         .where({market_id: id})
+<<<<<<< Updated upstream
         .returning('*')
         .orderBy('id');
     booths = await db('market_booths')
         .where({market_id: id})
         .returning('*')
         .orderBy('id');
+=======
+        .returning('*');
+    booths = await db('market_booths')
+        .where({market_id: id})
+        .returning('*');
+>>>>>>> Stashed changes
     return {...market, operation, booths};
 }
 

@@ -90,23 +90,24 @@ function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
       const id1 = req.params[paramID1]; // Grab ID from URL
       const id2 = req.params[paramID2]; // Grab ID from URL
       let result;
-      if(!joinTbl || !joinID) {
+      if(!joinTbl && !joinID) {
         // Find user ID on target entry
         result = await db(table)
           .select(tableID)
           .where({id: id1})
           .first();
+      } else if(!joinTbl || !joinID) {
+        return res.status(500).json({message: 'The middleware for this endpoint is missing data on its dependent table in the database.'})
       } else {
         result = await db(table)
           .select(`${table}.${tableID}`)
-          .where({[`${joinTbl}.${joinID}`]: id1, [`${joinTbl}.id`]: id2})
-          .join(joinTbl, joinOn)
-          .first();
+          .where({[`${joinTbl}.id`]: id2})
+          .join(joinTbl, joinOn);
       }
-      if(!result){
+      if(!result.length){
         return next(); // Let routes handle 404s
       }
-      result[tableID] === user_id // Determine if IDs match
+      result[0][tableID] === user_id // Determine if IDs match
         ? next()
         : res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
     }
