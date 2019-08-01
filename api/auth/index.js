@@ -58,38 +58,4 @@ router.get("/google/callback",
   }
 );
 
-<<<<<<< Updated upstream
-=======
-// FE endpoint for redirect to Facebook
-router.get("/facebook",
-  passport.authenticate("facebook", {
-    session: false, // using JWT instead of sessions
-    scope: ["email"]
-  })
-);
-
-// Facebook endpoint for redirect to FE
-router.get("/facebook/callback",
-  passport.authenticate("facebook", {
-    failureRedirect: `${FE_URL}`, // Handle auth failure on Facebook's side
-    session: false // using JWT instead of sessions
-  }),
-  async (req, res) => {
-    return db.facebook(req.user)
-      .then(user => {
-        const jwt = genToken(user, expire);
-        const exp = Date.now() + expire; // provides parallel to JWT exp
-        const redirectURL = `${FE_URL}/auth/token?jwt=${jwt}&exp=${exp}`;
-        res.redirect(redirectURL);
-      })
-      .catch(err => {
-        // Handle auth failure w/ our user DB
-        console.log(err)
-        const redirectURL = `${FE_URL}/auth/token?err=500`;
-        res.redirect(redirectURL);
-      });
-  }
-);
-
->>>>>>> Stashed changes
 module.exports = router;
