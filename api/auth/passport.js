@@ -46,19 +46,20 @@ module.exports = (passport) => {
     )
   );
 
+
   passport.use(
     new FacebookStrategy(
       {
         clientID: FACEBOOK_ID || 'test', // Fallback to prevent tests from failing
         clientSecret: FACEBOOK_SECRET,
         callbackURL: `${BE_URL}/auth/facebook/callback`, // BE endpoint that Facebook redirects to
-        profileFields: ['id', 'email']
+        profileFields: ['id', 'emails']
       },
       function(accessToken, refreshToken, profile, done) {
         console.log(profile)
-        // const { provider, id, emails } = profile;
-        // const email = emails[0].value;
-        // const user = { provider, prov_user: id, email };
+        const { provider, id, emails } = profile;
+        const email = emails[0].value; 
+        const user = { provider, prov_user: id, email };
         return done(null, user); // pass user data to callback
       }
     )
