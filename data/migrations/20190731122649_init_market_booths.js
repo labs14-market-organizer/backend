@@ -8,12 +8,12 @@ exports.up = function(knex) {
       .inTable('markets')
       .onDelete('CASCADE')
       .onUpdate('CASCADE');
-    booths.string('type')
+    booths.string('name')
       .notNullable();
     booths.integer('number')
       .notNullable();
     booths.specificType('price', 'numeric(8,2)');
-    booths.specificType('size', 'integer[1][2]');
+    booths.specificType('size', 'integer[]');
     booths.text('description');
   })
 };

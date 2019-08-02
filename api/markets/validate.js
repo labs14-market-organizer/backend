@@ -54,8 +54,8 @@ module.exports = {
       .optional(),
   ],
   booth: [
-    body('type').isString()
-      .withMessage("'type' must be a string")
+    body('name').isString()
+      .withMessage("'name' must be a string")
       .optional(),
     body('number').isInt()
       .withMessage("'number' must be an integer")

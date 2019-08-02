@@ -109,9 +109,8 @@ router.delete('/:id',
       })
 });
 
-// ***
-const boothReq = ['type', 'number']
-const boothOnly = ['type', 'number', 'price', 'size', 'description']
+const boothReq = ['name', 'number']
+const boothOnly = ['name', 'number', 'price', 'size', 'description']
 router.post('/:id/booths',
   protect,
   parentExists('markets'),
@@ -131,7 +130,6 @@ router.post('/:id/booths',
   }
 )
 
-// ***
 router.put('/:id/booths/:bID',
   protect,
   parentExists('markets'),
@@ -155,7 +153,6 @@ router.put('/:id/booths/:bID',
   }
 )
 
-// ***
 router.delete('/:id/booths/:bID',
   protect,
   parentExists('markets'),

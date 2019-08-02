@@ -78,7 +78,7 @@ describe('/markets', () => {
   
   describe('/:id/booths POST', () => {
     it('should return 201 status', () => {
-      const booth = { type: "Standard", number: 42 }
+      const booth = { name: "Standard", number: 42 }
       return request.post('/markets/3/booths')
        .set({authorization: tkn3})
        .send(booth)
@@ -86,7 +86,7 @@ describe('/markets', () => {
     })
     
     it("should return an object w/ 'booths' array", () => {
-      const booth = { type: "Standard", number: 42 }
+      const booth = { name: "Standard", number: 42 }
       return request.post('/markets/3/booths')
         .set({authorization: tkn3})
         .send(booth)
@@ -94,7 +94,7 @@ describe('/markets', () => {
     })
     
     // it('should return booth w/ next ID', () => {
-    //   const booth = { type: "Standard", number: 42 }
+    //   const booth = { name: "Standard", number: 42 }
     //   return request.post('/markets/3/booths')
     //     .set({authorization: tkn3})
     //     .send(booth)
@@ -207,7 +207,7 @@ describe('/markets', () => {
 
   describe('/:id/booths PUT', () => {
     it('should return 200 status', () => {
-      const booth = { type: 'TEST 1' }
+      const booth = { name: 'TEST 1' }
       return request.put('/markets/3/booths/1')
        .send(booth)
        .set({authorization: tkn3})
@@ -215,7 +215,7 @@ describe('/markets', () => {
     })
     
     it("should return a 'booths' array", () => {
-      const booth = { type: 'TEST 1' }
+      const booth = { name: 'TEST 1' }
       return request.put('/markets/3/booths/1')
         .send(booth)
         .set({authorization: tkn3})
@@ -225,7 +225,7 @@ describe('/markets', () => {
     })
     
     it('should return an object w/ new name', () => {
-      const booth = { type: 'TEST 1' }
+      const booth = { name: 'TEST 1' }
       return request.put('/markets/3/booths/1')
         .send(booth)
         .set({authorization: tkn3})
