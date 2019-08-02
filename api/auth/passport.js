@@ -50,18 +50,10 @@ module.exports = (passport) => {
         enableProof: true
       },
       function(accessToken, refreshToken, profile, done) {
-<<<<<<< HEAD
-        console.log(profile)
         const { provider, id, emails } = profile;
-        const email = emails[0].value;
+        const email = emails[0].value; 
         const user = { provider, prov_user: id, email };
         return done(null, user); // pass user data to callback
-=======
-          const { provider, id, emails } = profile;
-          const email = emails[0].value; 
-          const user = { provider, prov_user: id, email };
-          return done(null, user); // pass user data to callback
->>>>>>> 30f790a0f60ae158bf61aca66f130923c7f53e9d
       }
     )
   );
