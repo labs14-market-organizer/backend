@@ -177,32 +177,32 @@ Market hours of operation, by day
 
 ### Auth
 
-`google()` -> Determines if a Google user already has an account, creates an account (if needed), and returns the user
-`facebook()` -> Determines if a Facebook user already has an account, creates an account (if needed), and returns the user
+- `google()` -> Determines if a Google user already has an account, creates an account (if needed), and returns the user
+- `facebook()` -> Determines if a Facebook user already has an account, creates an account (if needed), and returns the user
 
 ### Users
 
-`findById(id)` -> Returns user with specified ID in the `users` table
+- `findById(id)` -> Returns user with specified ID in the `users` table
 
 ### Vendors
 
-`find()` -> Returns all vendors
-`findById()` -> Returns vendor with specified ID in the `vendors` table
-`add()` -> Adds vendor to `vendor` table
-`update()` -> Updates vendor with specified ID in the `vendors` table
-`remove()` -> Deletes vendor with specified ID in the `vendors` table
+- `find()` -> Returns all vendors
+- `findById()` -> Returns vendor with specified ID in the `vendors` table
+- `add()` -> Adds vendor to `vendor` table
+- `update()` -> Updates vendor with specified ID in the `vendors` table
+- `remove()` -> Deletes vendor with specified ID in the `vendors` table
 
 ### Markets
 
-`find()` -> Returns all markets
-`search()` -> Searches markets by city, state, and/or zip code based on parsed address string
-`findById()` -> Returns market with specified ID in the `markets` table
-`add()` -> Adds market to `markets` table
-`update()` -> Updates market with specified ID in the `markets` table
-`remove()` -> Deletes market with specified ID in the `markets` table
-`addBooth()` -> Adds booth to `market_booths` table
-`updateBooth()` -> Updates market with specified ID in the `market_booths` table
-`removeBooth()` -> Deletes market with specified ID in the `market_booths` table
+- `find()` -> Returns all markets
+- `search()` -> Searches markets by city, state, and/or zip code based on parsed address string
+- `findById()` -> Returns market with specified ID in the `markets` table
+- `add()` -> Adds market to `markets` table
+- `update()` -> Updates market with specified ID in the `markets` table
+- `remove()` -> Deletes market with specified ID in the `markets` table
+- `addBooth()` -> Adds booth to `market_booths` table
+- `updateBooth()` -> Updates market with specified ID in the `market_booths` table
+- `removeBooth()` -> Deletes market with specified ID in the `market_booths` table
 
 
 ## Environment Variables
