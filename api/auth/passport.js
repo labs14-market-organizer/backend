@@ -50,7 +50,6 @@ module.exports = (passport) => {
         enableProof: true
       },
       function(accessToken, refreshToken, profile, done) {
-        process.nextTick(function () {
           const { provider, id, emails } = profile;
           const email = emails[0].value; 
           const user = { provider, prov_user: id, email };
