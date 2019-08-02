@@ -241,17 +241,21 @@ async function addBooth(booth) {
     return new Promise(async (resolve, reject) => {
         try{
             let added;
+            // Wrap insert and update in a transaction to prevent partial insert
             await db.transaction(async t => {
                 [added] = await db('market_booths')
                     .insert(booth)
                     .returning('*')
                     .transacting(t);
+                // Update the market's updated_at field
                 await db('markets')
                     .where({id: booth.market_id})
                     .update({updated_at: new Date()})
                     .transacting(t);
             });
+            // Return the entire market after changes
             const market = await findById(booth.market_id);
+            // Include added booth for 404 handling
             resolve({added, market});
         } catch(err) {
             reject(err);
@@ -263,19 +267,22 @@ async function updateBooth(id, changes) {
     return new Promise(async (resolve, reject) => {
         try{
             let updated;
+            // Wrap updates in a transaction to prevent partial insert
             await db.transaction(async t => {
                 [updated] = await db('market_booths')
                     .where({id})
                     .update(changes)
                     .returning('*')
                     .transacting(t);
-                // [updated] = updated;
+                // Update the market's updated_at field
                 await db('markets')
                     .where({id: changes.market_id})
                     .update({updated_at: new Date()})
                     .transacting(t);
             });
+            // Return the entire market after changes
             const market = await findById(changes.market_id);
+            // Include updated booth for 404 handling
             resolve({updated, market});
         } catch(err) {
             reject(err)
@@ -287,6 +294,7 @@ async function removeBooth(id) {
     return new Promise(async (resolve, reject) => {
         try{
             let deleted;
+            // Wrap delete and update in a transaction to prevent partial insert
             await db.transaction(async t => {
                 deleted = await db('market_booths')
                     .where({id})
@@ -294,6 +302,7 @@ async function removeBooth(id) {
                     .returning('*')
                     .transacting(t);
                 [deleted] = deleted;
+                // If there was something to delete, update the market's updated_at field
                 if(!!deleted) {
                     await db('markets')
                         .where({id: deleted.market_id})
@@ -302,8 +311,10 @@ async function removeBooth(id) {
                 }
             });
             if(!deleted) {
+                // Include added booth for 404 handling
                 resolve({deleted})
             } else {
+                // Return the entire market after changes
                 const market = await findById(deleted.market_id);
                 resolve({deleted, market});
             }
