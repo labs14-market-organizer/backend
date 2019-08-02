@@ -1,10 +1,8 @@
 const db = require('../../data/dbConfig');
-
 module.exports = {
   google,
   facebook
 }
-
 async function google(provided) {
   const { email, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
@@ -30,14 +28,15 @@ async function google(provided) {
       }
     })
   } else { // If user already exists, return user
-    const rtrn = await db('users')
-      .where({email})
-      .returning('*');
+    const rtrn = await db('users as u')
+      .select('u.*')
+      .where(auth)
+      .join('user_auth as ua', {'u.id': 'ua.user_id'});
     return rtrn[0];
   }
 }
-
 async function facebook(provided) {
+  console.log('FOO')
   const { email, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
     .where(auth)
@@ -62,9 +61,10 @@ async function facebook(provided) {
       }
     })
   } else { // If user already exists, return user
-    const rtrn = await db('users')
-      .where({email})
-      .returning('*');
+    const rtrn = await db('users as u')
+      .select('u.*')
+      .where(auth)
+      .join('user_auth as ua', {'u.id': 'ua.user_id'});
     return rtrn[0];
   }
 }
