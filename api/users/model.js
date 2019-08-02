@@ -2,9 +2,9 @@ const db = require('../../data/dbConfig');
 
 module.exports = {
     findById,
-    add,
-    update,
-    remove,
+    // add,
+    // update,
+    // remove,
 };
 
 async function findById(id) {
@@ -12,9 +12,25 @@ async function findById(id) {
         .where({id})
         .first();
     const vendors = await db('vendors')
-        .where({admin_id: user.id});
-    const markets = await db('markets')
-        .where({admin_id: user.id});
+        .where({admin_id: user.id})
+        .returning('*')
+        .orderBy('id');
+    let markets = await db('markets')
+        .where({admin_id: user.id})
+        .returning('*')
+        .orderBy('id')
+        .map(async market => {
+            const operation = await db('market_days')
+                .where({market_id: market.id})
+                .returning('*')
+                .orderBy('id');
+            const booths = await db('market_booths')
+                .where({market_id: market.id})
+                .returning('*')
+                .orderBy('id');
+            return { ...market, operation, booths };
+        })
+    console.log(markets);
     return {
         ...user,
         vendors,
@@ -22,29 +38,29 @@ async function findById(id) {
     }
 }
 
-function add(users) {
-    return db('users')
-        .insert(users)
-        .then(([id]) => {
-            return findById(id)
-        })
-}
+// function add(users) {
+//     return db('users')
+//         .insert(users)
+//         .then(([id]) => {
+//             return findById(id)
+//         })
+// }
 
-function update(id, user) {
-    return db('users')
-        .where({ id })
-        .update(changes)
-        .then(count => {
-            if (count > 0) {
-                return findById(id)
-            } else {
-                return null
-            }
-        });
-}
+// function update(id, user) {
+//     return db('users')
+//         .where({ id })
+//         .update(changes)
+//         .then(count => {
+//             if (count > 0) {
+//                 return findById(id)
+//             } else {
+//                 return null
+//             }
+//         });
+// }
 
-function remove(id) {
-    return db('users')
-        .where(id)
-        .del();
-}
+// function remove(id) {
+//     return db('users')
+//         .where(id)
+//         .del();
+// }
