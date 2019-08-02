@@ -24,7 +24,7 @@ describe('/auth', () => {
     })
 
     it('should redirect to Facebook OAuth 2.0', () => {
-      const expected = "https://www.facebook.com/v3.2/dialog/oauth;";
+      const expected = "https://www.facebook.com/v3.2/dialog/oauth";
       return request.get('/auth/facebook')
         .then(res => expect(res.header.location.split('?')[0]).toBe(expected));
     })
