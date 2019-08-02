@@ -247,16 +247,22 @@ async function addBooth(booth) {
                     .insert(booth)
                     .returning('*')
                     .transacting(t);
-                // Update the market's updated_at field
-                await db('markets')
-                    .where({id: booth.market_id})
-                    .update({updated_at: new Date()})
-                    .transacting(t);
+                if(!!added) {
+                    // Update the market's updated_at field
+                    await db('markets')
+                        .where({id: booth.market_id})
+                        .update({updated_at: new Date()})
+                        .transacting(t);
+                }
             });
-            // Return the entire market after changes
-            const market = await findById(booth.market_id);
-            // Include added booth for 404 handling
-            resolve({added, market});
+            if(!added) {
+                // Include added booth for 404 handling
+                resolve({added});
+            } else {
+                // Return the entire market after changes
+                const market = await findById(booth.market_id);
+                resolve({added, market});
+            }
         } catch(err) {
             reject(err);
         }
@@ -274,16 +280,22 @@ async function updateBooth(id, changes) {
                     .update(changes)
                     .returning('*')
                     .transacting(t);
-                // Update the market's updated_at field
-                await db('markets')
-                    .where({id: changes.market_id})
-                    .update({updated_at: new Date()})
-                    .transacting(t);
+                if(!!updated) {
+                    // Update the market's updated_at field
+                    await db('markets')
+                        .where({id: changes.market_id})
+                        .update({updated_at: new Date()})
+                        .transacting(t);
+                }
             });
-            // Return the entire market after changes
-            const market = await findById(changes.market_id);
-            // Include updated booth for 404 handling
-            resolve({updated, market});
+            if(!updated) {
+                // Include updated booth for 404 handling
+                resolve({updated});
+            } else {
+                // Return the entire market after changes
+                const market = await findById(changes.market_id);
+                resolve({updated, market});
+            }
         } catch(err) {
             reject(err)
         }

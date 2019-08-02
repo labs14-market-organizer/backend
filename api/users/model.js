@@ -30,7 +30,6 @@ async function findById(id) {
                 .orderBy('id');
             return { ...market, operation, booths };
         })
-    console.log(markets);
     return {
         ...user,
         vendors,
