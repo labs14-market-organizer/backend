@@ -211,7 +211,7 @@ In order for the app to function correctly, the user must set up their own envir
 
 create a .env file that includes the following:
 
-    *  DB_ENV - specify `development` while in development and `production` in production/staging
+    *  NODE_ENV - specify `development` while in development and `production` in production/staging
     *  BE_URL - the URL of the backend you're using
     *  FE_URL - the URL of the frontend you're using
     *  JWT_SECRET - the secret used on the JWTs sent back to the frontend
