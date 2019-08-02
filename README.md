@@ -35,6 +35,16 @@ To get the server running locally:
 | GET    | `/user`     | logged in user | Returns info on logged in user. |
 | GET    | `/user/:id` | none           | Returns info on specific user.  |
 
+#### Vendor Routes
+
+| Method | Endpoint       | Access Control | Description                      |
+| ------ | -------------- | -------------- | -------------------------------- |
+| GET    | `/vendors`     | none           | Returns info on all vendors.     |
+| GET    | `/vendors/:id` | none           | Returns info on specific vendor. |
+| POST   | `/vendors/`    | logged in user | Creates new vendor.              |
+| PUT    | `/vendors/:id` | vendor admin   | Updates specific vendor.         |
+| DELETE | `/vendors/:id` | vendor admin   | Deletes specific vendor.         |
+
 #### Market Routes
 
 | Method | Endpoint                   | Access Control | Description                                  |
@@ -45,19 +55,9 @@ To get the server running locally:
 | POST   | `/markets/`                | logged in user | Creates new market.                          |
 | PUT    | `/markets/:id`             | market admin   | Updates specific market.                     |
 | DELETE | `/markets/:id`             | market admin   | Deletes specific market.                     |
-| POST   | `/markets/:id/booths`      | logged in user | Creates new booth at an existing market.     |
+| POST   | `/markets/:id/booths`      | market admin   | Creates new booth at an existing market.     |
 | PUT    | `/markets/:id/booths/:bID` | market admin   | Updates a booth at an existing market.       |
 | DELETE | `/markets/:id/booths/:bID` | market admin   | Deletes a booth at an existing market.       |
-
-#### Vendor Routes
-
-| Method | Endpoint       | Access Control | Description                      |
-| ------ | -------------- | -------------- | -------------------------------- |
-| GET    | `/vendors`     | none           | Returns info on all vendors.     |
-| GET    | `/vendors/:id` | none           | Returns info on specific vendor. |
-| POST   | `/vendors/`    | logged in user | Creates new vendor.              |
-| PUT    | `/vendors/:id` | vendor admin   | Updates specific vendor.         |
-| DELETE | `/vendors/:id` | vendor admin   | Deletes specific vendor.         |
 
 # Data Model
 
@@ -141,21 +141,6 @@ Market profile data
 }
 ```
 
-#### MARKET_DAYS
-Market hours of operation, by day
-
----
-
-```
-{
-  id: INTEGER, auto-incrementing
-  market_id: INTEGER, foreign key to MARKETS table
-  day: STRING,
-  start: TIME WITHOUT TIMEZONE
-  end: TIME WITHOUT TIMEZONE
-}
-```
-
 #### MARKET_BOOTHS
 Market booth types, per market
 
@@ -170,6 +155,21 @@ Market booth types, per market
   price: NUMERIC (precision 8, scale 2)
   size: ARRAY of INTEGERS
   description: TEXT
+}
+```
+
+#### MARKET_DAYS
+Market hours of operation, by day
+
+---
+
+```
+{
+  id: INTEGER, auto-incrementing
+  market_id: INTEGER, foreign key to MARKETS table
+  day: STRING,
+  start: TIME WITHOUT TIMEZONE
+  end: TIME WITHOUT TIMEZONE
 }
 ```
 
