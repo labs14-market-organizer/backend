@@ -25,7 +25,7 @@
     "supertest": "^4.0.2"
   },
   "scripts": {
-    "test": "cross-env DB_ENV=testing jest --watch --verbose",
+    "test": "cross-env NODE_ENV=testing jest --watch --verbose",
     "start": "node index.js",
     "server": "nodemon index.js"
   },
