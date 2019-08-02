@@ -54,7 +54,6 @@ module.exports = (passport) => {
           const email = emails[0].value; 
           const user = { provider, prov_user: id, email };
           return done(null, user); // pass user data to callback
-        })
       }
     )
   );
