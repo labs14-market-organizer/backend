@@ -1,10 +1,5 @@
 
 # backend
-🚫 Note: All lines that start with 🚫 are instructions and should be deleted before this is posted to your portfolio. This is intended to be a guideline. Feel free to add your own flare to it.
-
-🚫 The numbers 1️⃣ through 3️⃣ next to each item represent the week that part of the docs needs to be comepleted by.  Make sure to delete the numbers by the end of Labs.
-
-🚫 Each student has a required minimum number of meaningful PRs each week per the rubric.  Contributing to docs does NOT count as a PR to meet your weekly requirements.
 
 # API Documentation
 
@@ -26,10 +21,12 @@ To get the server running locally:
 
 #### Auth Routes
 
-| Method | Endpoint                | Access Control | Description                                |
-| ------ | ----------------------- | -------------- | ------------------------------------------ |
-| GET    | `/auth/google`          | none           | Redirects user to Google for secure login  |
-| GET    | `/auth/google/callback` | Google         | Handles redirects from Google & updates DB |
+| Method | Endpoint                 | Access Control | Description                                  |
+| ------ | ------------------------ | -------------- | -------------------------------------------- |
+| GET    | `/auth/google`           | none           | Redirects user to Google for secure login    |
+| GET    | `/auth/google/callback`  | Google         | Handles redirects from Google & updates DB   |
+| GET    | `/auth/facebook`         | none           | Redirects user to Facebook for secure login  |
+| GET    | `/auth/facebok/callback` | Facebook       | Handles redirects from Facebook & updates DB |
 
 #### User Routes
 
@@ -37,16 +34,6 @@ To get the server running locally:
 | ------ | ----------- | -------------- | ------------------------------  |
 | GET    | `/user`     | logged in user | Returns info on logged in user. |
 | GET    | `/user/:id` | none           | Returns info on specific user.  |
-
-#### Market Routes
-
-| Method | Endpoint       | Access Control | Description                      |
-| ------ | -------------- | -------------- | -------------------------------- |
-| GET    | `/markets`     | none           | Returns info on all markets.     |
-| GET    | `/markets/:id` | none           | Returns info on specific market. |
-| POST   | `/markets/`    | logged in user | Creates new market.              |
-| PUT    | `/markets/:id` | market admin   | Updates specific market.         |
-| DELETE | `/markets/:id` | market admin   | Deletes specific market.         |
 
 #### Vendor Routes
 
@@ -57,6 +44,20 @@ To get the server running locally:
 | POST   | `/vendors/`    | logged in user | Creates new vendor.              |
 | PUT    | `/vendors/:id` | vendor admin   | Updates specific vendor.         |
 | DELETE | `/vendors/:id` | vendor admin   | Deletes specific vendor.         |
+
+#### Market Routes
+
+| Method | Endpoint                   | Access Control | Description                                  |
+| ------ | -------------------------- | -------------- | -------------------------------------------- |
+| GET    | `/markets`                 | none           | Returns info on all markets.                 |
+| GET    | `/markets/search`          | none           | Returns info on markets matching `?q=` query |
+| GET    | `/markets/:id`             | none           | Returns info on specific market.             |
+| POST   | `/markets/`                | logged in user | Creates new market.                          |
+| PUT    | `/markets/:id`             | market admin   | Updates specific market.                     |
+| DELETE | `/markets/:id`             | market admin   | Deletes specific market.                     |
+| POST   | `/markets/:id/booths`      | market admin   | Creates new booth at an existing market.     |
+| PUT    | `/markets/:id/booths/:bID` | market admin   | Updates a booth at an existing market.       |
+| DELETE | `/markets/:id/booths/:bID` | market admin   | Deletes a booth at an existing market.       |
 
 # Data Model
 
@@ -71,6 +72,8 @@ Data needed for user to sign-in from linked OAuth providers
   user_id: INTEGER, foreign key to `users` table
   provider: STRING, the name of the OAuth provider
   prov_user: STRING, the provider's ID for the user
+  created_at: TIMESTAMP WITH TIMEZONE
+  updated_at: TIMESTAMP WITH TIMEZONE
 }
 ```
 
@@ -83,7 +86,8 @@ Top-level information on user accounts
 {
   id: INTEGER, auto-incrementing
   email: STRING, the user's preferred email address
-  // more to come
+  created_at: TIMESTAMP WITH TIMEZONE
+  updated_at: TIMESTAMP WITH TIMEZONE
 }
 ```
 
@@ -112,26 +116,96 @@ Vendor profile data
 }
 ```
 
+#### MARKETS
+Market profile data
+
+---
+
+```
+{
+  id: INTEGER, auto-incrementing
+  admin_id: INTEGER, foreign key to USERS table
+  name: STRING
+  description: TEXT 
+  address: STRING
+  city: STRING
+  state: STRING
+  zipcode: STRING
+  type: INTEGER
+  website: STRING
+  facebook: STRING
+  twitter: STRING
+  instagram: STRING
+  created_at: TIMESTAMP WITH TIMEZONE
+  updated_at: TIMESTAMP WITH TIMEZONE
+}
+```
+
+#### MARKET_BOOTHS
+Market booth types, per market
+
+---
+
+```
+{
+  id: INTEGER, auto-incrementing
+  market_id: INTEGER, foreign key to MARKETS table
+  name: STRING
+  number: INTEGER
+  price: NUMERIC (precision 8, scale 2)
+  size: ARRAY of INTEGERS
+  description: TEXT
+}
+```
+
+#### MARKET_DAYS
+Market hours of operation, by day
+
+---
+
+```
+{
+  id: INTEGER, auto-incrementing
+  market_id: INTEGER, foreign key to MARKETS table
+  day: STRING,
+  start: TIME WITHOUT TIMEZONE
+  end: TIME WITHOUT TIMEZONE
+}
+```
+
 ## Actions
 
 ### Auth
 
-`google()` -> Determines if a Google user already has an account, creates an account (if needed), and returns the user
+- `google()` -> Determines if a Google user already has an account, creates an account (if needed), and returns the user
+- `facebook()` -> Determines if a Facebook user already has an account, creates an account (if needed), and returns the user
 
 ### Users
 
-`find()` -> Returns all users
-`findById(id)` -> Returns user with specified ID in the `users` table
+- `findById(id)` -> Returns user with specified ID in the `users` table
 
 ### Vendors
 
-`find()` -> Returns all vendors
-`findById()` -> Returns vendor with specified ID in the `vendors` table
-`add()` -> Adds vendor to `vendor` table
-`update()` -> Updates vendor with specified ID in the `vendors` table
-`remove()` -> Deletes vendor with specified ID in the `vendors` table
+- `find()` -> Returns all vendors
+- `findById()` -> Returns vendor with specified ID in the `vendors` table
+- `add()` -> Adds vendor to `vendor` table
+- `update()` -> Updates vendor with specified ID in the `vendors` table
+- `remove()` -> Deletes vendor with specified ID in the `vendors` table
 
-## 3️⃣ Environment Variables
+### Markets
+
+- `find()` -> Returns all markets
+- `search()` -> Searches markets by city, state, and/or zip code based on parsed address string
+- `findById()` -> Returns market with specified ID in the `markets` table
+- `add()` -> Adds market to `markets` table
+- `update()` -> Updates market with specified ID in the `markets` table
+- `remove()` -> Deletes market with specified ID in the `markets` table
+- `addBooth()` -> Adds booth to `market_booths` table
+- `updateBooth()` -> Updates market with specified ID in the `market_booths` table
+- `removeBooth()` -> Deletes market with specified ID in the `market_booths` table
+
+
+## Environment Variables
 
 In order for the app to function correctly, the user must set up their own environment variables.
 
@@ -145,6 +219,8 @@ create a .env file that includes the following:
     *  DB_DEV - required in development only, the `postgres://` URL of your development database
     *  GOOGLE_ID - This is provided in the Credentials section of the Google Developer Console
     *  GOOGLE_SECRET - This is also provided in the Credentials section of the Google Developer Console
+    *  FACEBOOK_ID - Provided by Facebook
+    *  FACEBOOK_SECRET - Provided by Facebook
     
 ## Contributing
 
