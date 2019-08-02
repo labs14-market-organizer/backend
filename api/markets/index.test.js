@@ -10,6 +10,8 @@ const tkn2 = genToken({id: 2}, 1000*60*60*2);
 const tkn3 = genToken({id: 3}, 1000*60*60*2);
 const tkn4 = genToken({id: 4}, 1000*60*60*2);
 const tkn5 = genToken({id: 5}, 1000*60*60*2);
+console.log('TKN01',tkn1)
+console.log('TKN02',tkn2)
 
 describe('/markets', () => {
   beforeAll(async () => {

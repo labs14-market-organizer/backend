@@ -115,17 +115,18 @@ function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
         result = await db(table)
           .select(`${table}.${tableID}`,`${joinTbl}.${joinID}`)
           .where({[`${joinTbl}.id`]: id2})
-          .join(joinTbl, joinOn);
+          .join(joinTbl, joinOn)
+          .first();
       }
       // Check if the child entry even exists
-      if(!result || !result.length){
+      if(!result){
         return next(); // Let routes handle 404s
       }
       // Determine if admin IDs match
-      if(result[0][tableID] !== user_id) {
+      if(result[tableID] !== user_id) {
         res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
       // Determine if parent IDs match
-      } else if(`${result[0][joinID]}` !== id1) {
+      } else if(!!joinTbl && `${result[joinID]}` !== id1) {
         res.status(400).json({message: "The parent ID in the URL does not match the ID of the child entry's parent"})
       } else {
         next()
