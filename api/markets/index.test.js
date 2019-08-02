@@ -9,11 +9,13 @@ const tkn1 = genToken({id: 1}, 1000*60*60*2);
 const tkn2 = genToken({id: 2}, 1000*60*60*2);
 const tkn3 = genToken({id: 3}, 1000*60*60*2);
 const tkn4 = genToken({id: 4}, 1000*60*60*2);
+const tkn5 = genToken({id: 5}, 1000*60*60*2);
 
 describe('/markets', () => {
   beforeAll(async () => {
     // Reset markets table before running tests
     await knex.raw("TRUNCATE TABLE market_days RESTART IDENTITY CASCADE");
+    await knex.raw("TRUNCATE TABLE market_booths RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE markets RESTART IDENTITY CASCADE");
   })
 
@@ -64,6 +66,40 @@ describe('/markets', () => {
         .set({authorization: tkn4})
         .then(res => expect(getType(res.body.operation)).toBe('array'));
     })
+
+    it("should return an object w/ 'booths' array", () => {
+      const market = { name: "Kayla's" }
+      return request.post('/markets')
+        .send(market)
+        .set({authorization: tkn5})
+        .then(res => expect(getType(res.body.booths)).toBe('array'));
+    })
+  })
+  
+  describe('/:id/booths POST', () => {
+    it('should return 201 status', () => {
+      const booth = { type: "Standard", number: 42 }
+      return request.post('/markets/3/booths')
+       .set({authorization: tkn3})
+       .send(booth)
+       .expect(201);
+    })
+    
+    it("should return an object w/ 'booths' array", () => {
+      const booth = { type: "Standard", number: 42 }
+      return request.post('/markets/3/booths')
+        .set({authorization: tkn3})
+        .send(booth)
+        .then(res => expect(getType(res.body.booths)).toBe('array'));
+    })
+    
+    // it('should return booth w/ next ID', () => {
+    //   const booth = { type: "Standard", number: 42 }
+    //   return request.post('/markets/3/booths')
+    //     .set({authorization: tkn3})
+    //     .send(booth)
+    //     .then(res => expect(res.body.booths[0].id).toBe(3));
+    // })
   })
 
   describe('/ GET', () => {
@@ -79,7 +115,7 @@ describe('/markets', () => {
     
     it('should return an array w/ proper length', () => {
       return request.get('/markets')
-        .then(res => expect(res.body).toHaveLength(4));
+        .then(res => expect(res.body).toHaveLength(5));
     })
   })
 
@@ -169,6 +205,36 @@ describe('/markets', () => {
     })
   })
 
+  describe('/:id/booths PUT', () => {
+    it('should return 200 status', () => {
+      const booth = { type: 'TEST 1' }
+      return request.put('/markets/3/booths/1')
+       .send(booth)
+       .set({authorization: tkn3})
+       .expect(200);
+    })
+    
+    it("should return a 'booths' array", () => {
+      const booth = { type: 'TEST 1' }
+      return request.put('/markets/3/booths/1')
+        .send(booth)
+        .set({authorization: tkn3})
+        .then(res => {
+          expect(getType(res.body.booths)).toBe('array');
+        });
+    })
+    
+    it('should return an object w/ new name', () => {
+      const booth = { type: 'TEST 1' }
+      return request.put('/markets/3/booths/1')
+        .send(booth)
+        .set({authorization: tkn3})
+        .then(res => {
+          expect(res.body.booths[0].name).toBe(booth.name);
+        });
+    })
+  })
+
   describe('/:id DELETE', () => {
     it('should return 200 status', () => {
       return request.delete('/markets/1')
@@ -188,7 +254,26 @@ describe('/markets', () => {
         .expect(404);
     })
   })
+
+  describe('/:id/booths DELETE', () => {
+    it('should return 200 status', () => {
+      return request.delete('/markets/3/booths/1')
+       .set({authorization: tkn3})
+       .expect(200);
+    })
+    
+    it("should return a 'booths' array", () => {
+      return request.delete('/markets/3/booths/2')
+        .set({authorization: tkn3})
+        .then(res => {
+          expect(getType(res.body.booths)).toBe('array');
+        });
+    })
+    
+    it('should return 404 status after deleting', () => {
+      return request.delete('/markets/3/booths/1')
+        .set({authorization: tkn3})
+        .expect(404);
+    })
+  })
 })
-
-
-

@@ -74,7 +74,7 @@ function parentExists(table, param = 'id') {
       .where({id})
       .first();
     !result
-      ? res.status(400).json({message: 'No market exists with the specified market ID.'})
+      ? res.status(400).json({message: `No entry with the ID ${id} exists on the ${table} table in our database.`})
       : next();
   }
 }
@@ -104,7 +104,7 @@ function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
           .where({[`${joinTbl}.id`]: id2})
           .join(joinTbl, joinOn);
       }
-      if(!result.length){
+      if(!result || !result.length){
         return next(); // Let routes handle 404s
       }
       if(result[0][tableID] !== user_id) { // Determine if IDs match

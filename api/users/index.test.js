@@ -2,29 +2,34 @@ const server = require('../server');
 const request = require('supertest')(server);
 const getType = require('jest-get-type');
 const db = require('./model');
+const genToken = require('../auth/genToken');
 
-describe('/userlist', () => {
+const tkn1 = genToken({id: 1}, 1000*60*60*2);
+
+describe('/user', () => {
   describe('/ GET', () => {
     it('should return 200 status', () => {
-      return request.get('/userlist')
+      return request.get('/user')
+        .set({authorization: tkn1})
         .expect(200);
     })
 
     it('should return an array', () => {
-      return request.get('/userlist')
-        .then(res => expect(getType(res.body)).toBe('array'));
+      return request.get('/user')
+        .set({authorization: tkn1})
+        .then(res => expect(getType(res.body)).toBe('object'));
     })
   })
 
   describe('/:id GET', () => {
     it('should return 200 status', () => {
-      return request.get('/userlist/1')
+      return request.get('/user/1')
         .expect(200);
     })
     
-    // it('should return an object', () => {
-    //   return request.get('/userlist/1')
-    //     .then(res => expect(res).toBe('object'));
-    // })
+    it('should return an object', () => {
+      return request.get('/user/1')
+        .then(res => expect(getType(res.body)).toBe('object'));
+    })
   })
 })
