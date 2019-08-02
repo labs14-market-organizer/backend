@@ -1,5 +1,6 @@
 const { body } = require('express-validator');
 
+// Separate specs for markets & booth types
 module.exports = {
   market: [
     body('admin_id').isInt()
