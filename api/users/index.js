@@ -5,8 +5,10 @@ const Users = require("./model");
 router.get('/', protect, (req, res ) => {
     const id = req.user_id;
     Users.findById(id)
-    .then(users => {
-        res.status(200).json(users);
+    .then(user => {
+        !user
+            ? res.status(404).json({message: 'No user with that ID exists in our database'})
+            : res.status(200).json(users);
     })
     .catch(err => {
         res
@@ -17,8 +19,10 @@ router.get('/', protect, (req, res ) => {
 router.get('/:id', (req, res ) => {
     const {id} = req.params;
    Users.findById(id)
-        .then(users => {
-            res.status(200).json(users);
+    .then(user => {
+        !user
+            ? res.status(404).json({message: 'No user with that ID exists in our database'})
+            : res.status(200).json(users);
         })
         .catch(err => {
             res
