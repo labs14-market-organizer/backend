@@ -19,7 +19,7 @@ module.exports = {
 // Verifies JWT and stores subject on request as "user_id"
 function verifyJWT(req, res, next) {
   const jwtSecret = process.env.JWT_SECRET;
-  const token = req.headers.authorization;
+  const token = req.headers.Authorization;
   if(!token) {
     next(); // Let protect() handle route protection
   } else {
@@ -37,7 +37,7 @@ function verifyJWT(req, res, next) {
 // Protects route by requiring JWT
 // *** Always use after verifyJWT() ***
 function protect(req, res, next) {
-  !req.headers.authorization
+  !req.headers.Authorization
     ? res.status(401).json({ message: 'Authorization token missing.' })
     : next();
 }
