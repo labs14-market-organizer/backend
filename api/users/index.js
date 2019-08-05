@@ -8,7 +8,7 @@ router.get('/', protect, (req, res ) => {
     .then(user => {
         !user
             ? res.status(404).json({message: 'No user with that ID exists in our database'})
-            : res.status(200).json(users);
+            : res.status(200).json(user);
     })
     .catch(err => {
         res
@@ -22,7 +22,7 @@ router.get('/:id', (req, res ) => {
     .then(user => {
         !user
             ? res.status(404).json({message: 'No user with that ID exists in our database'})
-            : res.status(200).json(users);
+            : res.status(200).json(user);
         })
         .catch(err => {
             res
