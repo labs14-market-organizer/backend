@@ -11,6 +11,9 @@ async function findById(id) {
     const user = await db('users')
         .where({id})
         .first();
+    if(!user) {
+        return user; // Let route handle 404s
+    }
     const vendors = await db('vendors')
         .where({admin_id: user.id})
         .returning('*')
