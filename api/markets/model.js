@@ -1,3 +1,4 @@
+const {getStateCodeByStateName: stateCode} = require("us-state-codes");
 const db = require('../../data/dbConfig');
 
 module.exports = {
@@ -34,16 +35,20 @@ async function find() {
 async function search(query) {
     // Filter out unspecified fields
     query = Object.entries(query).filter(pair => pair[1] !== null);
+    // Create similarity scores to order by
+    // Multiplying each similarity score by the others
+    // And coalesce null values to 0.01
+    const similar = query.map(pair => `coalesce(similarity(${pair[0]}, '${pair[1]}'), 0.01)`).join(' * ');
     const markets = await db('markets')
         .where(builder => {
             // Create query builder on available fields
             query.forEach(pair => {
                 // Compare case-insensitive values set in parseQueryAddr middleware
-                builder.andWhere(pair[0],'ilike',`%${pair[1]}%`)
+                builder.orWhereRaw(`${pair[0]} % '${pair[1]}'`)
             })
         })
         .returning('*')
-        .orderBy('id');
+        .orderByRaw(`${similar} DESC, id`);
     // Map hours of operation and booths onto markets
     const final = await markets.map(async market => {
         const operation = await db('market_days')
@@ -78,6 +83,10 @@ async function findById(id) {
 
 function add(market) {
     let {operation, booths, ...rest} = market;
+    // Coerce state into short form if it isn't already
+    if(!!rest.state && rest.state.length > 2) {
+        rest.state = stateCode(rest.state);
+    }
     let resMarket, resBooths;
     let resHours = [];
     return new Promise(async (resolve, reject) => {
@@ -115,6 +124,10 @@ function add(market) {
 async function update(id, changes) {
     // Separate changes in hours of operation from all others
     const {operation, booths, ...market} = changes;
+    // Coerce state into short form if it isn't already
+    if(!!market.state && market.state.length > 2) {
+        market.state = stateCode(market.state);
+    }
     // Grab existing market
     const oldMarket = await findById(id);
     // If the market doesn't exist return empty result to trigger 404

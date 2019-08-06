@@ -17,7 +17,8 @@
     "passport-facebook": "^3.0.0",
     "passport-google-oauth": "^2.0.0",
     "passport-square": "^2.0.1",
-    "pg": "^7.11.0"
+    "pg": "^7.11.0",
+    "us-state-codes": "^1.1.2"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
