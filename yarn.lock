@@ -2919,11 +2919,6 @@ lodash.includes@^4.3.0:
   resolved "https://registry.yarnpkg.com/lodash.includes/-/lodash.includes-4.3.0.tgz#60bb98a87cb923c68ca1e51325483314849f553f"
   integrity sha1-YLuYqHy5I8aMoeUTJUgzFISfVT8=
 
-lodash.invert@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/lodash.invert/-/lodash.invert-4.3.0.tgz#8ffe20d4b616f56bea8f1aa0c6ebd80dcf742aee"
-  integrity sha1-j/4g1LYW9WvqjxqgxuvYDc90Ku4=
-
 lodash.isboolean@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz#6c2e171db2a257cd96802fd43b01b20d5f5870f6"
@@ -2948,11 +2943,6 @@ lodash.isstring@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/lodash.isstring/-/lodash.isstring-4.0.1.tgz#d527dfb5456eca7cc9bb95d5daeaf88ba54a5451"
   integrity sha1-1SfftUVuynzJu5XV2ur4i6VKVFE=
-
-lodash.map@^4.6.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/lodash.map/-/lodash.map-4.6.0.tgz#771ec7839e3473d9c4cde28b19394c3562f4f6d3"
-  integrity sha1-dx7Hg540c9nEzeKLGTlMNWL09tM=
 
 lodash.once@^4.0.0:
   version "4.1.1"
@@ -4829,15 +4819,6 @@ url-parse-lax@^1.0.0:
   integrity sha1-evjzA2Rem9eaJy56FKxovAYJ2nM=
   dependencies:
     prepend-http "^1.0.1"
-
-us-state-codes@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/us-state-codes/-/us-state-codes-1.1.2.tgz#e578e9a37d62ee20022e55844b42b870b56da5b8"
-  integrity sha512-NfYQl6VjAAxlhaIxXE03FgUlK8JAtKkjF3S4fuiLRbvoUQHQFaCnKH3YrJ6TMWXLYRLqGP8WE16nDjqZmNd5SA==
-  dependencies:
-    lodash.invert "^4.3.0"
-    lodash.isstring "^4.0.1"
-    lodash.map "^4.6.0"
 
 use@^3.1.0:
   version "3.1.1"
