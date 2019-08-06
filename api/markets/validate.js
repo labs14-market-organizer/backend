@@ -11,7 +11,7 @@ module.exports = {
       .optional(),
     body('description').isString()
       .withMessage("'description must be a string")
-      .optional(),
+      .optional({nullable: true}),
     body('operation').isArray()
       .withMessage("'operation' must be an array")
       .optional(),
@@ -28,51 +28,51 @@ module.exports = {
       .optional(),
     body('address').isString()
       .withMessage("'address' must be a string")
-      .optional(),
+      .optional({nullable: true}),
     body('city').isString()
       .withMessage("'city' must be a string")
-      .optional(),
+      .optional({nullable: true}),
     body('state').isString()
       .withMessage("'state' must be a string")
-      .optional(),
+      .optional({nullable: true}),
     body('zipcode').isNumeric()
       .withMessage("'zipcode' must be a string of numbers")
-      .optional(),
+      .optional({nullable: true}),
     body('type').isInt({min: 1, max: 2})
       .withMessage("'type' must be an integer value of 1 or 2")
-      .optional(),
+      .optional({nullable: true}),
     body('website').isURL()
       .withMessage("'website' must be a URL")
-      .optional(),
+      .optional({nullable: true}),
     body('facebook').isString()
       .withMessage("'facebook' must be a string")
-      .optional(),
+      .optional({nullable: true}),
     body('twitter').isString()
       .withMessage("'twitter' must be a string")
-      .optional(),
+      .optional({nullable: true}),
     body('instagram').isString()
       .withMessage("'instagram' must be a string")
-      .optional(),
+      .optional({nullable: true}),
   ],
   booth: [
     body('name').isString()
       .withMessage("'name' must be a string")
-      .optional(),
+      .optional({nullable: true}),
     body('number').isInt()
       .withMessage("'number' must be an integer")
-      .optional(),
+      .optional({nullable: true}),
     body('price').isNumeric()
       .withMessage("'price' must be numeric")
-      .optional(),
+      .optional({nullable: true}),
     body('size').custom(val => Array.isArray(val) && val.length === 2)
       .withMessage("'size' must be an array with exactly two entries")
-      .optional(),
+      .optional({nullable: true}),
     body('size.*').isInt()
       .withMessage("'size' must be an array of integers")
-      .optional(),
+      .optional({nullable: true}),
     body('description').isString()
       .withMessage("'description' must be a string")
-      .optional(),
+      .optional({nullable: true}),
   ]
 }
 
