@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const db = require('../data/dbConfig');
 const parseAddr = require("parse-address-string");
+const {getStateCodeByStateName: stateCode} = require("us-state-codes");
 const {validationResult} = require('express-validator');
 
 module.exports = {
@@ -51,7 +52,11 @@ async function parseQueryAddr(req, res, next) {
       req.query = null;
     } else {
       // Pull city, state, and zipcode from addr object
-      const {city, state, postal_code} = addr;
+      let {city, state, postal_code} = addr;
+      // Coerce state into short form if it isn't already
+      if (state && state.length > 2) {
+        state = stateCode(state);
+      }
       // Make sure at least one field has a value
       if (city === null && state === null && postal_code === null) {
         req.query = null
