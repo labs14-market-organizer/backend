@@ -1,10 +1,6 @@
 
-# backend
-🚫 Note: All lines that start with 🚫 are instructions and should be deleted before this is posted to your portfolio. This is intended to be a guideline. Feel free to add your own flare to it.
-
-🚫 The numbers 1️⃣ through 3️⃣ next to each item represent the week that part of the docs needs to be comepleted by.  Make sure to delete the numbers by the end of Labs.
-
-🚫 Each student has a required minimum number of meaningful PRs each week per the rubric.  Contributing to docs does NOT count as a PR to meet your weekly requirements.
+# Cloudstand-backend
+Back-end for labs14-Market Organizer.
 
 # API Documentation
 
@@ -12,15 +8,30 @@
 
 ## Getting started
 
+The complete application is build with Node.js, Express.js 
+<br>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 To get the server running locally:
-- Clone this repo
-- **yarn install** to install all required dependencies
-- **yarn server** to start the local server
-- **yarn test** to start server using testing environment
 
-### Node.js/Express
+- Clone this repo <br>
+$ git clone https://github.com/labs14-market-organizer/backend.git <br>
+$ cd backend <br>
 
-- 
+- Install the dependencies: <br>
+$ yarn install
+
+- Run the development server: <br>
+$ yarn server
+
+- To run the tests
+-$ yarn test
+
+- Navigate to http://localhost:---- <br>
+
+### Node.js/Express.js Flexibility
+
+-Express is a fast, assertive, essential and moderate web framework of Node.js. You can assume express as a layer built on the top of the Node.js that helps manage a server and routes. It provides a robust set of features to develop web and mobile applications.
 
 ## Endpoints
 
