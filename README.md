@@ -24,7 +24,7 @@ $ yarn install
 - Run the development server: <br>
 $ yarn server
 
-- To run the tests
+- To run the tests: <br>
 -$ yarn test
 
 - Navigate to http://localhost:---- <br>
