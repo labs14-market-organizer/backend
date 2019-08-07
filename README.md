@@ -27,7 +27,7 @@ $ yarn server
 - To run the tests: <br>
 -$ yarn test
 
-- Navigate to http://localhost:---- <br>
+- Navigate to http://localhost:5000 <br>
 
 ### Node.js/Express.js Flexibility
 
