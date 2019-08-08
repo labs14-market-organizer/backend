@@ -36,10 +36,22 @@ async function search(query) {
     // Filter out unspecified fields
     query = Object.entries(query).filter(pair => pair[1] !== null);
     // Create similarity scores to order by
-    // Multiplying each similarity score by the others
-    // And coalesce null values to 0.01
-    const similar = query.map(pair => `coalesce(similarity(${pair[0]}, '${pair[1]}'), 0.01)`).join(' * ');
+    const similar = query.map(pair => {
+            // Coalesce null values to 0.01
+            const basic = `coalesce(similarity(${pair[0]}, '${pair[1]}'), 0.01)`;
+            switch(pair[0]) {
+                case 'state':
+                    return `(${basic} * 0.01)`;
+                case 'zipcode':
+                    return `(${basic} * 0.1)`;
+                default:
+                    return basic;
+            }
+        })
+        // Add each similarity score together
+        .join(' + ');
     const markets = await db('markets')
+        // .select('id','city', 'state', 'zipcode', `${similar} as similar`)
         .where(builder => {
             // Create query builder on available fields
             query.forEach(pair => {
