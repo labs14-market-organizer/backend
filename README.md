@@ -1,6 +1,5 @@
-
-# Cloudstand-backend
-Back-end for labs14-Market Organizer.
+# Cloud Stands - Back-End
+Back-end for labs14-market-organizer.
 
 # API Documentation
 
@@ -25,14 +24,13 @@ $ yarn install
 $ yarn server
 
 - To run the tests: <br>
--$ yarn test
+$ yarn test
 
 - Navigate to http://localhost:5000 <br>
 
 ### Node.js/Express.js Flexibility
 
--Express is a fast, assertive, essential and moderate web framework of Node.js. You can assume express as a layer built on the top of the Node.js that helps manage a server and routes. It provides a robust set of features to develop web and mobile applications.
-
+Express is a fast, assertive, essential, and moderate web framework of Node.js. You can assume Express is a layer built on the top of Node.js that helps manage a server and its routes. It provides a robust set of features to develop web and mobile applications.
 
 ## Endpoints
 
@@ -192,6 +190,18 @@ Market hours of operation, by day
 
 ## Actions
 
+### Middleware
+- `verifyJWT()` -> Verifies any JWT passed in the Authorization header of a request and denies invalid tokens
+- `protect()` -> Always used after `verifyJWT`, protects routes by checking if a JWT exists in the Authorization header
+- `parseQueryAddr()` -> Parses a query string passed to the route on `q` as an address, pulling out the city, state, and zipcode into separate variables and placed on the request's `query` object
+- `parentExists(table, param)()` -> Curried function that checks whether the target asset is actually a child of the parent specified in the route's path by checking against the parent's `table` with the specified `param` in the route
+- `onlyOwner(table, tableID, paramID1)(joinTbl, joinID, joinOn, paramID2)()` -> Twice curried function that checks whether the user making the request is the owner of the target asset or its parent, respectively
+- `validate()` -> Immediately following an `express-validator` array of validators (from a `validate.js` file within the router's directory), checks the request body for valid data
+- `reqCols(required, reqID, colID)()` -> Curried function that checks the request body against an array of `required` columns, and can optionally check if one column (`colID`) needs to match the ID of the user making the request by setting `reqID` to true
+- `reqNestCols(reqObjs)()` -> Checks nested fields on the request body against a `reqObjs` object that specifies an array of required fields that should be nested within the parent specified by their key
+- `onlyCols(allowed)()` -> Rejects requests that try to pass any values not whitelisted in the `allowed` array of fields
+- `onlyNestCols(allowObjs)()` -> Rejects requests that try to pass any nested values not whitelisted on the specified parents within the `allowObjs` object
+
 ### Auth
 
 - `google()` -> Determines if a Google user already has an account, creates an account (if needed), and returns the user
@@ -236,8 +246,8 @@ create a .env file that includes the following:
     *  DB_DEV - required in development only, the `postgres://` URL of your development database
     *  GOOGLE_ID - This is provided in the Credentials section of the Google Developer Console
     *  GOOGLE_SECRET - This is also provided in the Credentials section of the Google Developer Console
-    *  FACEBOOK_ID - Provided by Facebook
-    *  FACEBOOK_SECRET - Provided by Facebook
+    *  FACEBOOK_ID - This is provided in the Basic Settings section of the Facebook Developers dashboard
+    *  FACEBOOK_SECRET - This is also provided in the Basic Settings section of the Facebook Developers dashboard
     
 ## Contributing
 
