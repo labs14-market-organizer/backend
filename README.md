@@ -190,18 +190,6 @@ Market hours of operation, by day
 
 ## Actions
 
-### Middleware
-- `verifyJWT()` -> Verifies any JWT passed in the Authorization header of a request and denies invalid tokens
-- `protect()` -> Always used after `verifyJWT`, protects routes by checking if a JWT exists in the Authorization header
-- `parseQueryAddr()` -> Parses a query string passed to the route on `q` as an address, pulling out the city, state, and zipcode into separate variables and placed on the request's `query` object
-- `parentExists(table, param)()` -> Curried function that checks whether the target asset is actually a child of the parent specified in the route's path by checking against the parent's `table` with the specified `param` in the route
-- `onlyOwner(table, tableID, paramID1)(joinTbl, joinID, joinOn, paramID2)()` -> Twice curried function that checks whether the user making the request is the owner of the target asset or its parent, respectively
-- `validate()` -> Immediately following an `express-validator` array of validators (from a `validate.js` file within the router's directory), checks the request body for valid data
-- `reqCols(required, reqID, colID)()` -> Curried function that checks the request body against an array of `required` columns, and can optionally check if one column (`colID`) needs to match the ID of the user making the request by setting `reqID` to true
-- `reqNestCols(reqObjs)()` -> Checks nested fields on the request body against a `reqObjs` object that specifies an array of required fields that should be nested within the parent specified by their key
-- `onlyCols(allowed)()` -> Rejects requests that try to pass any values not whitelisted in the `allowed` array of fields
-- `onlyNestCols(allowObjs)()` -> Rejects requests that try to pass any nested values not whitelisted on the specified parents within the `allowObjs` object
-
 ### Auth
 
 - `google()` -> Determines if a Google user already has an account, creates an account (if needed), and returns the user
@@ -231,6 +219,17 @@ Market hours of operation, by day
 - `updateBooth()` -> Updates market with specified ID in the `market_booths` table
 - `removeBooth()` -> Deletes market with specified ID in the `market_booths` table
 
+### Middleware
+- `verifyJWT()` -> Verifies any JWT passed in the Authorization header of a request and denies invalid tokens
+- `protect()` -> Always used after `verifyJWT`, protects routes by checking if a JWT exists in the Authorization header
+- `parseQueryAddr()` -> Parses a query string passed to the route on `q` as an address, pulling out the city, state, and zipcode into separate variables and placed on the request's `query` object
+- `parentExists(table, param)()` -> Curried function that checks whether the target asset is actually a child of the parent specified in the route's path by checking against the parent's `table` with the specified `param` in the route
+- `onlyOwner(table, tableID, paramID1)(joinTbl, joinID, joinOn, paramID2)()` -> Twice curried function that checks whether the user making the request is the owner of the target asset or its parent, respectively
+- `validate()` -> Immediately following an `express-validator` array of validators (from a `validate.js` file within the router's directory), checks the request body for valid data
+- `reqCols(required, reqID, colID)()` -> Curried function that checks the request body against an array of `required` columns, and can optionally check if one column (`colID`) needs to match the ID of the user making the request by setting `reqID` to true
+- `reqNestCols(reqObjs)()` -> Checks nested fields on the request body against a `reqObjs` object that specifies an array of required fields that should be nested within the parent specified by their key
+- `onlyCols(allowed)()` -> Rejects requests that try to pass any values not whitelisted in the `allowed` array of fields
+- `onlyNestCols(allowObjs)()` -> Rejects requests that try to pass any nested values not whitelisted on the specified parents within the `allowObjs` object
 
 ## Environment Variables
 
