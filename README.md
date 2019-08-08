@@ -1,5 +1,5 @@
-# Cloud Stands | Back-End
-Back-end for labs14-market-organizer.
+# Cloud Stands | Backend
+Backend for labs14-market-organizer.
 
 # API Documentation
 
