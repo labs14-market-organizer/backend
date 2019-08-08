@@ -38,7 +38,8 @@ async function search(query) {
     // Create similarity scores to order by
     const similar = query.map(pair => {
             // Coalesce null values to 0.01
-            const basic = `coalesce(similarity(${pair[0]}, '${pair[1]}'), 0.01)`;
+            const basic = `coalesce(word_similarity(${pair[0]}, '${pair[1]}'), 0.01)`;
+            // Weigh columns differently
             switch(pair[0]) {
                 case 'state':
                     return `(${basic} * 0.01)`;
@@ -51,12 +52,11 @@ async function search(query) {
         // Add each similarity score together
         .join(' + ');
     const markets = await db('markets')
-        // .select('id','city', 'state', 'zipcode', `${similar} as similar`)
         .where(builder => {
             // Create query builder on available fields
             query.forEach(pair => {
                 // Compare case-insensitive values set in parseQueryAddr middleware
-                builder.orWhereRaw(`${pair[0]} % '${pair[1]}'`)
+                builder.orWhereRaw(`'${pair[1]}' <% ${pair[0]}`)
             })
         })
         .returning('*')
