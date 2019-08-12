@@ -60,6 +60,9 @@ module.exports = {
       .matches(`^[0-9]{3}-[0-9]{3}-[0-9]{4}$`)
       .withMessage("'phone' must be in the format '###-###-####'")
       .optional(),
+    body('rules').isString()
+    .withMessage("'rules' must be a string")
+    .optional({nullable: true}),
   ],
   booth: [
     body('name').isString()
