@@ -44,8 +44,8 @@ router.get('/:id', (req, res ) => {
     });
 });
 
-const marketReq = ['name']
-const marketOnly = ['admin_id', 'name', 'description', 'operation', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'twitter', 'instagram']
+const marketReq = ['name', 'email', 'phone']
+const marketOnly = ['admin_id', 'name', 'description', 'operation', 'address', 'city', 'state', 'zipcode', 'type', 'website', 'facebook', 'twitter', 'instagram', 'email', 'phone']
 const marketNestReq = {operation: ['day', 'start', 'end']};
 const marketPostNestOnly = {operation: ['day', 'start', 'end']};
 router.post('/',
