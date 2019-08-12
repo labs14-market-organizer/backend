@@ -56,9 +56,10 @@ module.exports = {
     body('email').isEmail()
       .withMessage("'email' must be a vaild email")
       .optional(),
-    body('phone').isNumeric()
-      .withMessage("'phone' must be a valid number")
-      .optional({ no_symbols: false}),
+    body('phone').isString()
+      .matches(`^[0-9]{3}-[0-9]{3}-[0-9]{4}$`)
+      .withMessage("'phone' must be in the format '###-###-####'")
+      .optional(),
   ],
   booth: [
     body('name').isString()
