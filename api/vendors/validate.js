@@ -39,5 +39,11 @@ module.exports = [
     .optional({nullable: true}),
   body('instagram').isString()
     .withMessage("'instagram' must be a string")
-    .optional({nullable: true}),
+    .optional({ nullable: true }),
+  body('email').isEmail()
+    .withMessage("'email' must be a vaild email")
+    .optional(),
+  body('phone').isNumeric()
+    .withMessage("'phone' must be a valid number")
+    .optional({ no_symbols: false }),
 ];
