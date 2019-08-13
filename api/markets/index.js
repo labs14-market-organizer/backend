@@ -131,7 +131,7 @@ router.post('/:id/booths',
   }
 )
 
-const boothOwnerPut = {
+const boothOwner = {
   markets: {
     id: 'admin_id',
     param: 'id',
@@ -146,7 +146,7 @@ const boothOwnerPut = {
 router.put('/:id/booths/:bID',
   protect,
   parentExists({markets: 'id'}),
-  onlyOwner(boothOwnerPut),
+  onlyOwner(boothOwner),
   onlyCols(boothOnly),
   spec.booth, validate,
   (req, res) => {
@@ -168,8 +168,7 @@ router.put('/:id/booths/:bID',
 router.delete('/:id/booths/:bID',
   protect,
   parentExists({markets: 'id'}),
-  // onlyOwner({markets: {id: 'admin_id'}})
-  //   ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
+  onlyOwner(boothOwner),
   (req, res) => {
     Markets.removeBooth(req.params.bID)
       .then(booth => {
