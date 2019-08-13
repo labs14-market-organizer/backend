@@ -116,7 +116,9 @@ Vendor profile data
   id: INTEGER, auto-incrementing
   admin_id: INTEGER, foreign key to USERS table
   name: STRING
-  description: TEXT 
+  description: TEXT
+  email: STRING
+  phone: STRING
   items: ARRAY of STRINGs
   electricity: BOOLEAN
   ventilation: BOOLEAN
@@ -141,7 +143,10 @@ Market profile data
   id: INTEGER, auto-incrementing
   admin_id: INTEGER, foreign key to USERS table
   name: STRING
-  description: TEXT 
+  description: TEXT
+  rules: TEXT
+  email: STRING
+  phone: STRING
   address: STRING
   city: STRING
   state: STRING

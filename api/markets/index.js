@@ -109,11 +109,12 @@ router.delete('/:id',
       })
 });
 
+// Booth POST, PUT, & DELETE endpoints
 const boothReq = ['name', 'number']
 const boothOnly = ['name', 'number', 'price', 'size', 'description']
 router.post('/:id/booths',
   protect,
-  parentExists('markets'),
+  parentExists({markets: 'id'}),
   onlyOwner('markets', 'admin_id')(),
   reqCols(boothReq),
   onlyCols(boothOnly),
@@ -132,7 +133,7 @@ router.post('/:id/booths',
 
 router.put('/:id/booths/:bID',
   protect,
-  parentExists('markets'),
+  parentExists({markets: 'id'}),
   onlyOwner('markets', 'admin_id')
     ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
   onlyCols(boothOnly),
@@ -155,7 +156,7 @@ router.put('/:id/booths/:bID',
 
 router.delete('/:id/booths/:bID',
   protect,
-  parentExists('markets'),
+  parentExists({markets: 'id'}),
   onlyOwner('markets', 'admin_id')
     ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
   (req, res) => {
@@ -175,5 +176,11 @@ router.delete('/:id/booths/:bID',
       })
   }
 )
+
+// Reservation POST, PUT, & DELETE endpoints
+// router.post('/:id/booths/:bID/reserve',
+//   protect,
+//   parentExists({markets: "id", market_booths: "bID"})
+// )
 
 module.exports = router;

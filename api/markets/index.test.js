@@ -23,6 +23,8 @@ describe('/markets', () => {
     it('should return 201 status', () => {
       const market = {
         name: "Leigh's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555",
         city: "Forest Park",
         state: "GA",
         zipcode: "30298"
@@ -36,6 +38,8 @@ describe('/markets', () => {
     it('should return an object', () => {
       const market = {
         name: "Mindy's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555",
         city: "Atlanta",
         state: "GA",
         zipcode: "30301"
@@ -49,6 +53,8 @@ describe('/markets', () => {
     it('should return an object w/ next ID', () => {
       const market = {
         name: "Matt's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555",
         city: "Atlanta",
         state: "GA",
         zipcode: "30302"
@@ -60,7 +66,11 @@ describe('/markets', () => {
     })
 
     it("should return an object w/ 'operation' array", () => {
-      const market = { name: "Lajawanti's" }
+      const market = {
+        name: "Lajawanti's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
       return request.post('/markets')
         .send(market)
         .set({authorization: tkn4})
@@ -68,7 +78,11 @@ describe('/markets', () => {
     })
 
     it("should return an object w/ 'booths' array", () => {
-      const market = { name: "Kayla's" }
+      const market = {
+        name: "Kayla's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
       return request.post('/markets')
         .send(market)
         .set({authorization: tkn5})

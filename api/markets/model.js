@@ -262,6 +262,7 @@ function remove(id) {
     });
 }
 
+// Booth functions
 async function addBooth(booth) {
     return new Promise(async (resolve, reject) => {
         try{
@@ -360,3 +361,5 @@ async function removeBooth(id) {
         }
     })
 }
+
+// Market_vendor functions

@@ -36,7 +36,6 @@ async function google(provided) {
   }
 }
 async function facebook(provided) {
-  console.log('FOO')
   const { email, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
     .where(auth)

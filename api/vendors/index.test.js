@@ -18,7 +18,11 @@ describe('/vendors', () => {
 
   describe('/ POST', () => {
     it('should return 201 status', () => {
-      const vendor = { name: "Leigh's" }
+      const vendor = {
+        name: "Leigh's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
       return request.post('/vendors')
        .send(vendor)
        .set({authorization: tkn1})
@@ -26,7 +30,11 @@ describe('/vendors', () => {
     })
     
     it('should return an object', () => {
-      const vendor = { name: "Mindy's" }
+      const vendor = {
+        name: "Mindy's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
       return request.post('/vendors')
         .send(vendor)
         .set({authorization: tkn2})
@@ -34,7 +42,11 @@ describe('/vendors', () => {
     })
     
     it('should return an object w/ next ID', () => {
-      const vendor = { name: "Matt's" }
+      const vendor = {
+        name: "Matt's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
       return request.post('/vendors')
         .send(vendor)
         .set({authorization: tkn3})
@@ -44,6 +56,8 @@ describe('/vendors', () => {
     it('should return an object w/ items array', () => {
       const vendor = {
         name: "Lajawanti's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555",
         items: ["something","something else"]
       }
       return request.post('/vendors')

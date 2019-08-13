@@ -71,20 +71,29 @@ async function parseQueryAddr(req, res, next) {
     ? res.status(400).json({message: "Could not parse the query properly. Try formatting as 'City, ST zipcode' or any combination."})
     : next();
 }
-// "table" = the table of the parent entry
-// "param" = the URL parameter identifying the parent
-function parentExists(table, param = 'id') {
+
+// "obj" = an object with keys equal to the parent table and
+//     values equal to the URL parameter identifying the parent
+function parentExists(obj) {
   return async (req, res, next) => {
-    // Grab the parent ID
-    const id = req.params[param];
-    // Check if parent exists
-    const result = await db(table)
-      .select('id')
-      .where({id})
-      .first();
-    // If parent doesn't exist, return as bad request
-    !result
-      ? res.status(400).json({message: `No entry with the ID ${id} exists on the ${table} table in our database.`})
+    const entries = Object.entries(obj);
+    let results = await Promise.all(entries.map(async pair => {
+      // Grab the parent ID
+      const id = req.params[pair[1]];
+      // Check if parent exists
+      const result = await db(pair[0])
+        .select('id')
+        .where({id})
+        .first();
+      return [!!result, pair[0]];
+    }))
+    const missing = results.reduce((arr, pair) => {
+      return !pair[0]
+        ? [...arr, pair[1]]
+        : arr;
+    }, []);
+    !!missing.length
+      ? res.status(400).json({message: `The specified parent entries from the following tables don't exist: ${missing.join(', ')}`})
       : next();
   }
 }

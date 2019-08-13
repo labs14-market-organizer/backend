@@ -16,10 +16,13 @@ exports.up = function(knex) {
       .onDelete('CASCADE')
       .onUpdate('CASCADE');
     reserve.specificType('reserve_date', 'date[]')
+    reserve.integer('paid')
+      .notNullable()
+      .defaultTo(0);
     reserve.timestamp("created_at", { useTz: true }) // use timestamps with timezones
       .notNullable()
       .defaultTo(knex.fn.now()); // default value to current time at creation
-    reserve.timestamp("mkt_updated_at", { useTz: true })
+    reserve.timestamp("updated_at", { useTz: true })
       .notNullable()
       .defaultTo(knex.fn.now());
   })
