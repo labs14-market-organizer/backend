@@ -59,7 +59,7 @@ router.post('/',
 
 router.put('/:id',
   protect,
-  // onlyOwner('vendors', 'admin_id')(),
+  onlyOwner({vendors: {id: 'admin_id', param: 'id'}}),
   onlyCols(vendorOnly),
   spec, validate,
   (req, res) => {
@@ -81,7 +81,7 @@ router.put('/:id',
 
 router.delete('/:id',
   protect,
-  // onlyOwner('vendors', 'admin_id')(),
+  onlyOwner({vendors: {id: 'admin_id', param: 'id'}}),
   (req, res) => {
     const {id} = req.params;
     Vendors.remove(id)
