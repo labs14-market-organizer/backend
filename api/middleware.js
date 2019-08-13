@@ -142,26 +142,31 @@ function onlyOwner(obj) {
         ? [...arr, result.table]
         : arr;
     }, []);
-    const matchParamID = owners.reduce((newObj, table) => {
-      const params = table[1].join.reduce((arr, joined, i) => {
-        return i === 0
-          ? [...arr, [joined.id, table[1].param]]
-          : [...arr, [joined.id, table[1].join[i-1].param]]
-      }, [])
-      return {...newObj, [table[0]]: params}
-    }, {})
-    const mismatches = results.reduce((newObj, result) => {
-      const arr = Object.values(matchParamID[result.table]).reduce((newArr, pair) => {
-        const [col, param] = pair;
-        return `${result.result[col]}` !== req.params[param]
-          ? [...newArr, col]
-          : newArr;
-      }, [])
-      return {...newObj, [result.table]: arr}
-    }, {})
+    const hasJoin = !Object.values(obj).every(table => !table.join);
+    let matchParamID, mismatches;
+    if(hasJoin) {
+      matchParamID = owners.reduce((newObj, table) => {
+        const params = table[1].join.reduce((arr, joined, i) => {
+          return i === 0
+            ? [...arr, [joined.id, table[1].param]]
+            : [...arr, [joined.id, table[1].join[i-1].param]]
+        }, [])
+        return {...newObj, [table[0]]: params}
+      }, {})
+      mismatches = results.reduce((newObj, result) => {
+        const arr = Object.values(matchParamID[result.table]).reduce((newArr, pair) => {
+          const [col, param] = pair;
+          return `${result.result[col]}` !== req.params[param]
+            ? [...newArr, col]
+            : newArr;
+        }, [])
+        return {...newObj, [result.table]: arr}
+      }, {})
+    }
+
     if(!req.owner.length) {
       res.status(403).json({message: `Only the admins of the the following associated entries are authorized to make this request: ${Object.keys(obj).join(', ')}`})
-    } else if(Object.values(mismatches).every(owner => owner.length > 0)) {
+    } else if(hasJoin && Object.values(mismatches).every(owner => owner.length > 0)) {
       res.status(400).json({message: 'One or more of the parent IDs in the URL does not match the ID of the relevant parent.'})
     } else {
       return next();
