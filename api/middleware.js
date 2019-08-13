@@ -77,7 +77,7 @@ async function parseQueryAddr(req, res, next) {
 function parentExists(obj) {
   return async (req, res, next) => {
     const entries = Object.entries(obj);
-    let results = await Promise.all(entries.map(async pair => {
+    const results = await Promise.all(entries.map(async pair => {
       // Grab the parent ID
       const id = req.params[pair[1]];
       // Check if parent exists
@@ -87,6 +87,7 @@ function parentExists(obj) {
         .first();
       return [!!result, pair[0]];
     }))
+    // Create an array of missing parents
     const missing = results.reduce((arr, pair) => {
       return !pair[0]
         ? [...arr, pair[1]]
@@ -107,35 +108,53 @@ function parentExists(obj) {
 // "joinOn" = an object that specifies how to join "table" w/ "joinTbl"
 // "paramID2" = the name of the request parameter that
 //     maps to the child ID in "joinTbl"
-function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
+// function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
+function onlyOwner(obj) {
   // Default "joinTbl" & "joinID" to null so that joins are optional
   // Default "joinOn" to represent common pattern
-  return (joinTbl = null, joinID = null, joinOn = {[`${table}.id`]: `${joinTbl}.${table.replace(/\s$/, '')}_id`}, paramID2 = 'oID') => {
+  // return (joinTbl = null, joinID = null, joinOn = {[`${table}.id`]: `${joinTbl}.${table.replace(/\s$/, '')}_id`}, paramID2 = 'oID') => {
     return async (req, res, next) => {
       const {user_id} = req; // Grab user ID from request
-      const id1 = req.params[paramID1]; // Grab ID from URL
-      const id2 = req.params[paramID2]; // Grab ID from URL
-      let result;
-      if(!joinTbl && !joinID) {
-        // Find user ID on target entry
-        result = await db(table)
-          .select(tableID)
-          .where({id: id1})
+      const owners = Object.entries(obj);
+      const results = await Promise.all(owners.map(async owner => {
+        const [table, {join, ...tbl}] = owner;
+        let first, last;
+        if(!!join) {
+          first = join[0];
+          last = join[join.length-1];
+        }
+        const result = await db(table)
+          .select(`${table}.${tbl.id}`)
+          .join(first.table, function() {
+            if(!!join) {
+              join.forEach(joined => {
+                this.andOn(joined.on)
+              })
+            }
+          })
+          .where(builder => {
+            if(!join) {
+              builder.where({[`${table}.id`]: req.params[tbl.param]});
+            } else {
+              builder.where({[`${last.table}.${last.id}`]: req.params[last.param]})
+            }
+          })
           .first();
-      } else if(!joinTbl || !joinID) {
-        return res.status(500).json({message: 'The middleware for this endpoint is missing data on its dependent table in the database.'})
-      } else {
-        // Retrieve actual admin & parent IDs for child entry
-        result = await db(table)
-          .select(`${table}.${tableID}`,`${joinTbl}.${joinID}`)
-          .where({[`${joinTbl}.id`]: id2})
-          .join(joinTbl, joinOn)
-          .first();
-      }
-      // Check if the child entry even exists
-      if(!result){
-        return next(); // Let routes handle 404s
-      }
+        return [result[tbl.id], table];
+      }))
+      req.owner = results.reduce((arr, pair) => {
+        return pair[0] === user_id
+          ? [...arr, pair[1]]
+          : arr;
+      }, []);
+      return next();
+      
+
+
+
+
+
+
       // Determine if admin IDs match
       if(result[tableID] !== user_id) {
         res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
@@ -146,7 +165,6 @@ function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
         next()
       }
     }
-  }
 }
 
 // Handles any invalid fields in request body via express-validator

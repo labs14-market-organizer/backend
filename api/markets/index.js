@@ -70,7 +70,7 @@ router.post('/',
 const marketPutNestOnly = {operation: ['id','day','start','end']};
 router.put('/:id',
   protect,
-  onlyOwner('markets', 'admin_id')(),
+  // onlyOwner({markets: {id: 'admin_id', param: 'id'}})(),
   onlyCols(marketOnly),
   onlyNestCols(marketPutNestOnly),
   spec.market, validate,
@@ -91,7 +91,7 @@ router.put('/:id',
 
 router.delete('/:id',
   protect,
-  onlyOwner('markets', 'admin_id')(),
+  // onlyOwner({markets: {id: 'admin_id', param: 'id'}})(),
   (req, res) => {
     Markets.remove(req.params.id)
       .then(deleted => {
@@ -115,7 +115,7 @@ const boothOnly = ['name', 'number', 'price', 'size', 'description']
 router.post('/:id/booths',
   protect,
   parentExists({markets: 'id'}),
-  onlyOwner('markets', 'admin_id')(),
+  // onlyOwner({markets: {id: 'admin_id', param: 'id'}})(),
   reqCols(boothReq),
   onlyCols(boothOnly),
   spec.booth, validate,
@@ -131,14 +131,28 @@ router.post('/:id/booths',
   }
 )
 
+const boothOwnerPut = {
+  markets: {
+    id: 'admin_id',
+    param: 'id',
+    join: [{
+      table: 'market_booths',
+      id: 'market_id',
+      param: 'bID',
+      on: {'markets.id': 'market_booths.market_id'}
+    }]
+  }
+}
 router.put('/:id/booths/:bID',
   protect,
   parentExists({markets: 'id'}),
-  onlyOwner('markets', 'admin_id')
-    ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
+  // onlyOwner({markets: {id: 'admin_id', join: }})
+  //   ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
+  onlyOwner(boothOwnerPut),
   onlyCols(boothOnly),
   spec.booth, validate,
   (req, res) => {
+    console.log(req.owner)
     req.body.market_id = req.params.id;
     Markets.updateBooth(req.params.bID, req.body)
     .then(booth => {
@@ -157,8 +171,8 @@ router.put('/:id/booths/:bID',
 router.delete('/:id/booths/:bID',
   protect,
   parentExists({markets: 'id'}),
-  onlyOwner('markets', 'admin_id')
-    ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
+  // onlyOwner({markets: {id: 'admin_id'}})
+  //   ('market_booths', 'market_id', {'markets.id': 'market_booths.market_id'}, 'bID'),
   (req, res) => {
     Markets.removeBooth(req.params.bID)
       .then(booth => {
