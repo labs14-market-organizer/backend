@@ -152,7 +152,6 @@ router.put('/:id/booths/:bID',
   onlyCols(boothOnly),
   spec.booth, validate,
   (req, res) => {
-    console.log(req.owner)
     req.body.market_id = req.params.id;
     Markets.updateBooth(req.params.bID, req.body)
     .then(booth => {

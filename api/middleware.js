@@ -94,77 +94,79 @@ function parentExists(obj) {
         : arr;
     }, []);
     !!missing.length
-      ? res.status(400).json({message: `The specified parent entries from the following tables don't exist: ${missing.join(', ')}`})
+      ? res.status(400).json({message: `The specified entries from the following tables don't exist: ${missing.join(', ')}`})
       : next();
   }
 }
 
-// "table" = the table of the target entry
-// "tableID" = the column name of the associated user ID in that table
-// "paramID1" = the name of the request parameter that
-//     maps to the entry ID in the target table
-// "joinTbl" = the dependent table of the child entry
-// "joinID" = the column name identifying the child's parent
-// "joinOn" = an object that specifies how to join "table" w/ "joinTbl"
-// "paramID2" = the name of the request parameter that
-//     maps to the child ID in "joinTbl"
-// function onlyOwner(table, tableID = 'user_id', paramID1 = 'id') {
+// 
 function onlyOwner(obj) {
-  // Default "joinTbl" & "joinID" to null so that joins are optional
-  // Default "joinOn" to represent common pattern
-  // return (joinTbl = null, joinID = null, joinOn = {[`${table}.id`]: `${joinTbl}.${table.replace(/\s$/, '')}_id`}, paramID2 = 'oID') => {
-    return async (req, res, next) => {
-      const {user_id} = req; // Grab user ID from request
-      const owners = Object.entries(obj);
-      const results = await Promise.all(owners.map(async owner => {
-        const [table, {join, ...tbl}] = owner;
-        let first, last;
-        if(!!join) {
-          first = join[0];
-          last = join[join.length-1];
-        }
-        const result = await db(table)
-          .select(`${table}.${tbl.id}`)
-          .join(first.table, function() {
-            if(!!join) {
-              join.forEach(joined => {
-                this.andOn(joined.on)
-              })
-            }
-          })
-          .where(builder => {
-            if(!join) {
-              builder.where({[`${table}.id`]: req.params[tbl.param]});
-            } else {
-              builder.where({[`${last.table}.${last.id}`]: req.params[last.param]})
-            }
-          })
-          .first();
-        return [result[tbl.id], table];
-      }))
-      req.owner = results.reduce((arr, pair) => {
-        return pair[0] === user_id
-          ? [...arr, pair[1]]
-          : arr;
-      }, []);
-      return next();
-      
-
-
-
-
-
-
-      // Determine if admin IDs match
-      if(result[tableID] !== user_id) {
-        res.status(403).json({ message: 'Only the user associated with that entry is authorized to make this request.' })
-      // Determine if parent IDs match
-      } else if(!!joinTbl && `${result[joinID]}` !== id1) {
-        res.status(400).json({message: "The parent ID in the URL does not match the ID of the child entry's parent"})
-      } else {
-        next()
+  return async (req, res, next) => {
+    const {user_id} = req; // Grab user ID from request
+    const owners = Object.entries(obj);
+    const results = await Promise.all(owners.map(async owner => {
+      const [table, {join, ...tbl}] = owner;
+      const select = [`${table}.id`, `${table}.${tbl.id}`]
+      let first, last;
+      if(!!join) {
+        join.forEach(joined => {
+          select.push(`${joined.table}.${joined.id}`)
+        })
+        first = join[0];
+        last = join[join.length-1];
       }
+      let result = await db(table)
+        .select(...select)
+        .modify(builder => {
+          if(!!join) {
+            join.forEach(joined => {
+              builder.join(joined.table, joined.on)
+            })
+          }
+        })
+        .where(builder => {
+          if(!join) {
+            builder.where({[`${table}.id`]: req.params[tbl.param]});
+          } else {
+            builder.where({[`${last.table}.id`]: req.params[last.param]})
+          }
+        });
+      [result] = result;
+      return {result, table, id: tbl.id};
+    }))
+    if(!results.every(result => !!result.result)) {
+      return next(); // Let route handle 404s
     }
+    req.owner = await results.reduce((arr, result) => {
+      return result.result[result.id] === user_id
+        ? [...arr, result.table]
+        : arr;
+    }, []);
+    const matchParamID = owners.reduce((newObj, table) => {
+      const params = table[1].join.reduce((arr, joined, i) => {
+        return i === 0
+          ? [...arr, [joined.id, table[1].param]]
+          : [...arr, [joined.id, table[1].join[i-1].param]]
+      }, [])
+      return {...newObj, [table[0]]: params}
+    }, {})
+    const mismatches = results.reduce((newObj, result) => {
+      const arr = Object.values(matchParamID[result.table]).reduce((newArr, pair) => {
+        const [col, param] = pair;
+        return `${result.result[col]}` !== req.params[param]
+          ? [...newArr, col]
+          : newArr;
+      }, [])
+      return {...newObj, [result.table]: arr}
+    }, {})
+    if(!req.owner.length) {
+      res.status(403).json({message: `Only the admins of the the following associated entries are authorized to make this request: ${Object.keys(obj).join(', ')}`})
+    } else if(Object.values(mismatches).every(owner => owner.length > 0)) {
+      res.status(400).json({message: 'One or more of the parent IDs in the URL does not match the ID of the relevant parent.'})
+    } else {
+      return next();
+    }
+  }
 }
 
 // Handles any invalid fields in request body via express-validator
