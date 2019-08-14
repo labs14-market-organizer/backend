@@ -396,19 +396,66 @@ async function addReserve(reserve) {
     const result = await db('market_reserve')
         .insert(reserve)
         .returning('*');
-    return result
+    const market = await db('market_booths')
+        .select('market_id')
+        .where({id: result[0].booth_id})
+        .first();
+    const booths = await db('market_booths')
+        .select('id')
+        .where({market_id: market.market_id})
+        .map(booth => booth.id);
+    const reservations = await db('market_reserve as mr')
+        .select('mb.id','mb.name','mb.number')
+        .count('*')
+        .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
+        .whereIn('mb.id', booths)
+        .groupBy('mb.id')
+        .orderBy('mb.id');
+    return {result, reservations}
 }
 
-function updateReserve(id, changes) {
-    return db('market_reserve')
+async function updateReserve(id, changes) {
+    const result = await db('market_reserve')
         .where({id})
         .update(changes)
         .returning('*');
+    const market = await db('market_booths')
+        .select('market_id')
+        .where({id: result[0].booth_id})
+        .first();
+    const booths = await db('market_booths')
+        .select('id')
+        .where({market_id: market.market_id})
+        .map(booth => booth.id);
+    const reservations = await db('market_reserve as mr')
+        .select('mb.id','mb.name','mb.number')
+        .count('*')
+        .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
+        .whereIn('mb.id', booths)
+        .groupBy('mb.id')
+        .orderBy('mb.id');
+    return {result, reservations}
 }
 
-function removeReserve(id) {
-    return db('market_reserve')
+async function removeReserve(id) {
+    const result = await db('market_reserve')
         .where({id})
         .del()
         .returning('*');
+    const market = await db('market_booths')
+        .select('market_id')
+        .where({id: result[0].booth_id})
+        .first();
+    const booths = await db('market_booths')
+        .select('id')
+        .where({market_id: market.market_id})
+        .map(booth => booth.id);
+    const reservations = await db('market_reserve as mr')
+        .select('mb.id','mb.name','mb.number')
+        .count('*')
+        .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
+        .whereIn('mb.id', booths)
+        .groupBy('mb.id')
+        .orderBy('mb.id');
+    return {result, reservations}
 }
