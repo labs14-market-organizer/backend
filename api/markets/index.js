@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Markets = require("./model");
-const {protect, parseQueryAddr, parentExists, onlyOwner, reqCols, reqNestCols, validate, onlyCols, onlyNestCols} = require('../middleware');
+const {protect, parseQueryAddr, parentExists, onlyOwner, reqCols, reqNestCols, validate, onlyCols, onlyNestCols, availBooths} = require('../middleware');
 const spec = require('./validate');
 
 router.get('/', (req, res ) => {
@@ -273,6 +273,7 @@ router.post('/:id/booths/:bID/reserve/',
   onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
   reqCols(reserveReqPost),
   onlyCols(reserveOnlyPost),
+  availBooths('bID'),
   spec.reserve, validate,
   (req, res) => {
     req.body = {

@@ -396,7 +396,7 @@ async function addReserve(reserve) {
     const result = await db('market_reserve')
         .insert(reserve)
         .returning('*');
-    return result;
+    return result
 }
 
 function updateReserve(id, changes) {

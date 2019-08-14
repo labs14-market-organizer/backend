@@ -16,7 +16,8 @@ module.exports = {
   reqCols,
   reqNestCols,
   onlyCols,
-  onlyNestCols
+  onlyNestCols,
+  availBooths
 }
 
 // Verifies JWT and stores subject on request as "user_id"
@@ -348,5 +349,18 @@ function onlyNestCols(allowObjs) {
     } else {
       next();
     }
+  }
+}
+
+function availBooths(param) {
+  return async (req, res, next) => {
+    const [{number}] = await db('market_booths')
+      .select('number')
+      .where({id: req.params[param]});
+    const booths = await db('market_reserve')
+      .where({booth_id: req.params[param], reserve_date: req.body.reserve_date});
+    booths.length >= number
+      ? res.status(403).json({message: 'All available booths have already been reserved on this date.'})
+      : next();
   }
 }

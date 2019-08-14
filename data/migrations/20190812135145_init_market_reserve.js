@@ -15,7 +15,8 @@ exports.up = function(knex) {
       .inTable('vendors')
       .onDelete('CASCADE')
       .onUpdate('CASCADE');
-    reserve.specificType('reserve_date', 'date[]')
+    reserve.timestamp('reserve_date', {useTz: true})
+      .notNullable();
     reserve.integer('paid')
       .notNullable()
       .defaultTo(0);
