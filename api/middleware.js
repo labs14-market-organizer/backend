@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const db = require('../data/dbConfig');
 const parseAddr = require("parse-address-string");
+const getType = require('jest-get-type');
 const {getStateCodeByStateName: stateCode} = require("us-state-codes");
 const {validationResult} = require('express-validator');
 
@@ -239,9 +240,21 @@ function reqNestCols(reqObjs) {
   }
 }
 
-// "allowed" = array of columns that the user is allowed to specify in the request body
 function onlyCols(allowed) {
   return (req, res, next) => {
+    if(getType(allowed) === 'object') {
+      const {owner} = req;
+      allowed = Object.entries(allowed)
+        .reduce((arr, table) => {
+          const [tbl, cols] = table;
+          if(owner.includes(tbl)) {
+            const newCols = cols.filter(col => !arr.includes(col));
+            return [...arr, ...newCols];
+          } else {
+            return arr;
+          }
+        }, [])
+    }
     // Filters through array of allowed columns to flag
     //     any that are included that shouldn't be
     const flagged = Object.keys(req.body)
