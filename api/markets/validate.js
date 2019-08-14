@@ -83,6 +83,15 @@ module.exports = {
     body('description').isString()
       .withMessage("'description' must be a string")
       .optional({nullable: true}),
+  ],
+  reserve: [
+    body('reserve_date').isArray()
+      .withMessage("'reserve_date' must be an array")
+      .optional(),
+    // body('reserve_date.*'),
+    body('paid').isInt()
+      .withMessage("'paid' must be an integer")
+      .optional()
   ]
 }
 
