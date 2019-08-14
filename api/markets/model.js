@@ -277,14 +277,10 @@ async function addRequest(request) {
 }
 
 async function updateRequest(id, changes) {
-    console.log('FOO')
     const result = await db('market_vendors')
         .where({id})
         .update(changes)
         .returning('*')
-        // .toSQL().toNative();
-    console.log('BAR')
-    console.log(result)
     return result;
 }
 
@@ -404,15 +400,15 @@ async function addReserve(reserve) {
 }
 
 function updateReserve(id, changes) {
-return db('market_reserve')
-    .where({id})
-    .update(changes)
-    .returning('*');
+    return db('market_reserve')
+        .where({id})
+        .update(changes)
+        .returning('*');
 }
 
 function removeReserve(id) {
-return db('market_reserve')
-    .where({id})
-    .del()
-    .returning('*');
+    return db('market_reserve')
+        .where({id})
+        .del()
+        .returning('*');
 }

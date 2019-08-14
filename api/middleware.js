@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../data/dbConfig');
 const parseAddr = require("parse-address-string");
 const getType = require('jest-get-type');
+const genToken = require('./auth/genToken');
 const {getStateCodeByStateName: stateCode} = require("us-state-codes");
 const {validationResult} = require('express-validator');
 
@@ -40,6 +41,10 @@ function verifyJWT(req, res, next) {
           .orderBy('id')
           .map(vendor => vendor.id);
         req.vendor = req.vendor[0];
+        const user = {id: req.user_id};
+        const expire = 1000*60*60*2; // 2 hours
+        // Create new JWT that can be refreshed on frontend
+        req.headers.authorization = genToken(user, expire)
         next();
       } else {
         res.status(403).json({ message: 'Invalid authorization token.' })
