@@ -193,7 +193,7 @@ const reserveOnlyPost = ['reserve_date']
 router.post('/:id/booths/:bID/reserve/',
   protect,
   parentExists({markets: 'id', market_booths: 'bID'}),
-  // onlyOwner({vendors: {id: 'admin_id', param: 'vID'}}),
+  onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
   reqCols(reserveReqPost),
   onlyCols(reserveOnlyPost),
   // spec.reserve, validate,
@@ -214,33 +214,34 @@ const reserveOwner = {
       {
         table: 'market_reserve',
         id: 'booth_id',
-        param: 'bID',
+        param: 'rID',
         on: {'market_booths.id': 'market_reserve.booth_id'}
       },
     ]
   },
   vendors: {
     id: 'admin_id',
-    // param: 'id',
+    req: 'vendor',
     join: [{
       table: 'market_reserve',
       id: 'vendor_id',
-      // param: 'bID',
+      param: 'rID',
       on: {'vendors.id': 'market_reserve.vendor_id'}
     }]
   }
 }
-// const reserveReqPut = ['reserve_date']
-// const reserveOnlyPut = ['reserve_date']
-// router.put('/:id/booths/:bID/reserve/:vID',
-//   protect,
-//   parentExists({markets: 'id', market_booths: 'bID'}),
-//   onlyOwner(reserveOwner),
-//   reqCols(reserveReqPost),
-//   onlyCols(reserveOnlyPost),
-//   // spec.reserve, validate,
-//   // (req, res) => {}
-// )
+const reserveOnlyPut = {
+  markets: ['paid'],
+  vendors: ['reserve_date']
+}
+router.put('/:id/booths/:bID/reserve/:rID',
+  protect,
+  parentExists({markets: 'id', market_booths: 'bID'}),
+  onlyOwner(reserveOwner),
+  onlyCols(reserveOnlyPut),
+  // spec.reserve, validate,
+  // (req, res) => {}
+)
 
 router.delete('/:id/booths/:bID/reserve/:rID',
   protect,

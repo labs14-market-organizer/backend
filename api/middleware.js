@@ -28,16 +28,16 @@ function verifyJWT(req, res, next) {
     jwt.verify(token, jwtSecret, async (err, decoded) => {
       if(!err) {
         req.user_id = decoded.subject;
-        req.markets = await db('markets')
+        req.market = await db('markets')
           .select('id')
           .where({admin_id: req.user_id})
           .orderBy('id')
-          .map(market => market.id);
-        req.vendors = await db('vendors')
+          .map(market => market.id)[0];
+        req.vendor = await db('vendors')
           .select('id')
           .where({admin_id: req.user_id})
           .orderBy('id')
-          .map(vendor => vendor.id);
+          .map(vendor => vendor.id)[0];
         next();
       } else {
         res.status(403).json({ message: 'Invalid authorization token.' })
