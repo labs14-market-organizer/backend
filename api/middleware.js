@@ -40,7 +40,6 @@ function verifyJWT(req, res, next) {
           .orderBy('id')
           .map(vendor => vendor.id);
         req.vendor = req.vendor[0];
-        console.log(req.user_id, req.market, req.vendor)
         next();
       } else {
         res.status(403).json({ message: 'Invalid authorization token.' })
@@ -90,7 +89,6 @@ async function parseQueryAddr(req, res, next) {
 //     values equal to the URL parameter identifying the parent
 function parentExists(obj) {
   return async (req, res, next) => {
-    console.log('MW PARENT')
     const entries = Object.entries(obj);
     const results = await Promise.all(entries.map(async pair => {
       // Grab the parent ID
@@ -117,7 +115,6 @@ function parentExists(obj) {
 // 
 function onlyOwner(obj) {
   return async (req, res, next) => {
-    console.log('MW OWNER')
     const {user_id} = req; // Grab user ID from request
     const owners = Object.entries(obj);
     const results = await Promise.all(owners.map(async owner => {
@@ -147,7 +144,6 @@ function onlyOwner(obj) {
             } else if(!!tbl.body) {
               builder.where({[`${table}.id`]: req.body[tbl.body]})
             } else {
-              console.log('REQ',req['vendor'])
               builder.where({[`${table}.id`]: req[tbl.req]})
             }
           } else {
@@ -234,7 +230,6 @@ function validate(req, res, next)  {
 //     that should match the user ID of the user making the request
 function reqCols(required, reqID = false, colID = 'id') {
   return (req, res, next) => {
-    console.log('MW REQCOLS')
     // Filters through array of required columns to flag any missing fields
     const body = Object.keys(req.body);
     let missing = required
@@ -319,7 +314,6 @@ function onlyCols(allowed) {
 //     representing allowed subfields
 function onlyNestCols(allowObjs) {
   return (req, res, next) => {
-    console.log('MW ONLYCOLS')
     const body = Object.keys(req.body);
     // Compares request body to specified parents
     // to see which parent fields are available to check

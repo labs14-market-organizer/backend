@@ -109,6 +109,83 @@ router.delete('/:id',
       })
 });
 
+// Market_vendors endpoints
+// const requestReqPost = []
+router.post('/:id/request',
+  protect,
+  parentExists({markets: 'id'}),
+  // onlyCols(requestReqPost),
+  spec.request, validate,
+  (req, res) => {
+    req.body = {
+      ...req.body,
+      market_id: req.params.id,
+      vendor_id: req.vendor,
+      status: 1 // Currently only have public markets
+    }
+    Markets.addRequest(req.body)
+      .then(added => {
+        res.status(201).json(added);
+      })
+      .catch(err => {
+        res.status(500).json({knex: err, message: 'The request could not be added to our database.'})
+      })
+  }
+)
+
+const requestReqPut = ['status'];
+const requestOnly = ['status'];
+router.put('/:id/request/:rqID',
+  protect,
+  parentExists({markets: 'id'}),
+  onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
+  reqCols(requestReqPut),
+  onlyCols(requestOnly),
+  spec.request, validate,
+  (req, res) => {
+    req.body = {
+      ...req.body,
+      market_id: req.params.id,
+      vendor_id: req.vendor,
+      updated_at: new Date()
+    }
+    Markets.updateRequest(req.params.rqID, req.body)
+      .then(updated => {
+        if (!!updated) {
+          res.status(200).json(updated);
+        } else {
+          res.status(404).json({ message: 'We do not have a request with the specified ID in our database.' });
+        }
+      })
+      .catch(err => {
+        res.status(500).json({knex: err, message: 'The specified request could not be updated in our database.'});
+      })
+  }
+)
+
+router.delete('/:id/request/:rqID',
+  protect,
+  parentExists({markets: 'id'}),
+  onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
+  spec.request, validate,
+  (req, res) => {
+    Markets.removeRequest(req.params.rqID)
+      .then(deleted => {
+        if (!!deleted) {
+          res.status(200).json(deleted);
+        } else {
+          res.status(404).json({
+            message: 'We do not have a request with the specified ID in our database.',
+          });
+        }
+      })
+      .catch(err => {
+        res.status(500)
+          .json({knex: err, message: 'The specified request could not be removed from our database.'});
+      })
+  }
+)
+
 // Booth POST, PUT, & DELETE endpoints
 const boothReq = ['name', 'number']
 const boothOnly = ['name', 'number', 'price', 'size', 'description']
@@ -228,7 +305,7 @@ const reserveOwner = {
       {
         table: 'market_reserve',
         id: 'booth_id',
-        param: 'rID',
+        param: 'rsID',
         on: {'market_booths.id': 'market_reserve.booth_id'}
       },
     ]
@@ -239,7 +316,7 @@ const reserveOwner = {
     join: [{
       table: 'market_reserve',
       id: 'vendor_id',
-      param: 'rID',
+      param: 'rsID',
       on: {'vendors.id': 'market_reserve.vendor_id'}
     }]
   }
@@ -248,7 +325,7 @@ const reserveOnlyPut = {
   markets: ['paid'],
   vendors: ['reserve_date']
 }
-router.put('/:id/booths/:bID/reserve/:rID',
+router.put('/:id/booths/:bID/reserve/:rsID',
   protect,
   parentExists({markets: 'id', market_booths: 'bID'}),
   onlyOwner(reserveOwner),
@@ -261,11 +338,10 @@ router.put('/:id/booths/:bID/reserve/:rID',
       vendor_id: req.vendor,
       updated_at: new Date()
     }
-    req.body.updated_at = new Date();
-    Markets.updateReserve(req.params.rID, req.body)
+    Markets.updateReserve(req.params.rsID, req.body)
       .then(updated => {
         if (!!updated) {
-        res.status(200).json(updated);
+          res.status(200).json(updated);
         } else {
           res.status(404).json({ message: 'We do not have a reservation with the specified ID in our database.' });
         }
@@ -276,13 +352,13 @@ router.put('/:id/booths/:bID/reserve/:rID',
   }
 )
 
-router.delete('/:id/booths/:bID/reserve/:rID',
+router.delete('/:id/booths/:bID/reserve/:rsID',
   protect,
   parentExists({markets: 'id', market_booths: 'bID'}),
   onlyOwner(reserveOwner),
   spec.reserve, validate,
   (req, res) => {
-    Markets.removeReserve(req.params.rID)
+    Markets.removeReserve(req.params.rsID)
       .then(deleted => {
         if (!!deleted) {
           res.status(200).json(deleted);

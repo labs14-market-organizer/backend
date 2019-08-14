@@ -84,6 +84,11 @@ module.exports = {
       .withMessage("'description' must be a string")
       .optional({nullable: true}),
   ],
+  request: [
+    body('status').isInt({min: -1, max: 1})
+      .withMessage("'status' must be an integer between 1 and -1")
+      .optional()
+  ],
   reserve: [
     body('reserve_date').isArray()
       .withMessage("'reserve_date' must be an array")

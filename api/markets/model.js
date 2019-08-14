@@ -8,6 +8,9 @@ module.exports = {
     add,
     update,
     remove,
+    addRequest,
+    updateRequest,
+    removeRequest,
     addBooth,
     updateBooth,
     removeBooth,
@@ -265,6 +268,33 @@ function remove(id) {
     });
 }
 
+// Market_vendors functions
+async function addRequest(request) {
+    const result = await db('market_vendors')
+        .insert(request)
+        .returning('*');
+    return result;
+}
+
+async function updateRequest(id, changes) {
+    console.log('FOO')
+    const result = await db('market_vendors')
+        .where({id})
+        .update(changes)
+        .returning('*')
+        // .toSQL().toNative();
+    console.log('BAR')
+    console.log(result)
+    return result;
+}
+
+function removeRequest(id) {
+    return db('market_vendors')
+        .where({id})
+        .del()
+        .returning('*');
+}
+
 // Booth functions
 async function addBooth(booth) {
     return new Promise(async (resolve, reject) => {
@@ -365,15 +395,11 @@ async function removeBooth(id) {
     })
 }
 
-// Market_vendor functions
+// Market_reserve functions
 async function addReserve(reserve) {
-    console.log('FOO')
     const result = await db('market_reserve')
         .insert(reserve)
-        .returning('*')
-        // .toSQL().toNative();
-    console.log('BAR')
-    console.log('MODEL', result)
+        .returning('*');
     return result;
 }
 
