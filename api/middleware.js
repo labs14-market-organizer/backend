@@ -25,9 +25,19 @@ function verifyJWT(req, res, next) {
   if(!token) {
     next(); // Let protect() handle route protection
   } else {
-    jwt.verify(token, jwtSecret, (err, decoded) => {
+    jwt.verify(token, jwtSecret, async (err, decoded) => {
       if(!err) {
         req.user_id = decoded.subject;
+        req.markets = await db('markets')
+          .select('id')
+          .where({admin_id: req.user_id})
+          .orderBy('id')
+          .map(market => market.id);
+        req.vendors = await db('vendors')
+          .select('id')
+          .where({admin_id: req.user_id})
+          .orderBy('id')
+          .map(vendor => vendor.id);
         next();
       } else {
         res.status(403).json({ message: 'Invalid authorization token.' })
@@ -127,9 +137,21 @@ function onlyOwner(obj) {
         })
         .where(builder => {
           if(!join) {
-            builder.where({[`${table}.id`]: req.params[tbl.param]});
+            if(!!tbl.param) {
+              builder.where({[`${table}.id`]: req.params[tbl.param]});
+            } else if(!!tbl.body) {
+              builder.where({[`${table}.id`]: req.body[tbl.body]})
+            } else {
+              builder.where({[`${table}.id`]: req[tbl.req]})
+            }
           } else {
-            builder.where({[`${last.table}.id`]: req.params[last.param]})
+            if(!!last.param) {
+              builder.where({[`${last.table}.id`]: req.params[last.param]});
+            } else if(!!last.body) {
+              builder.where({[`${last.table}.id`]: req.body[last.body]})
+            } else {
+              builder.where({[`${last.table}.id`]: req[last.req]})
+            }
           }
         });
       [result] = result;
@@ -144,31 +166,46 @@ function onlyOwner(obj) {
         : arr;
     }, []);
     const hasJoin = !Object.values(obj).every(table => !table.join);
-    let matchParamID, mismatches;
+    let matchIDs, mismatches;
     if(hasJoin) {
-      matchParamID = owners.reduce((newObj, table) => {
-        const params = table[1].join.reduce((arr, joined, i) => {
-          return i === 0
-            ? [...arr, [joined.id, table[1].param]]
-            : [...arr, [joined.id, table[1].join[i-1].param]]
+      matchIDs = owners.reduce((newObj, table) => {
+        const arrIDs = table[1].join.reduce((arr, joined, i) => {
+          const {id} = joined;
+          const {id: tblID, join: tblJoin, ...tbl} = table[1];
+          if(i === 0) {
+            return [...arr, {id, ...tbl}];
+          } else {
+            const {id: prevID, table: prevTbl, on, ...prev} = table[1].join[i-1];
+            return [...arr, {id, ...prev}];
+          }
         }, [])
-        return {...newObj, [table[0]]: params}
+        return {...newObj, [table[0]]: arrIDs}
       }, {})
       mismatches = results.reduce((newObj, result) => {
-        const arr = Object.values(matchParamID[result.table]).reduce((newArr, pair) => {
-          const [col, param] = pair;
-          return `${result.result[col]}` !== req.params[param]
-            ? [...newArr, col]
-            : newArr;
+        const arr = Object.values(matchIDs[result.table]).reduce((newArr, pair) => {
+          const {id, ...loc} = pair;
+          const place = Object.keys(loc)[0];
+          if(place === 'param') {
+            return `${result.result[id]}` !== req.params[loc[place]]
+              ? [...newArr, id]
+              : newArr;
+          } else if(place === 'body') {
+            return `${result.result[id]}` !== req.body[loc[place]]
+              ? [...newArr, id]
+              : newArr;
+          } else {
+            return `${result.result[id]}` !== req[loc[place]]
+              ? [...newArr, id]
+              : newArr;
+          }
         }, [])
         return {...newObj, [result.table]: arr}
       }, {})
     }
-
     if(!req.owner.length) {
       res.status(403).json({message: `Only the admins of the the following associated entries are authorized to make this request: ${Object.keys(obj).join(', ')}`})
     } else if(hasJoin && Object.values(mismatches).every(owner => owner.length > 0)) {
-      res.status(400).json({message: 'One or more of the parent IDs in the URL does not match the ID of the relevant parent.'})
+      res.status(400).json({message: 'One or more of the parent IDs does not match the ID of the relevant parent.'})
     } else {
       return next();
     }
