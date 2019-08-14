@@ -88,7 +88,10 @@ module.exports = {
     body('reserve_date').isArray()
       .withMessage("'reserve_date' must be an array")
       .optional(),
-    // body('reserve_date.*'),
+    body('reserve_date.*').isString()
+      .matches(`^[0-9]{4}-(((0[13578]|1[02])-(0[0-9]|1[0-9]|2[0-9]|3[0-1]))|((0[469]|11)-(0[0-9]|1[0-9]|2[0-9]|30))|(02-(0[0-9]|1[0-9]|2[0-9])))$`)
+      .withMessage("'reserve_date' must be an array of valid dates in the format 'YYYY-MM-DD'")
+      .optional(),
     body('paid').isInt()
       .withMessage("'paid' must be an integer")
       .optional()
