@@ -284,7 +284,7 @@ router.post('/:id/booths/:bID/reserve/',
     }
     Markets.addReserve(req.body)
       .then(reserve =>  {
-        res.status(201).json(reserve.reservations)
+        res.status(201).json(reserve.available)
       })
       .catch(err => {
         res.status(500).json({knex: err, message: 'The reservation could not be added to our database.'})
@@ -342,7 +342,7 @@ router.put('/:id/booths/:bID/reserve/:rsID',
     Markets.updateReserve(req.params.rsID, req.body)
       .then(updated => {
         if (!!updated.result) {
-          res.status(200).json(updated.reservations);
+          res.status(200).json(updated.available);
         } else {
           res.status(404).json({ message: 'We do not have a reservation with the specified ID in our database.' });
         }
@@ -362,7 +362,7 @@ router.delete('/:id/booths/:bID/reserve/:rsID',
     Markets.removeReserve(req.params.rsID)
       .then(deleted => {
         if (!!deleted.result) {
-          res.status(200).json(deleted.reservations);
+          res.status(200).json(deleted.available);
         } else {
           res.status(404).json({
             message: 'We do not have a market with the specified ID in our database.',

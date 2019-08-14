@@ -404,14 +404,13 @@ async function addReserve(reserve) {
         .select('id')
         .where({market_id: market.market_id})
         .map(booth => booth.id);
-    const reservations = await db('market_reserve as mr')
-        .select('mb.id','mb.name','mb.number')
-        .count('*')
+    const available = await db('market_reserve as mr')
+        .select('mb.id', db.raw('(mb.number - count(*)) as available'))
         .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
         .whereIn('mb.id', booths)
         .groupBy('mb.id')
         .orderBy('mb.id');
-    return {result, reservations}
+    return {result, available}
 }
 
 async function updateReserve(id, changes) {
@@ -427,14 +426,13 @@ async function updateReserve(id, changes) {
         .select('id')
         .where({market_id: market.market_id})
         .map(booth => booth.id);
-    const reservations = await db('market_reserve as mr')
-        .select('mb.id','mb.name','mb.number')
-        .count('*')
+    const available = await db('market_reserve as mr')
+        .select('mb.id', db.raw('(mb.number - count(*)) as available'))
         .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
         .whereIn('mb.id', booths)
         .groupBy('mb.id')
         .orderBy('mb.id');
-    return {result, reservations}
+    return {result, available}
 }
 
 async function removeReserve(id) {
@@ -450,12 +448,11 @@ async function removeReserve(id) {
         .select('id')
         .where({market_id: market.market_id})
         .map(booth => booth.id);
-    const reservations = await db('market_reserve as mr')
-        .select('mb.id','mb.name','mb.number')
-        .count('*')
+    const available = await db('market_reserve as mr')
+        .select('mb.id', db.raw('(mb.number - count(*)) as available'))
         .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
         .whereIn('mb.id', booths)
         .groupBy('mb.id')
         .orderBy('mb.id');
-    return {result, reservations}
+    return {result, available}
 }
