@@ -197,7 +197,21 @@ router.post('/:id/booths/:bID/reserve/',
   reqCols(reserveReqPost),
   onlyCols(reserveOnlyPost),
   spec.reserve, validate,
-  // (req, res) => {}
+  (req, res) => {
+    req.body = {
+      ...req.body,
+      booth_id: req.params.bID,
+      vendor_id: req.vendor,
+      paid: 0
+    }
+    Markets.addReserve(req.body)
+      .then(reserve =>  {
+        res.status(201).json(reserve)
+      })
+      .catch(err => {
+        res.status(500).json({knex: err, message: 'The reservation could not be added to our database.'})
+      })
+  }
 )
 
 const reserveOwner = {
@@ -240,7 +254,26 @@ router.put('/:id/booths/:bID/reserve/:rID',
   onlyOwner(reserveOwner),
   onlyCols(reserveOnlyPut),
   spec.reserve, validate,
-  // (req, res) => {}
+  (req, res) => {
+    req.body = {
+      ...req.body,
+      booth_id: req.params.bID,
+      vendor_id: req.vendor,
+      updated_at: new Date()
+    }
+    req.body.updated_at = new Date();
+    Markets.updateReserve(req.params.rID, req.body)
+      .then(updated => {
+        if (!!updated) {
+        res.status(200).json(updated);
+        } else {
+          res.status(404).json({ message: 'We do not have a reservation with the specified ID in our database.' });
+        }
+      })
+      .catch(err => {
+        res.status(500).json({knex: err, message: 'The specified market could not be updated in our database.'});
+      })
+  }
 )
 
 router.delete('/:id/booths/:bID/reserve/:rID',
@@ -248,7 +281,22 @@ router.delete('/:id/booths/:bID/reserve/:rID',
   parentExists({markets: 'id', market_booths: 'bID'}),
   onlyOwner(reserveOwner),
   spec.reserve, validate,
-  // (req, res) => {}
+  (req, res) => {
+    Markets.removeReserve(req.params.rID)
+      .then(deleted => {
+        if (!!deleted) {
+          res.status(200).json(deleted);
+        } else {
+          res.status(404).json({
+            message: 'We do not have a market with the specified ID in our database.',
+          });
+        }
+      })
+      .catch(err => {
+        res.status(500)
+          .json({knex: err, message: 'The specified market could not be removed from our database.'});
+      })
+  }
 )
 
 module.exports = router;

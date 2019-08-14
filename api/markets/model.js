@@ -11,6 +11,9 @@ module.exports = {
     addBooth,
     updateBooth,
     removeBooth,
+    addReserve,
+    updateReserve,
+    removeReserve
 };
 
 async function find() {
@@ -363,3 +366,27 @@ async function removeBooth(id) {
 }
 
 // Market_vendor functions
+async function addReserve(reserve) {
+    console.log('FOO')
+    const result = await db('market_reserve')
+        .insert(reserve)
+        .returning('*')
+        // .toSQL().toNative();
+    console.log('BAR')
+    console.log('MODEL', result)
+    return result;
+}
+
+function updateReserve(id, changes) {
+return db('market_reserve')
+    .where({id})
+    .update(changes)
+    .returning('*');
+}
+
+function removeReserve(id) {
+return db('market_reserve')
+    .where({id})
+    .del()
+    .returning('*');
+}
