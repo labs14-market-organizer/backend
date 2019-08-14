@@ -404,9 +404,14 @@ async function addReserve(reserve) {
         .select('id')
         .where({market_id: market.market_id})
         .map(booth => booth.id);
-    const available = await db('market_reserve as mr')
-        .select('mb.id', db.raw('(mb.number - count(*)) as available'))
-        .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
+    const available = await db('market_booths as mb')
+        .select('mb.id', db.raw('(mb.number - count(mr.id)) as available'))
+        .count({used: 'mr.id'})
+        .leftJoin(db('market_reserve')
+            .where({'market_reserve.reserve_date': result[0].reserve_date})
+            .as('mr'),
+            {'mr.booth_id': 'mb.id'}
+        )
         .whereIn('mb.id', booths)
         .groupBy('mb.id')
         .orderBy('mb.id');
@@ -426,9 +431,14 @@ async function updateReserve(id, changes) {
         .select('id')
         .where({market_id: market.market_id})
         .map(booth => booth.id);
-    const available = await db('market_reserve as mr')
-        .select('mb.id', db.raw('(mb.number - count(*)) as available'))
-        .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
+    const available = await db('market_booths as mb')
+        .select('mb.id', db.raw('(mb.number - count(mr.id)) as available'))
+        .count({used: 'mr.id'})
+        .leftJoin(db('market_reserve')
+            .where({'market_reserve.reserve_date': result[0].reserve_date})
+            .as('mr'),
+            {'mr.booth_id': 'mb.id'}
+        )
         .whereIn('mb.id', booths)
         .groupBy('mb.id')
         .orderBy('mb.id');
@@ -448,9 +458,14 @@ async function removeReserve(id) {
         .select('id')
         .where({market_id: market.market_id})
         .map(booth => booth.id);
-    const available = await db('market_reserve as mr')
-        .select('mb.id', db.raw('(mb.number - count(*)) as available'))
-        .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
+    const available = await db('market_booths as mb')
+        .select('mb.id', db.raw('(mb.number - count(mr.id)) as available'))
+        .count({used: 'mr.id'})
+        .leftJoin(db('market_reserve')
+            .where({'market_reserve.reserve_date': result[0].reserve_date})
+            .as('mr'),
+            {'mr.booth_id': 'mb.id'}
+        )
         .whereIn('mb.id', booths)
         .groupBy('mb.id')
         .orderBy('mb.id');

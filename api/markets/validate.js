@@ -16,6 +16,7 @@ module.exports = {
       .withMessage("'operation' must be an array")
       .optional(),
     body('operation.*.day').isString()
+      .matches(`^(sunday|monday|tuesday|wednesday|thursday|friday|saturday)$`)
       .withMessage("'day' under 'operation' must be a string")
       .optional(),
     body('operation.*.start').isString()

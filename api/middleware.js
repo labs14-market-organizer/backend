@@ -17,6 +17,7 @@ module.exports = {
   reqNestCols,
   onlyCols,
   onlyNestCols,
+  validReserveDate,
   availBooths
 }
 
@@ -348,6 +349,34 @@ function onlyNestCols(allowObjs) {
       })
     } else {
       next();
+    }
+  }
+}
+
+function validReserveDate(bodyKey, marketParam) {
+  return async (req, res, next) => {
+    console.log('FOO');
+    const date = req.body[bodyKey];
+    if(!date) {
+      next(); // Let other middleware handle missing data
+    } else {
+      const day = new Date(date).getDay();
+      const nums = {
+        sunday: 0,
+        monday: 1,
+        tuesday: 2,
+        wednesday: 3,
+        thursday: 4,
+        friday: 5,
+        saturday: 6
+      }
+      const days = await db('market_days')
+        .where({market_id: req.params[marketParam]})
+        .pluck('day')
+      const numDays = days.map(day => nums[day]);
+      !numDays.includes(day)
+        ? res.status(403).json({message: `This market is not open on that day. Please try for one of the following days: ${days.join(', ')}`})
+        : next();
     }
   }
 }
