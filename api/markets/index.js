@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Markets = require("./model");
-const {protect, parseQueryAddr, parentExists, onlyOwner, validReserveDate, reqCols, reqNestCols, validate, onlyCols, onlyNestCols, availBooths} = require('../middleware');
+const mw = require('../middleware');
 const spec = require('./validate');
 
 router.get('/', (req, res ) => {
@@ -16,7 +16,7 @@ router.get('/', (req, res ) => {
 });
 
 router.get('/search',
-  parseQueryAddr,
+  mw.parseQueryAddr,
   (req, res)  => {
       const {query} = req;
       Markets.search(query)
@@ -49,12 +49,12 @@ const marketOnly = ['admin_id','rules', 'name', 'description', 'operation', 'add
 const marketNestReq = {operation: ['day', 'start', 'end']};
 const marketPostNestOnly = {operation: ['day', 'start', 'end']};
 router.post('/',
-  protect,
-  reqCols(marketReq, true, 'admin_id'),
-  reqNestCols(marketNestReq),
-  onlyCols(marketOnly),
-  onlyNestCols(marketPostNestOnly),
-  spec.market, validate,
+  mw.protect,
+  mw.reqCols(marketReq, true, 'admin_id'),
+  mw.reqNestCols(marketNestReq),
+  mw.onlyCols(marketOnly),
+  mw.onlyNestCols(marketPostNestOnly),
+  spec.market, mw.validate,
   (req, res) => {
     if(!!req.user_id) {
       req.body.admin_id = req.user_id;
@@ -69,11 +69,11 @@ router.post('/',
 
 const marketPutNestOnly = {operation: ['id','day','start','end']};
 router.put('/:id',
-  protect,
-  onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
-  onlyCols(marketOnly),
-  onlyNestCols(marketPutNestOnly),
-  spec.market, validate,
+  mw.protect,
+  mw.onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
+  mw.onlyCols(marketOnly),
+  mw.onlyNestCols(marketPutNestOnly),
+  spec.market, mw.validate,
   (req, res) => {
     req.body.updated_at = new Date();
     Markets.update(req.params.id, req.body)
@@ -90,8 +90,8 @@ router.put('/:id',
 });
 
 router.delete('/:id',
-  protect,
-  onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
+  mw.protect,
+  mw.onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
   (req, res) => {
     Markets.remove(req.params.id)
       .then(deleted => {
@@ -112,10 +112,10 @@ router.delete('/:id',
 // Market_vendors endpoints
 const requestReqPost = []
 router.post('/:id/request',
-  protect,
-  parentExists({markets: 'id'}),
-  onlyCols(requestReqPost),
-  spec.request, validate,
+  mw.protect,
+  mw.parentExists({markets: 'id'}),
+  mw.onlyCols(requestReqPost),
+  spec.request, mw.validate,
   (req, res) => {
     req.body = {
       ...req.body,
@@ -136,12 +136,12 @@ router.post('/:id/request',
 const requestReqPut = ['status'];
 const requestOnly = ['status'];
 router.put('/:id/request/:rqID',
-  protect,
-  parentExists({markets: 'id'}),
-  onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
-  reqCols(requestReqPut),
-  onlyCols(requestOnly),
-  spec.request, validate,
+  mw.protect,
+  mw.parentExists({markets: 'id'}),
+  mw.onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
+  mw.reqCols(requestReqPut),
+  mw.onlyCols(requestOnly),
+  spec.request, mw.validate,
   (req, res) => {
     req.body = {
       ...req.body,
@@ -164,10 +164,10 @@ router.put('/:id/request/:rqID',
 )
 
 router.delete('/:id/request/:rqID',
-  protect,
-  parentExists({markets: 'id'}),
-  onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
-  spec.request, validate,
+  mw.protect,
+  mw.parentExists({markets: 'id'}),
+  mw.onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
+  spec.request, mw.validate,
   (req, res) => {
     Markets.removeRequest(req.params.rqID)
       .then(deleted => {
@@ -190,12 +190,12 @@ router.delete('/:id/request/:rqID',
 const boothReq = ['name', 'number']
 const boothOnly = ['name', 'number', 'price', 'size', 'description']
 router.post('/:id/booths',
-  protect,
-  parentExists({markets: 'id'}),
-  onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
-  reqCols(boothReq),
-  onlyCols(boothOnly),
-  spec.booth, validate,
+  mw.protect,
+  mw.parentExists({markets: 'id'}),
+  mw.onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
+  mw.reqCols(boothReq),
+  mw.onlyCols(boothOnly),
+  spec.booth, mw.validate,
   (req, res) => {
     req.body.market_id = req.params.id;
     Markets.addBooth(req.body)
@@ -221,11 +221,11 @@ const boothOwner = {
   }
 }
 router.put('/:id/booths/:bID',
-  protect,
-  parentExists({markets: 'id'}),
-  onlyOwner(boothOwner),
-  onlyCols(boothOnly),
-  spec.booth, validate,
+  mw.protect,
+  mw.parentExists({markets: 'id'}),
+  mw.onlyOwner(boothOwner),
+  mw.onlyCols(boothOnly),
+  spec.booth, mw.validate,
   (req, res) => {
     req.body.market_id = req.params.id;
     Markets.updateBooth(req.params.bID, req.body)
@@ -243,9 +243,9 @@ router.put('/:id/booths/:bID',
 )
 
 router.delete('/:id/booths/:bID',
-  protect,
-  parentExists({markets: 'id'}),
-  onlyOwner(boothOwner),
+  mw.protect,
+  mw.parentExists({markets: 'id'}),
+  mw.onlyOwner(boothOwner),
   (req, res) => {
     Markets.removeBooth(req.params.bID)
       .then(booth => {
@@ -266,8 +266,8 @@ router.delete('/:id/booths/:bID',
 
 // Reservation endpoints
 router.get('/:id/booths/date/:dt',
-  parentExists({markets: 'id'}),
-  validReserveDate({param: 'dt'},{param: 'id'}),
+  mw.parentExists({markets: 'id'}),
+  mw.validReserveDate({param: 'dt'},{param: 'id'}),
   (req, res) => {
     Markets.findReserveByDate(req.params.id, req.params.dt)
     .then(booths => {
@@ -284,14 +284,15 @@ router.get('/:id/booths/date/:dt',
 const reserveReqPost = ['reserve_date']
 const reserveOnlyPost = ['reserve_date']
 router.post('/:id/booths/:bID/reserve/',
-  protect,
-  parentExists({markets: 'id', market_booths: 'bID'}),
-  onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
-  reqCols(reserveReqPost),
-  onlyCols(reserveOnlyPost),
-  validReserveDate({body: 'reserve_date'},{param: 'id'}),
-  availBooths('bID'),
-  spec.reserve, validate,
+  mw.protect,
+  mw.parentExists({markets: 'id', market_booths: 'bID'}),
+  mw.onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
+  mw.reqCols(reserveReqPost),
+  mw.onlyCols(reserveOnlyPost),
+  mw.futureDate({body: 'reserve_date'}, true),
+  mw.validReserveDate({body: 'reserve_date'},{param: 'id'}),
+  mw.availBooths('bID'),
+  spec.reserve, mw.validate,
   (req, res) => {
     req.body = {
       ...req.body,
@@ -344,12 +345,13 @@ const reserveOnlyPut = {
   vendors: ['reserve_date']
 }
 router.put('/:id/booths/:bID/reserve/:rsID',
-  protect,
-  parentExists({markets: 'id', market_booths: 'bID'}),
-  onlyOwner(reserveOwner),
-  onlyCols(reserveOnlyPut),
-  validReserveDate({body: 'reserve_date'},{param: 'id'}),
-  spec.reserve, validate,
+  mw.protect,
+  mw.parentExists({markets: 'id', market_booths: 'bID'}),
+  mw.onlyOwner(reserveOwner),
+  mw.onlyCols(reserveOnlyPut),
+  mw.futureDate({body: 'reserve_date'}, true),
+  mw.validReserveDate({body: 'reserve_date'},{param: 'id'}),
+  spec.reserve, mw.validate,
   (req, res) => {
     req.body = {
       ...req.body,
@@ -372,10 +374,10 @@ router.put('/:id/booths/:bID/reserve/:rsID',
 )
 
 router.delete('/:id/booths/:bID/reserve/:rsID',
-  protect,
-  parentExists({markets: 'id', market_booths: 'bID'}),
-  onlyOwner(reserveOwner),
-  spec.reserve, validate,
+  mw.protect,
+  mw.parentExists({markets: 'id', market_booths: 'bID'}),
+  mw.onlyOwner(reserveOwner),
+  spec.reserve, mw.validate,
   (req, res) => {
     Markets.removeReserve(req.params.rsID)
       .then(deleted => {
@@ -395,8 +397,8 @@ router.delete('/:id/booths/:bID/reserve/:rsID',
 )
 
 router.get('/:id/vendors',
-  parentExists({markets: 'id'}),
-  validReserveDate({param: 'dt'},{param: 'id'}),
+  mw.parentExists({markets: 'id'}),
+  mw.validReserveDate({param: 'dt'},{param: 'id'}),
   (req, res) => {
     Markets.findVendors(req.params.id)
     .then(vendors => {
@@ -411,8 +413,8 @@ router.get('/:id/vendors',
 )
 
 router.get('/:id/vendors/date/:dt',
-  parentExists({markets: 'id'}),
-  validReserveDate({param: 'dt'},{param: 'id'}),
+  mw.parentExists({markets: 'id'}),
+  mw.validReserveDate({param: 'dt'},{param: 'id'}),
   (req, res) => {
     Markets.findVendorsByDate(req.params.id, req.params.dt)
     .then(vendors => {

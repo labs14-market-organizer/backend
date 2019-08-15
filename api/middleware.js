@@ -17,6 +17,7 @@ module.exports = {
   reqNestCols,
   onlyCols,
   onlyNestCols,
+  futureDate,
   validReserveDate,
   availBooths
 }
@@ -353,6 +354,34 @@ function onlyNestCols(allowObjs) {
   }
 }
 
+function futureDate(dateObj, today = false) {
+  return (req, res, next) => {
+    const datePlace = Object.keys(dateObj)[0];
+    let date;
+    if(datePlace === 'param') {
+      date = req.params[dateObj[datePlace]];
+    } else if (datePlace === 'body') {
+      date = req.body[dateObj[datePlace]];
+    } else {
+      date = req[dateObj[datePlace]];
+    }
+    if(!date) {
+      next(); // Let other middleware handle missing data
+    } else if (!!today) {
+      console.log(new Date(date) > new Date(Date.now() - ((1000*60*60*24)+1)))
+      new Date(date) > new Date(Date.now() - ((1000*60*60*24)+1))
+        ? next()
+        : res.status(400).json({message: `'${dateObj[datePlace]}' must be a date no earlier than today.`})
+    } else {
+      console.log(new Date(date) > new Date(Date.now()))
+      new Date(date) > new Date(Date.now())
+        ? next()
+        : res.status(400).json({message: `'${dateObj[datePlace]}' must be a date after today.`})
+    }
+    next();
+  }
+}
+
 function validReserveDate(dateObj, mktObj) {
   return async (req, res, next) => {
     const datePlace = Object.keys(dateObj)[0];
@@ -395,7 +424,6 @@ function validReserveDate(dateObj, mktObj) {
       const num = new Date(date).getUTCDay();
       const day = Object.keys(nums).find(key => nums[key] === num);
       const numDays = days.map(day => nums[day]);
-      console.log(num, day, date)
       !numDays.includes(num)
         ? res.status(403).json({message: `This market is not open on ${day}s. Please try for one of the following days: ${days.join(', ')}`})
         : next();
