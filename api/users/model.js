@@ -18,6 +18,7 @@ async function findById(id) {
         .where({admin_id: user.id})
         .returning('*')
         .orderBy('id')
+        // Map requests (approved/pending/rejected) to join market onto each vendor
         .map(async vendor => {
             const status_mkt = await db('market_vendors')
                 .where({vendor_id: vendor.id})
@@ -29,6 +30,7 @@ async function findById(id) {
         .where({admin_id: user.id})
         .returning('*')
         .orderBy('id')
+        // Map hours of operation and booth types onto each market
         .map(async market => {
             const operation = await db('market_days')
                 .where({market_id: market.id})
@@ -40,15 +42,16 @@ async function findById(id) {
                 .orderBy('id');
             return { ...market, operation, booths };
         })
+    // Grab vendor IDs to populate upcoming vendor schedule
     const vdrIDs = vendors.map(vdr => vdr.id);
     const upcoming_vdr = await db('market_reserve as mr')
         .select('mr.*', 'mb.market_id')
         .join('market_booths as mb', {'mb.id': 'mr.booth_id'})
         .whereIn('mr.vendor_id', vdrIDs)
         .andWhere('mr.reserve_date', '>=', db.raw('current_date'))
+    // Grab market IDs to populate upcoming market schedule
     const mktIDs = markets.map(mkt => mkt.id);
-    const upcoming_mkt = await db(
-        db('market_booths as mb1')
+    const upcoming_mkt = await db(db('market_booths as mb1')
             .select('mb1.market_id',db.raw('sum(mb1.number) as number'))
             .whereIn('mb1.market_id', mktIDs)
             .groupBy('mb1.market_id')
