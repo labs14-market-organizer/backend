@@ -416,10 +416,16 @@ function onlyNestCols(allowObjs) {
   }
 }
 
+// "dateObj" = object representing where to find the date
+// "param/body/req" = nested keys on "dateObj" with values
+//     equal to the date identifier
+// "today" = whether or not today is a valid date
 function futureDate(dateObj, today = false) {
   return (req, res, next) => {
+    // Grab the place of the date
     const datePlace = Object.keys(dateObj)[0];
     let date;
+    // Grab the date from its place
     if(datePlace === 'param') {
       date = req.params[dateObj[datePlace]];
     } else if (datePlace === 'body') {
@@ -429,11 +435,14 @@ function futureDate(dateObj, today = false) {
     }
     if(!date) {
       next(); // Let other middleware handle missing data
+    // Check whether today would be considered valid
     } else if (!!today) {
+      // Compare the date to a moment 24 hours ago, minus one millisecond
       new Date(date) > new Date(Date.now() - ((1000*60*60*24)+1))
         ? next()
         : res.status(400).json({message: `'${dateObj[datePlace]}' must be a date no earlier than today.`})
     } else {
+      // Compare the date to this moment
       new Date(date) > new Date(Date.now())
         ? next()
         : res.status(400).json({message: `'${dateObj[datePlace]}' must be a date after today.`})
@@ -441,11 +450,18 @@ function futureDate(dateObj, today = false) {
   }
 }
 
+// "dateObj" = object representing where to find the date
+// "param/body/req" = nested keys on "dateObj" with values
+//     equal to the date identifier
+// "mktObj" = object representing how to find the market
+// "param/body/req" = the same as for "dateObj"
 function validReserveDate(dateObj, mktObj) {
   return async (req, res, next) => {
+    // Grab the places of the date and market
     const datePlace = Object.keys(dateObj)[0];
     const mktPlace = Object.keys(mktObj)[0];
     let date;
+    // Grab the date from its place
     if(datePlace === 'param') {
       date = req.params[dateObj[datePlace]];
     } else if (datePlace === 'body') {
@@ -460,6 +476,7 @@ function validReserveDate(dateObj, mktObj) {
       if(!date.match(regex)) {
         return res.status(400).json({message: 'Please format the date as YYYY-MM-DD.'})
       }
+      // Map the days of the week to JS's .getDay() values
       const nums = {
         sunday: 0,
         monday: 1,
@@ -470,6 +487,7 @@ function validReserveDate(dateObj, mktObj) {
         saturday: 6
       }
       let mkt;
+      // Grab the market from its place
       if(mktPlace === 'param') {
         mkt = req.params[mktObj[mktPlace]];
       } else if (mktPlace === 'body') {
@@ -477,12 +495,18 @@ function validReserveDate(dateObj, mktObj) {
       } else {
         mkt = req[mktObj[mktPlace]];
       }
+      // Create an array of days the market is open
       const days = await db('market_days')
         .where({market_id: mkt})
         .pluck('day')
+      // Use UTC to ignore user timezone
       const num = new Date(date).getUTCDay();
+      // Reverse engineer the name of the day
       const day = Object.keys(nums).find(key => nums[key] === num);
+      // Create an array of valid days by number
       const numDays = days.map(day => nums[day]);
+      // If the specified date is not included in valid days,
+      //     kick back with 403
       !numDays.includes(num)
         ? res.status(403).json({message: `This market is not open on ${day}s. Please try for one of the following days: ${days.join(', ')}`})
         : next();
