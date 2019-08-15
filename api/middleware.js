@@ -43,7 +43,7 @@ function verifyJWT(req, res, next) {
           .where({admin_id: req.user_id})
           .orderBy('id')
           .map(vendor => vendor.id);
-        req.vendor = req.vendor[0];
+        req.vendor = req.vendor[1];
         const user = {id: req.user_id};
         const expire = 1000*60*60*2; // 2 hours
         // Create new JWT that can be refreshed on frontend

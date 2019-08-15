@@ -400,7 +400,12 @@ router.get('/:id/vendors',
   mw.parentExists({markets: 'id'}),
   mw.validReserveDate({param: 'dt'},{param: 'id'}),
   (req, res) => {
-    Markets.findVendors(req.params.id)
+    let args = [req.params.id]
+    console.log(req.query)
+    if(!!req.query.q) {
+      args.push(req.query.q)
+    }
+    Markets.findVendors(...args)
     .then(vendors => {
       !vendors.length
         ? res.status(404).json({ message: 'No vendors could be found in our database for that date.' })
@@ -416,7 +421,11 @@ router.get('/:id/vendors/date/:dt',
   mw.parentExists({markets: 'id'}),
   mw.validReserveDate({param: 'dt'},{param: 'id'}),
   (req, res) => {
-    Markets.findVendorsByDate(req.params.id, req.params.dt)
+    let args = [req.params.id, req.params.dt]
+    if(!!req.query.q) {
+      args.push(req.query.q)
+    }
+    Markets.findVendorsByDate(...args)
     .then(vendors => {
       !vendors.length
         ? res.status(404).json({ message: 'No vendors could be found in our database for that date.' })
