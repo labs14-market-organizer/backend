@@ -401,7 +401,7 @@ async function findReserveByDate(marketID, date) {
         .pluck('id');
     const result = await db('market_booths as mb')
         .select('mb.id', 'mb.number', db.raw('(mb.number - count(mr.id)) as available'))
-        .count({used: 'mr.id'})
+        .count({reserved: 'mr.id'})
         .leftJoin(db('market_reserve')
             .where({'market_reserve.reserve_date': date})
             .as('mr'),

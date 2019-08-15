@@ -378,7 +378,6 @@ function futureDate(dateObj, today = false) {
         ? next()
         : res.status(400).json({message: `'${dateObj[datePlace]}' must be a date after today.`})
     }
-    next();
   }
 }
 

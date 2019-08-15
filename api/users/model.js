@@ -33,10 +33,30 @@ async function findById(id) {
                 .orderBy('id');
             return { ...market, operation, booths };
         })
+    const vdrIDs = vendors.map(vdr => vdr.id);
+    const upcoming_vdr = await db('market_reserve as mr')
+        .select('mr.*', 'mb.market_id')
+        .join('market_booths as mb', {'mb.id': 'mr.booth_id'})
+        .whereIn('mr.vendor_id', vdrIDs)
+        .andWhere('mr.reserve_date', '>=', db.raw('current_date'))
+    const mktIDs = markets.map(mkt => mkt.id);
+    const upcoming_mkt = await db('market_booths as mb')
+        .select('mb.market_id','mr.reserve_date', db.raw('sum(mb.number) as number'), db.raw('(sum(mb.number) - count(mr.id)) as available'))
+        .count({reserved: 'mr.id'})
+        .leftJoin(db('market_reserve')
+            .where('market_reserve.reserve_date', '>=', db.raw('current_date'))
+            .as('mr'),
+            {'mr.booth_id': 'mb.id'}
+        )
+        .whereIn('mb.market_id', mktIDs)
+        .groupBy('mb.market_id','mr.reserve_date')
+        .orderBy('mr.reserve_date');
     return {
         ...user,
         vendors,
-        markets
+        markets,
+        upcoming_vdr,
+        upcoming_mkt
     }
 }
 
