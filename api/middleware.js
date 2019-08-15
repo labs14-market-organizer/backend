@@ -394,7 +394,7 @@ function validReserveDate(dateObj, mktObj) {
         .pluck('day')
       const num = new Date(date).getDay();
       const day = Object.keys(nums).find(key => nums[key] === num);
-      const numDays = days.map(day => nums[num]);
+      const numDays = days.map(day => nums[day]);
       !numDays.includes(num)
         ? res.status(403).json({message: `This market is not open on ${day}s. Please try for one of the following days: ${days.join(', ')}`})
         : next();

@@ -110,11 +110,11 @@ router.delete('/:id',
 });
 
 // Market_vendors endpoints
-// const requestReqPost = []
+const requestReqPost = []
 router.post('/:id/request',
   protect,
   parentExists({markets: 'id'}),
-  // onlyCols(requestReqPost),
+  onlyCols(requestReqPost),
   spec.request, validate,
   (req, res) => {
     req.body = {
@@ -270,10 +270,10 @@ router.get('/:id/booths/date/:dt',
   validReserveDate({param: 'dt'},{param: 'id'}),
   (req, res) => {
     Markets.findReserveByDate(req.params.id, req.params.dt)
-    .then(markets => {
-      !markets.length
+    .then(booths => {
+      !booths.length
         ? res.status(404).json({ message: 'No booths could be found in our database for that date.' })
-        : res.status(200).json(markets);
+        : res.status(200).json(booths);
     })
     .catch(err => {
       res.status(500).json({knex: err, message: 'An error occurred while retrieving booths from the database.' });
@@ -391,6 +391,38 @@ router.delete('/:id/booths/:bID/reserve/:rsID',
         res.status(500)
           .json({knex: err, message: 'The specified market could not be removed from our database.'});
       })
+  }
+)
+
+router.get('/:id/vendors',
+  parentExists({markets: 'id'}),
+  validReserveDate({param: 'dt'},{param: 'id'}),
+  (req, res) => {
+    Markets.findVendors(req.params.id)
+    .then(vendors => {
+      !vendors.length
+        ? res.status(404).json({ message: 'No vendors could be found in our database for that date.' })
+        : res.status(200).json(vendors);
+    })
+    .catch(err => {
+      res.status(500).json({knex: err, message: 'An error occurred while retrieving booths from the database.' });
+    });
+  }
+)
+
+router.get('/:id/vendors/date/:dt',
+  parentExists({markets: 'id'}),
+  validReserveDate({param: 'dt'},{param: 'id'}),
+  (req, res) => {
+    Markets.findVendorsByDate(req.params.id, req.params.dt)
+    .then(vendors => {
+      !vendors.length
+        ? res.status(404).json({ message: 'No vendors could be found in our database for that date.' })
+        : res.status(200).json(vendors);
+    })
+    .catch(err => {
+      res.status(500).json({knex: err, message: 'An error occurred while retrieving booths from the database.' });
+    });
   }
 )
 
