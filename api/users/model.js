@@ -17,7 +17,14 @@ async function findById(id) {
     const vendors = await db('vendors')
         .where({admin_id: user.id})
         .returning('*')
-        .orderBy('id');
+        .orderBy('id')
+        .map(async vendor => {
+            const status_mkt = await db('market_vendors')
+                .where({vendor_id: vendor.id})
+                .returning('*')
+                .orderBy('id');
+            return { ...vendor, status_mkt }
+        });
     let markets = await db('markets')
         .where({admin_id: user.id})
         .returning('*')
