@@ -3,7 +3,7 @@ const { body } = require('express-validator');
 // Separate specs for markets & booth types
 module.exports = {
   market: [
-    body('admin_id').isInt()
+    body('admin_id').isInt({min: 1})
       .withMessage("'admin_id' must be an integer")
       .optional(),
     body('name').isString()
@@ -55,7 +55,7 @@ module.exports = {
       .withMessage("'instagram' must be a string")
       .optional({ nullable: true }),
     body('email').isEmail()
-      .withMessage("'email' must be a vaild email")
+      .withMessage("'email' must be a valid email")
       .optional(),
     body('phone').isString()
       .matches(`^[0-9]{3}-[0-9]{3}-[0-9]{4}$`)
@@ -69,7 +69,7 @@ module.exports = {
     body('name').isString()
       .withMessage("'name' must be a string")
       .optional({nullable: true}),
-    body('number').isInt()
+    body('number').isInt({min: 0})
       .withMessage("'number' must be an integer")
       .optional({nullable: true}),
     body('price').isNumeric()
@@ -78,7 +78,7 @@ module.exports = {
     body('size').custom(val => Array.isArray(val) && val.length === 2)
       .withMessage("'size' must be an array with exactly two entries")
       .optional({nullable: true}),
-    body('size.*').isInt()
+    body('size.*').isInt({min: 0})
       .withMessage("'size' must be an array of integers")
       .optional({nullable: true}),
     body('description').isString()
@@ -95,7 +95,7 @@ module.exports = {
       .matches(`^[0-9]{4}-(((0[13578]|1[02])-(0[0-9]|1[0-9]|2[0-9]|3[0-1]))|((0[469]|11)-(0[0-9]|1[0-9]|2[0-9]|30))|(02-(0[0-9]|1[0-9]|2[0-9])))$`)
       .withMessage("'reserve_date' must be a valid date in the format 'YYYY-MM-DD'")
       .optional(),
-    body('paid').isInt()
+    body('paid').isInt({min: 0, max: 1})
       .withMessage("'paid' must be an integer")
       .optional()
   ]

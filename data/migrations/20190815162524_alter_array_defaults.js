@@ -1,4 +1,4 @@
-
+// Default array columns to empty array
 exports.up = function(knex) {
   return knex.schema.table("vendors", vendors => {
     vendors.specificType('items', 'varchar[]')
