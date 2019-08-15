@@ -34,8 +34,27 @@ function update(id, changes) {
 }
 
 function remove(id) {
-  return db('vendors')
-      .where({id})
-      .del()
-      .returning('*');
+  return new Promise(async (resolve, reject) => {
+      try{
+          // Wrap deletions in a transaction to avoid partial creation
+          await db.transaction(async t => {
+              await db('market_reserve')
+                  .where({'vendor_id': id})
+                  .del()
+                  .transacting(t);
+              await db('market_vendors')
+                  .where({'vendor_id': id})
+                  .del()
+                  .transacting(t);
+              vendor = await db('vendors')
+                  .where({id})
+                  .del()
+                  .returning('*')
+                  .transacting(t);
+          })
+          resolve(vendor)
+      } catch(err) {
+          reject(err);
+      }
+  });
 }

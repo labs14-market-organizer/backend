@@ -244,11 +244,23 @@ function remove(id) {
             let booths, operation, market;
             // Wrap deletions in a transaction to avoid partial creation
             await db.transaction(async t => {
+                await db('market_vendors')
+                  .where({'market_id': id})
+                  .del()
+                  .transacting(t);
                 booths = await db('market_booths')
                     .where({market_id: id})
-                    .del()
                     .returning('*')
                     .orderBy('id')
+                    .transacting(t);
+                boothIDs = booths.map(booth => booth.id)
+                await db('market_reserve')
+                    .whereIn('booth_id', boothIDs)
+                    .del()
+                    .transacting(t);
+                await db('market_booths')
+                    .whereIn('id', boothIDs)
+                    .del()
                     .transacting(t);
                 operation = await db('market_days')
                     .where({market_id: id})
@@ -261,6 +273,7 @@ function remove(id) {
                     .del()
                     .returning('*')
                     .transacting(t);
+                await db('')
             })
             // If no market existed, let route handle 404
             if(!market) { resolve(market) }
@@ -366,6 +379,10 @@ async function removeBooth(id) {
             let deleted;
             // Wrap delete and update in a transaction to prevent partial insert
             await db.transaction(async t => {
+                await db('market_reserve')
+                    .where({'booth_id': id})
+                    .del()
+                    .transacting(t);
                 deleted = await db('market_booths')
                     .where({id})
                     .del()
