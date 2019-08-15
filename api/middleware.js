@@ -32,21 +32,23 @@ function verifyJWT(req, res, next) {
     jwt.verify(token, jwtSecret, async (err, decoded) => {
       if(!err) {
         req.user_id = decoded.subject;
+        // Grab ID of first market created by user (for now, assume they only have one)
         req.market = await db('markets')
           .select('id')
           .where({admin_id: req.user_id})
           .orderBy('id')
           .map(market => market.id);
         req.market = req.market[0];
+        // Grab ID of first vendor created by user (for now, assume they only have one)
         req.vendor = await db('vendors')
           .select('id')
           .where({admin_id: req.user_id})
           .orderBy('id')
           .map(vendor => vendor.id);
-        req.vendor = req.vendor[1];
+        req.vendor = req.vendor[0];
+        // Create new JWT that can be refreshed on frontend
         const user = {id: req.user_id};
         const expire = 1000*60*60*2; // 2 hours
-        // Create new JWT that can be refreshed on frontend
         req.headers.authorization = genToken(user, expire)
         next();
       } else {
