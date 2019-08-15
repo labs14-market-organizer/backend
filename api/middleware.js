@@ -392,9 +392,10 @@ function validReserveDate(dateObj, mktObj) {
       const days = await db('market_days')
         .where({market_id: mkt})
         .pluck('day')
-      const num = new Date(date).getDay();
+      const num = new Date(date).getUTCDay();
       const day = Object.keys(nums).find(key => nums[key] === num);
       const numDays = days.map(day => nums[day]);
+      console.log(num, day, date)
       !numDays.includes(num)
         ? res.status(403).json({message: `This market is not open on ${day}s. Please try for one of the following days: ${days.join(', ')}`})
         : next();
