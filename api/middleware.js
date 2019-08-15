@@ -353,13 +353,26 @@ function onlyNestCols(allowObjs) {
   }
 }
 
-function validReserveDate(bodyKey, marketParam) {
+function validReserveDate(dateObj, mktObj) {
   return async (req, res, next) => {
-    console.log('FOO');
-    const date = req.body[bodyKey];
+    const datePlace = Object.keys(dateObj)[0];
+    const mktPlace = Object.keys(mktObj)[0];
+    let date;
+    if(datePlace === 'param') {
+      date = req.params[dateObj[datePlace]];
+    } else if (datePlace === 'body') {
+      date = req.body[dateObj[datePlace]];
+    } else {
+      date = req[dateObj[datePlace]];
+    }
+    console.log(date)
     if(!date) {
       next(); // Let other middleware handle missing data
     } else {
+      const regex = /^[0-9]{4}-(((0[13578]|1[02])-(0[0-9]|1[0-9]|2[0-9]|3[0-1]))|((0[469]|11)-(0[0-9]|1[0-9]|2[0-9]|30))|(02-(0[0-9]|1[0-9]|2[0-9])))$/;
+      if(!date.match(regex)) {
+        return res.status(400).json({message: 'Please format the date as YYYY-MM-DD.'})
+      }
       const day = new Date(date).getDay();
       const nums = {
         sunday: 0,
@@ -370,8 +383,16 @@ function validReserveDate(bodyKey, marketParam) {
         friday: 5,
         saturday: 6
       }
+      let mkt;
+      if(mktPlace === 'param') {
+        mkt = req.params[mktObj[mktPlace]];
+      } else if (mktPlace === 'body') {
+        mkt = req.body[mktObj[mktPlace]];
+      } else {
+        mkt = req[mktObj[mktPlace]];
+      }
       const days = await db('market_days')
-        .where({market_id: req.params[marketParam]})
+        .where({market_id: mkt})
         .pluck('day')
       const numDays = days.map(day => nums[day]);
       !numDays.includes(day)

@@ -14,6 +14,7 @@ module.exports = {
     addBooth,
     updateBooth,
     removeBooth,
+    findReserveByDate,
     addReserve,
     updateReserve,
     removeReserve
@@ -392,6 +393,25 @@ async function removeBooth(id) {
 }
 
 // Market_reserve functions
+async function findReserveByDate(marketID, date) {
+    const booths = await db('market_booths')
+        .where({market_id: marketID})
+        .pluck('id');
+    const result = await db('market_booths as mb')
+        .select('mb.id', 'mb.number', db.raw('(mb.number - count(mr.id)) as available'))
+        .count({used: 'mr.id'})
+        .leftJoin(db('market_reserve')
+            .where({'market_reserve.reserve_date': date})
+            .as('mr'),
+            {'mr.booth_id': 'mb.id'}
+        )
+        .whereIn('mb.id', booths)
+        .groupBy('mb.id')
+        .orderBy('mb.id');
+    console.log('RESULT', result)
+    return result;
+}
+
 async function addReserve(reserve) {
     const result = await db('market_reserve')
         .insert(reserve)
@@ -400,21 +420,7 @@ async function addReserve(reserve) {
         .select('market_id')
         .where({id: result[0].booth_id})
         .first();
-    const booths = await db('market_booths')
-        .select('id')
-        .where({market_id: market.market_id})
-        .map(booth => booth.id);
-    const available = await db('market_booths as mb')
-        .select('mb.id', db.raw('(mb.number - count(mr.id)) as available'))
-        .count({used: 'mr.id'})
-        .leftJoin(db('market_reserve')
-            .where({'market_reserve.reserve_date': result[0].reserve_date})
-            .as('mr'),
-            {'mr.booth_id': 'mb.id'}
-        )
-        .whereIn('mb.id', booths)
-        .groupBy('mb.id')
-        .orderBy('mb.id');
+    const available = await findReserveByDate(market.market_id, result[0].reserve_date);
     return {result, available}
 }
 
@@ -427,21 +433,7 @@ async function updateReserve(id, changes) {
         .select('market_id')
         .where({id: result[0].booth_id})
         .first();
-    const booths = await db('market_booths')
-        .select('id')
-        .where({market_id: market.market_id})
-        .map(booth => booth.id);
-    const available = await db('market_booths as mb')
-        .select('mb.id', db.raw('(mb.number - count(mr.id)) as available'))
-        .count({used: 'mr.id'})
-        .leftJoin(db('market_reserve')
-            .where({'market_reserve.reserve_date': result[0].reserve_date})
-            .as('mr'),
-            {'mr.booth_id': 'mb.id'}
-        )
-        .whereIn('mb.id', booths)
-        .groupBy('mb.id')
-        .orderBy('mb.id');
+    const available = await findReserveByDate(market.market_id, result[0].reserve_date);
     return {result, available}
 }
 
@@ -454,20 +446,6 @@ async function removeReserve(id) {
         .select('market_id')
         .where({id: result[0].booth_id})
         .first();
-    const booths = await db('market_booths')
-        .select('id')
-        .where({market_id: market.market_id})
-        .map(booth => booth.id);
-    const available = await db('market_booths as mb')
-        .select('mb.id', db.raw('(mb.number - count(mr.id)) as available'))
-        .count({used: 'mr.id'})
-        .leftJoin(db('market_reserve')
-            .where({'market_reserve.reserve_date': result[0].reserve_date})
-            .as('mr'),
-            {'mr.booth_id': 'mb.id'}
-        )
-        .whereIn('mb.id', booths)
-        .groupBy('mb.id')
-        .orderBy('mb.id');
+    const available = await findReserveByDate(market.market_id, result[0].reserve_date);
     return {result, available}
 }

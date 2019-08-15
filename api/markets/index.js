@@ -264,7 +264,23 @@ router.delete('/:id/booths/:bID',
   }
 )
 
-// Reservation POST, PUT, & DELETE endpoints
+// Reservation endpoints
+router.get('/:id/booths/date/:dt',
+  parentExists({markets: 'id'}),
+  validReserveDate({param: 'dt'},{param: 'id'}),
+  (req, res) => {
+    Markets.findReserveByDate(req.params.id, req.params.dt)
+    .then(markets => {
+      !markets.length
+        ? res.status(404).json({ message: 'No booths could be found in our database for that date.' })
+        : res.status(200).json(markets);
+    })
+    .catch(err => {
+      res.status(500).json({knex: err, message: 'An error occurred while retrieving booths from the database.' });
+    });
+  }
+)
+
 const reserveReqPost = ['reserve_date']
 const reserveOnlyPost = ['reserve_date']
 router.post('/:id/booths/:bID/reserve/',
@@ -273,6 +289,7 @@ router.post('/:id/booths/:bID/reserve/',
   onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
   reqCols(reserveReqPost),
   onlyCols(reserveOnlyPost),
+  validReserveDate({body: 'reserve_date'},{param: 'id'}),
   availBooths('bID'),
   spec.reserve, validate,
   (req, res) => {
@@ -331,7 +348,7 @@ router.put('/:id/booths/:bID/reserve/:rsID',
   parentExists({markets: 'id', market_booths: 'bID'}),
   onlyOwner(reserveOwner),
   onlyCols(reserveOnlyPut),
-  validReserveDate('reserve_date','id'),
+  validReserveDate({body: 'reserve_date'},{param: 'id'}),
   spec.reserve, validate,
   (req, res) => {
     req.body = {
