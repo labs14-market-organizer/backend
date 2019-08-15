@@ -47,17 +47,28 @@ async function findById(id) {
         .whereIn('mr.vendor_id', vdrIDs)
         .andWhere('mr.reserve_date', '>=', db.raw('current_date'))
     const mktIDs = markets.map(mkt => mkt.id);
-    const upcoming_mkt = await db('market_booths as mb')
-        .select('mb.market_id','mr.reserve_date', db.raw('sum(mb.number) as number'), db.raw('(sum(mb.number) - count(mr.id)) as available'))
-        .count({reserved: 'mr.id'})
-        .leftJoin(db('market_reserve')
-            .where('market_reserve.reserve_date', '>=', db.raw('current_date'))
-            .as('mr'),
-            {'mr.booth_id': 'mb.id'}
+    const upcoming_mkt = await db(
+        db('market_booths as mb1')
+            .select('mb1.market_id',db.raw('sum(mb1.number) as number'))
+            .whereIn('mb1.market_id', mktIDs)
+            .groupBy('mb1.market_id')
+            .as('mb1')
         )
-        .whereIn('mb.market_id', mktIDs)
-        .groupBy('mb.market_id','mr.reserve_date')
-        .orderBy('mr.reserve_date');
+        .select('mb1.*','mb2.*',db.raw('(mb1.number - mb2.reserved) as available'))
+        .join(
+            db('market_booths as mb2')
+                .select('mb2.market_id','mr.reserve_date')
+                .count({reserved: 'mr.id'})
+                .join(db('market_reserve as mr')
+                    .where('mr.reserve_date', '>=', db.raw('current_date'))
+                    .as('mr'),
+                    {'mr.booth_id': 'mb2.id'}
+                )
+                .whereIn('mb2.market_id', mktIDs)
+                .groupBy(['mb2.market_id','mr.reserve_date'])
+                .as('mb2'),
+            'mb1.market_id','mb2.market_id'
+        )
     return {
         ...user,
         vendors,

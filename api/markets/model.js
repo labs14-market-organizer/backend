@@ -459,6 +459,14 @@ function findVendors(marketID) {
         .orderBy('v.name', 'v.id');
 }
 
+// function findVendors(marketID) {
+//     return db('market_vendors as mv')
+//         .select('*')
+//         .join('vendors as v', {'mv.vendor_id': 'v.id'})
+//         .where({'mv.market_id':marketID})
+//         .orderBy('v.name', 'v.id');
+// }
+
 function findVendorsByDate(marketID, date) {
     return db('market_reserve as mr')
         .select('mr.id','mr.vendor_id','v.name','mr.booth_id','mr.paid')
@@ -467,3 +475,12 @@ function findVendorsByDate(marketID, date) {
         .where({'mr.reserve_date': date, 'mb.market_id':marketID})
         .orderBy('v.name', 'v.id');
 }
+
+// function findVendorsByDate(marketID, date) {
+//     return db('market_reserve as mr')
+//         .select('mr.id','mr.vendor_id','v.name','mr.booth_id','mr.paid')
+//         .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
+//         .join('vendors as v', {'mr.vendor_id': 'v.id'})
+//         .where({'mr.reserve_date': date, 'mb.market_id':marketID})
+//         .orderBy('v.name', 'v.id');
+// }

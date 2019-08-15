@@ -368,12 +368,10 @@ function futureDate(dateObj, today = false) {
     if(!date) {
       next(); // Let other middleware handle missing data
     } else if (!!today) {
-      console.log(new Date(date) > new Date(Date.now() - ((1000*60*60*24)+1)))
       new Date(date) > new Date(Date.now() - ((1000*60*60*24)+1))
         ? next()
         : res.status(400).json({message: `'${dateObj[datePlace]}' must be a date no earlier than today.`})
     } else {
-      console.log(new Date(date) > new Date(Date.now()))
       new Date(date) > new Date(Date.now())
         ? next()
         : res.status(400).json({message: `'${dateObj[datePlace]}' must be a date after today.`})
