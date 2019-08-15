@@ -365,7 +365,6 @@ function validReserveDate(dateObj, mktObj) {
     } else {
       date = req[dateObj[datePlace]];
     }
-    console.log(date)
     if(!date) {
       next(); // Let other middleware handle missing data
     } else {
@@ -373,7 +372,6 @@ function validReserveDate(dateObj, mktObj) {
       if(!date.match(regex)) {
         return res.status(400).json({message: 'Please format the date as YYYY-MM-DD.'})
       }
-      const day = new Date(date).getDay();
       const nums = {
         sunday: 0,
         monday: 1,
@@ -394,9 +392,11 @@ function validReserveDate(dateObj, mktObj) {
       const days = await db('market_days')
         .where({market_id: mkt})
         .pluck('day')
-      const numDays = days.map(day => nums[day]);
-      !numDays.includes(day)
-        ? res.status(403).json({message: `This market is not open on that day. Please try for one of the following days: ${days.join(', ')}`})
+      const num = new Date(date).getDay();
+      const day = Object.keys(nums).find(key => nums[key] === num);
+      const numDays = days.map(day => nums[num]);
+      !numDays.includes(num)
+        ? res.status(403).json({message: `This market is not open on ${day}s. Please try for one of the following days: ${days.join(', ')}`})
         : next();
     }
   }
