@@ -338,15 +338,26 @@ function reqNestCols(reqObjs) {
   }
 }
 
+// "allowed" = array of allowed columns or object with keys
+//     representing an owner type and values of the columns
+//     that that owner is allowed to pass
 function onlyCols(allowed) {
   return (req, res, next) => {
+    // Check if "allowed" is an object and coerce to array
     if(getType(allowed) === 'object') {
+      // Grab user owner types placed on request in "onlyOwner()"
       const {owner} = req;
+      // Create an array of allowed columns for all owner
+      //     types relevant to the user
       allowed = Object.entries(allowed)
         .reduce((arr, table) => {
+          // Grab owner table and allowed columns
           const [tbl, cols] = table;
+          // Check if the user is a relevant owner
           if(owner.includes(tbl)) {
+            // Filter out columns already in the array
             const newCols = cols.filter(col => !arr.includes(col));
+            // Add new columns to the array
             return [...arr, ...newCols];
           } else {
             return arr;
