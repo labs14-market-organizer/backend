@@ -122,25 +122,49 @@ function parentExists(obj) {
   }
 }
 
-// 
+// "obj" = an object with keys equal to the parent table
+//     and values equal to nested objects
+// "id" = a nested key inside "obj" that's value is the name
+//     of the column identifying the user on the table
+// "param/body/req" = another nested key inside "obj" that's
+//     value equals the key on the specified object that the
+//     matching ID can be found
+// "join" = a nested key inside "obj" that's value is an array
+//     of more nested objects, each representing a table to join
+//     *** Specify them in order of the joins ***
+// "id/param/body/req" = keys nested inside "join" objects,
+//     acting exactly as their namesakes above
+// "table" = a nested key inside "join" objects that identifies
+//     the table to be joined
+// "on" = a nested key inside "join" objects that will be passed
+//     as the argument within the relevant knex join
 function onlyOwner(obj) {
   return async (req, res, next) => {
     const {user_id} = req; // Grab user ID from request
+    // Create an array of tables representing "owners"
     const owners = Object.entries(obj);
+    // Pass over all defined owners
     const results = await Promise.all(owners.map(async owner => {
+      // Separate joins from target parent data
       const [table, {join, ...tbl}] = owner;
+      // Create select statement without joins
       const select = [`${table}.id`, `${table}.${tbl.id}`]
-      let first, last;
+      // Declare "last" outside of if/else
+      let last;
+      // Check if any joins were specified
       if(!!join) {
+        // Add to select statement for each join
         join.forEach(joined => {
           select.push(`${joined.table}.${joined.id}`)
         })
-        first = join[0];
+        // Define "last" now that we now at least one join exists
         last = join[join.length-1];
       }
       let result = await db(table)
+        // Feed in final select statement
         .select(...select)
         .modify(builder => {
+          // If there are any joins, add each of them
           if(!!join) {
             join.forEach(joined => {
               builder.join(joined.table, joined.on)
@@ -149,6 +173,8 @@ function onlyOwner(obj) {
         })
         .where(builder => {
           if(!join) {
+            // If there aren't any joins, grab the specified
+            //     identifier to match top table against
             if(!!tbl.param) {
               builder.where({[`${table}.id`]: req.params[tbl.param]});
             } else if(!!tbl.body) {
@@ -157,6 +183,8 @@ function onlyOwner(obj) {
               builder.where({[`${table}.id`]: req[tbl.req]})
             }
           } else {
+            // If there are joins, grab the specified identifier
+            //     to match the last join against
             if(!!last.param) {
               builder.where({[`${last.table}.id`]: req.params[last.param]});
             } else if(!!last.body) {
@@ -165,57 +193,78 @@ function onlyOwner(obj) {
               builder.where({[`${last.table}.id`]: req[last.req]})
             }
           }
-        });
-      [result] = result;
+        })
+        .first();
+        // Pass relevant identifiers into results array
       return {result, table, id: tbl.id};
     }))
+    // Check if there were no matches
     if(!results.every(result => !!result.result)) {
       return next(); // Let route handle 404s
     }
+    // Attach array of owner matches onto request for other
+    //     middleware or the route handler to use later
     req.owner = await results.reduce((arr, result) => {
       return result.result[result.id] === user_id
         ? [...arr, result.table]
         : arr;
     }, []);
+    // Check if any joins exist to match/mismatch
     const hasJoin = !Object.values(obj).every(table => !table.join);
     let matchIDs, mismatches;
     if(hasJoin) {
-      matchIDs = owners.reduce((newObj, table) => {
-        const arrIDs = table[1].join.reduce((arr, joined, i) => {
+      // Create object w/ nested arrays of IDs to match
+      matchIDs = owners.reduce((newObj, owner) => {
+        // Create array of IDs for each join table
+        const arrIDs = owner[1].join.reduce((arr, joined, i) => {
+          // Grab parent ID from join
           const {id} = joined;
-          const {id: tblID, join: tblJoin, ...tbl} = table[1];
+          // Remove irrelevant data from owner table
+          const {id: tblID, join: tblJoin, ...tbl} = owner[1];
+          // If it's the first join, use owner table data
           if(i === 0) {
             return [...arr, {id, ...tbl}];
+          // Otherwise, use previous join data
           } else {
-            const {id: prevID, table: prevTbl, on, ...prev} = table[1].join[i-1];
+            // Remove irrelevant data from previous join
+            const {id: prevID, owner: prevTbl, on, ...prev} = owner[1].join[i-1];
             return [...arr, {id, ...prev}];
           }
         }, [])
-        return {...newObj, [table[0]]: arrIDs}
+        // Name the array with owner table name
+        return {...newObj, [owner[0]]: arrIDs}
       }, {})
+      // Create object of actual parents whose IDs don't
+      //     match those specified in the request
       mismatches = results.reduce((newObj, result) => {
         const arr = Object.values(matchIDs[result.table]).reduce((newArr, pair) => {
+          // Separate ID from location of identifier
           const {id, ...loc} = pair;
+          // Grab the place of the identifier and compare to result
           const place = Object.keys(loc)[0];
           if(place === 'param') {
             return `${result.result[id]}` !== req.params[loc[place]]
-              ? [...newArr, id]
+              ? [...newArr, id] // Add mismatches
               : newArr;
           } else if(place === 'body') {
             return `${result.result[id]}` !== req.body[loc[place]]
-              ? [...newArr, id]
+              ? [...newArr, id] // Add mismatches
               : newArr;
           } else {
             return `${result.result[id]}` !== req[loc[place]]
-              ? [...newArr, id]
+              ? [...newArr, id] // Add mismatches
               : newArr;
           }
         }, [])
+        // Name the array with owner table name
         return {...newObj, [result.table]: arr}
       }, {})
     }
+    // If the user isn't a relevant owner, kick back with 403
     if(!req.owner.length) {
       res.status(403).json({message: `Only the admins of the the following associated entries are authorized to make this request: ${Object.keys(obj).join(', ')}`})
+    // If there's at least one mismatched ID for a join,
+    //     kick back with 400
     } else if(hasJoin && Object.values(mismatches).every(owner => owner.length > 0)) {
       res.status(400).json({message: 'One or more of the parent IDs does not match the ID of the relevant parent.'})
     } else {
