@@ -160,7 +160,28 @@ describe('/markets', () => {
         .send(booth)
         .then(res => expect(res.body.booths[2].number).toBe(booth.number));
     })
-  })  
+  })
+
+  describe('markets/:id/booths/:bID/reserve/ POST', () => {
+    const reserve = {reserve_date: "9999-01-30"};
+    return request.post('/:id/booths/:bID/reserve/')
+      .send(reserve)
+      .expect(201);
+  })
+
+  describe('markets/:id/booths/:bID/reserve/ PUT', () => {
+    const reserve = {reserve_date: "9999-01-30"};
+    return request.post('/:id/booths/:bID/reserve/')
+      .send(reserve)
+      .expect(201);
+  })
+
+  describe('markets/:id/booths/:bID/reserve/ DELETE', () => {
+    const reserve = {reserve_date: "9999-01-30"};
+    return request.post('/:id/booths/:bID/reserve/')
+      .send(reserve)
+      .expect(201);
+  })
 
   describe('/ GET', () => {
     it('should return 200 status', () => {
@@ -342,25 +363,25 @@ describe('/markets', () => {
     })
   })
 
-  describe('/:id/request/:rID DELETE', () => {
-    it('should return 200 status', () => {
-      return request.delete('/markets/3/request/1')
-       .set({authorization: tkn3})
-       .expect(200);
-    })
+  // describe('/:id/request/:rID DELETE', () => {
+  //   it('should return 200 status', () => {
+  //     return request.delete('/markets/3/request/1')
+  //      .set({authorization: tkn3})
+  //      .expect(200);
+  //   })
     
-    it('should return an object', () => {
-      return request.delete('/markets/3/request/2')
-        .set({authorization: tkn3})
-        .then(res => expect(getType(res.body)).toBe('object'));
-    })
+  //   it('should return an object', () => {
+  //     return request.delete('/markets/3/request/2')
+  //       .set({authorization: tkn3})
+  //       .then(res => expect(getType(res.body)).toBe('object'));
+  //   })
     
-    it('should return 404 status after deleting', () => {
-      return request.delete('/markets/3/request/1')
-        .set({authorization: tkn3})
-        .expect(404);
-    })
-  })
+  //   it('should return 404 status after deleting', () => {
+  //     return request.delete('/markets/3/request/1')
+  //       .set({authorization: tkn3})
+  //       .expect(404);
+  //   })
+  // })
 
   describe('/:id/booths DELETE', () => {
     it('should return 200 status', () => {
