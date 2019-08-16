@@ -461,10 +461,14 @@ async function updateReserve(id, changes) {
 }
 
 async function removeReserve(id) {
+    console.log(id)
     const result = await db('market_reserve')
         .where({id})
         .del()
         .returning('*');
+    if(!result.length) {
+        return {result}
+    }
     const market = await db('market_booths')
         .select('market_id')
         .where({id: result[0].booth_id})

@@ -384,17 +384,18 @@ router.delete('/:id/booths/:bID/reserve/:rsID',
   (req, res) => {
     Markets.removeReserve(req.params.rsID)
       .then(deleted => {
-        if (!!deleted.result) {
+        if (!!deleted.result.length) {
           res.status(200).json(deleted.available);
         } else {
           res.status(404).json({
-            message: 'We do not have a market with the specified ID in our database.',
+            message: 'We do not have a reservation with the specified ID in our database.',
           });
         }
       })
       .catch(err => {
+        console.error(err)
         res.status(500)
-          .json({knex: err, message: 'The specified market could not be removed from our database.'});
+          .json({knex: err, message: 'The specified reservation could not be removed from our database.'});
       })
   }
 )
