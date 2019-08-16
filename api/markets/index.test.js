@@ -346,8 +346,7 @@ describe('/markets', () => {
     it('should return 200 status', () => {
       return request.delete('/markets/3/request/1')
        .set({authorization: tkn3})
-       .then(res => expect(res.body).toBe('object'))
-      //  .expect(200);
+       .expect(200);
     })
     
     it('should return an object', () => {
