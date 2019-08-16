@@ -262,9 +262,18 @@ Reservations of a booth type at a market on a given date
 - `add()` -> Adds market to `markets` table
 - `update()` -> Updates market with specified ID in the `markets` table
 - `remove()` -> Deletes market with specified ID in the `markets` table
+- `addRequest()` -> Adds request by vendor to join market in `market_vendors` table
+- `updateRequest()` -> Edits request to join market in `market_vendors` table
+- `removeRequest()` -> Deletes request to join market in `market_vendors` table
 - `addBooth()` -> Adds booth to `market_booths` table
 - `updateBooth()` -> Updates market with specified ID in the `market_booths` table
 - `removeBooth()` -> Deletes market with specified ID in the `market_booths` table
+- `findReserveByDate()` -> Returns available booths on a date by joining `market_booths` and `market_reserve` tables
+- `addReserve()` -> Adds reservation to a booth type on the `market_reserve` table
+- `updateReserve()` -> Edits reservation to a booth type on the `market_reserve` table
+- `removeReserve()` -> Deletes reservation to a booth type on the `market_reserve` table
+- `findVendors()` -> Returns vendors who have accepted a market's rules by joining `vendors` and `market_vendors` tables
+- `findVendorsByDate()` -> Returns vendors reserved at a market on a date by joining `market_vendors` and `market_reserve` tables
 
 ### Middleware
 - `verifyJWT()` -> Verifies any JWT passed in the Authorization header of a request and denies invalid tokens
