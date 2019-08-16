@@ -514,13 +514,19 @@ function validReserveDate(dateObj, mktObj) {
   }
 }
 
+// "param" = the URL parameter where the booth ID can be found
 function availBooths(param) {
   return async (req, res, next) => {
-    const [{number}] = await db('market_booths')
+    // Grab the total number of the specified booth type
+    const {number} = await db('market_booths')
       .select('number')
-      .where({id: req.params[param]});
+      .where({id: req.params[param]})
+      .first();
+    console.log(number);
+    // Grab the current total of reservations for that type
     const booths = await db('market_reserve')
       .where({booth_id: req.params[param], reserve_date: req.body.reserve_date});
+    // If the booth limit has been reached, kick back a 403
     booths.length >= number
       ? res.status(403).json({message: 'All available booths have already been reserved on this date.'})
       : next();
