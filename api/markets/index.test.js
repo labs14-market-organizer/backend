@@ -163,24 +163,26 @@ describe('/markets', () => {
   })
 
   describe('markets/:id/booths/:bID/reserve/ POST', () => {
-    const reserve = {reserve_date: "9999-01-30"};
-    return request.post('/:id/booths/:bID/reserve/')
-      .send(reserve)
-      .expect(201);
-  })
+    it('should return 201 status', () => {
+      const reserve = {reserve_date: "9999-01-31"};
+      return request.post('/:id/booths/:bID/reserve/')
+        .send(reserve)
+        .expect(201);
+    })
 
-  describe('markets/:id/booths/:bID/reserve/ PUT', () => {
-    const reserve = {reserve_date: "9999-01-30"};
-    return request.post('/:id/booths/:bID/reserve/')
-      .send(reserve)
-      .expect(201);
-  })
-
-  describe('markets/:id/booths/:bID/reserve/ DELETE', () => {
-    const reserve = {reserve_date: "9999-01-30"};
-    return request.post('/:id/booths/:bID/reserve/')
-      .send(reserve)
-      .expect(201);
+    it('should return 201 status', () => {
+      const reserve = {reserve_date: "9999-01-31"};
+      return request.post('/:id/booths/:bID/reserve/')
+        .send(reserve)
+        .expect(201);
+    })
+    
+    it('should return 201 status', () => {
+      const reserve = {reserve_date: "9999-01-31"};
+      return request.post('/:id/booths/:bID/reserve/')
+        .send(reserve)
+        .expect(201);
+    })
   })
 
   describe('/ GET', () => {
