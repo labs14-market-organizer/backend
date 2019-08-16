@@ -48,8 +48,8 @@ function verifyJWT(req, res, next) {
         req.vendor = req.vendor[0];
         // Create new JWT that can be refreshed on frontend
         const user = {id: req.user_id};
-        const expire = 1000*60*60*2; // 2 hours
-        req.headers.authorization = genToken(user, expire)
+        const exp = 1000*60*60*2; // 2 hours
+        req.token = {token: genToken(user, exp), exp}
         next();
       } else {
         res.status(403).json({ message: 'Invalid authorization token.' })
