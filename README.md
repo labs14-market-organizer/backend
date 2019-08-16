@@ -279,13 +279,16 @@ Reservations of a booth type at a market on a given date
 - `verifyJWT()` -> Verifies any JWT passed in the Authorization header of a request and denies invalid tokens
 - `protect()` -> Always used after `verifyJWT`, protects routes by checking if a JWT exists in the Authorization header
 - `parseQueryAddr()` -> Parses a query string passed to the route on `q` as an address, pulling out the city, state, and zipcode into separate variables and placed on the request's `query` object
-- `parentExists(table, param)()` -> Curried function that checks whether the target asset is actually a child of the parent specified in the route's path by checking against the parent's `table` with the specified `param` in the route
-- `onlyOwner(table, tableID, paramID1)(joinTbl, joinID, joinOn, paramID2)()` -> Twice curried function that checks whether the user making the request is the owner of the target asset or its parent, respectively
+- `parentExists()` -> Function that checks whether the target asset is actually a child of the parent specified in the route's path
+- `onlyOwner()` -> Function that checks whether the user making the request is the owner of the target asset or its parent
 - `validate()` -> Immediately following an `express-validator` array of validators (from a `validate.js` file within the router's directory), checks the request body for valid data
-- `reqCols(required, reqID, colID)()` -> Curried function that checks the request body against an array of `required` columns, and can optionally check if one column (`colID`) needs to match the ID of the user making the request by setting `reqID` to true
-- `reqNestCols(reqObjs)()` -> Checks nested fields on the request body against a `reqObjs` object that specifies an array of required fields that should be nested within the parent specified by their key
-- `onlyCols(allowed)()` -> Rejects requests that try to pass any values not whitelisted in the `allowed` array of fields
-- `onlyNestCols(allowObjs)()` -> Rejects requests that try to pass any nested values not whitelisted on the specified parents within the `allowObjs` object
+- `reqCols()` -> Function that checks the request body against an array of `required` columns, and can optionally check if one column (`colID`) needs to match the ID of the user making the request by setting `reqID` to true
+- `reqNestCols()` -> Checks nested fields on the request body for required fields that should be nested within their specified parent
+- `onlyCols()` -> Rejects requests that try to pass any values not whitelisted in the `allowed` array of fields
+- `onlyNestCols()` -> Rejects requests that try to pass any nested values not whitelisted on the specified parents within the `allowObjs` object
+- `futureDate()` -> Verifies that a date passed in the route is in the future, optionally including the current day
+- `validReserveDate()` -> Verifies that a date passed in the route is a day that the specified market is open
+- `availBooths()` -> Verifies that there are available booths for the specified booth type on the specified date
 
 ## Environment Variables
 
@@ -296,6 +299,7 @@ create a .env file that includes the following:
     *  NODE_ENV - specify `development` while in development and `production` in production/staging
     *  BE_URL - the URL of the backend you're using
     *  FE_URL - the URL of the frontend you're using
+    *  TZ - the timezone of the server
     *  JWT_SECRET - the secret used on the JWTs sent back to the frontend
     *  DB_TEST - required in development only, the `postgres://` URL of your test database
     *  DB_DEV - required in development only, the `postgres://` URL of your development database
