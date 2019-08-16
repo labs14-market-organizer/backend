@@ -423,7 +423,6 @@ async function findReserveByDate(marketID, date) {
         .leftJoin(db('market_reserve')
             .select('id', 'booth_id', 'vendor_id')
             .where({'market_reserve.reserve_date': date})
-            // .groupBy('market_reserve.id')
             .as('mr'),
             {'mr.booth_id': 'mb.id'}
         )
