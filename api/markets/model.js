@@ -42,10 +42,11 @@ async function find() {
 
 //searches city, state and zipcode by search query
 async function search(query) {
+    let {q, ...queries} = query;
     // Filter out unspecified fields
-    query = Object.entries(query).filter(pair => pair[1] !== null);
+    queries = Object.entries(queries).filter(pair => pair[1] !== null);
     // Create similarity scores to order by
-    const similar = query.map(pair => {
+    const similar = queries.map(pair => {
             // Coalesce null values to 0.01
             const basic = `coalesce(word_similarity(${pair[0]}, '${pair[1]}'), 0.01)`;
             // Weigh columns differently
@@ -63,13 +64,13 @@ async function search(query) {
     const markets = await db('markets')
         .where(builder => {
             // Create query builder on available fields
-            query.forEach(pair => {
+            queries.forEach(pair => {
                 // Compare case-insensitive values set in parseQueryAddr middleware
                 builder.orWhereRaw(`'${pair[1]}' <% ${pair[0]}`)
             })
         })
         .returning('*')
-        .orderByRaw(`${similar} DESC, id`);
+        .orderByRaw(`${similar} DESC, id`)
     // Map hours of operation and booths onto markets
     const final = await markets.map(async market => {
         const operation = await db('market_days')

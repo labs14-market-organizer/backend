@@ -26,6 +26,7 @@ router.get('/search',
         : res.status(200).json(markets);
     })
     .catch(err => {
+      console.error(err)
         res.status(500).json({knex: err, message: 'This is a error message' });
     });
   }
@@ -403,7 +404,6 @@ router.get('/:id/vendors',
   mw.validReserveDate({param: 'dt'},{param: 'id'}),
   (req, res) => {
     let args = [req.params.id]
-    console.log(req.query)
     if(!!req.query.q) {
       args.push(req.query.q)
     }

@@ -75,7 +75,6 @@ router.get("/facebook/callback",
       })
       .catch(err => {
         // Handle auth failure w/ our user DB
-        console.log(err)
         const redirectURL = `${FE_URL}/auth/token?err=500`;
         res.redirect(redirectURL);
       });

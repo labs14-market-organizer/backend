@@ -67,9 +67,9 @@ function protect(req, res, next) {
 }
 
 // Parses query string as address
-async function parseQueryAddr(req, res, next) {
+function parseQueryAddr(req, res, next) {
   // Parse address using 'parse-address-string' package
-  await parseAddr(req.query.q, (err, addr) => {
+  return parseAddr(req.query.q, (err, addr) => {
     // If there's an error, kick it down to ternary below
     if(err) {
       req.query = null;
@@ -88,11 +88,11 @@ async function parseQueryAddr(req, res, next) {
         req.query = {city, state, zipcode: postal_code};
       }
     }
+    // If the query couldn't be parsed, return a 400
+    return req.query === null
+      ? res.status(400).json({message: "Could not parse the query properly. Try formatting as 'City, ST zipcode' or any combination."})
+      : next();
   })
-  // If the query couldn't be parsed, return a 400
-  req.query === null
-    ? res.status(400).json({message: "Could not parse the query properly. Try formatting as 'City, ST zipcode' or any combination."})
-    : next();
 }
 
 // "obj" = an object with keys equal to the parent table and
@@ -235,19 +235,15 @@ function onlyOwner(obj) {
         // Name the array with owner table name
         return {...newObj, [owner[0]]: arrIDs}
       }, {})
-      console.log('MATCH', matchIDs)
       // Create object of actual parents whose IDs don't
       //     match those specified in the request
       mismatches = results.reduce((newObj, result) => {
         const arr = Object.values(matchIDs[result.table]).reduce((newArr, pair) => {
-          console.log(pair)
           // Separate ID from location of identifier
           const {id, ...loc} = pair;
           // Grab the place of the identifier and compare to result
           const place = Object.keys(loc)[0];
           if(place === 'param') {
-            console.log(`${result.result[id]}`, req.params[loc[place]])
-            console.log(`${result.result[id]}` !== req.params[loc[place]])
             return `${result.result[id]}` !== req.params[loc[place]]
               ? [...newArr, id] // Add mismatches
               : newArr;
@@ -256,8 +252,6 @@ function onlyOwner(obj) {
               ? [...newArr, id] // Add mismatches
               : newArr;
           } else {
-            console.log(`${result.result[id]}`, req[loc[place]])
-            console.log(`${result.result[id]}` !== req[loc[place]])
             return `${result.result[id]}` !== req[loc[place]]
               ? [...newArr, id] // Add mismatches
               : newArr;
