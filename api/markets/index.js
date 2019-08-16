@@ -369,6 +369,7 @@ router.put('/:id/booths/:bID/reserve/:rsID',
         }
       })
       .catch(err => {
+        console.error(err)
         res.status(500).json({knex: err, message: 'The specified market could not be updated in our database.'});
       })
   }

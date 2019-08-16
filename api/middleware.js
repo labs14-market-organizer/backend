@@ -148,17 +148,18 @@ function onlyOwner(obj) {
       // Separate joins from target parent data
       const [table, {join, ...tbl}] = owner;
       // Create select statement without joins
-      const select = [`${table}.id`, `${table}.${tbl.id}`]
+      const select = [`${table}.${tbl.id}`]
       // Declare "last" outside of if/else
       let last;
       // Check if any joins were specified
       if(!!join) {
+        // Define "last" now that we now at least one join exists
+        last = join[join.length-1];
+        select.unshift(`${last.table}.id`)
         // Add to select statement for each join
         join.forEach(joined => {
           select.push(`${joined.table}.${joined.id}`)
         })
-        // Define "last" now that we now at least one join exists
-        last = join[join.length-1];
       }
       let result = await db(table)
         // Feed in final select statement
@@ -347,6 +348,9 @@ function onlyCols(allowed) {
     if(getType(allowed) === 'object') {
       // Grab user owner types placed on request in "onlyOwner()"
       const {owner} = req;
+      if(owner === undefined) {
+        return next(); // Let route handle 404s
+      }
       // Create an array of allowed columns for all owner
       //     types relevant to the user
       allowed = Object.entries(allowed)
@@ -522,7 +526,6 @@ function availBooths(param) {
       .select('number')
       .where({id: req.params[param]})
       .first();
-    console.log(number);
     // Grab the current total of reservations for that type
     const booths = await db('market_reserve')
       .where({booth_id: req.params[param], reserve_date: req.body.reserve_date});

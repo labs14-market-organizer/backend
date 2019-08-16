@@ -443,15 +443,19 @@ async function addReserve(reserve) {
 }
 
 async function updateReserve(id, changes) {
-    const result = await db('market_reserve')
+    let result = await db('market_reserve')
         .where({id})
         .update(changes)
         .returning('*');
+    [result] = result;
+    if(!result) {
+        return {result}
+    }
     const market = await db('market_booths')
         .select('market_id')
-        .where({id: result[0].booth_id})
+        .where({id: result.booth_id})
         .first();
-    const available = await findReserveByDate(market.market_id, result[0].reserve_date);
+    const available = await findReserveByDate(market.market_id, result.reserve_date);
     return {result, available}
 }
 
