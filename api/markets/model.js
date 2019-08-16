@@ -418,16 +418,19 @@ async function findReserveByDate(marketID, date) {
         .where({market_id: marketID})
         .pluck('id');
     const result = await db('market_booths as mb')
-        .select('mb.id', 'mb.number', db.raw('(mb.number - count(mr.id)) as available'))
+        .select('mb.id', 'mb.number', db.raw('(mb.number - count(mr.id)) as available'), db.raw('ARRAY_AGG(DISTINCT mr.vendor_id) as user_vdrs'))
         .count({reserved: 'mr.id'})
         .leftJoin(db('market_reserve')
+            .select('id', 'booth_id', 'vendor_id')
             .where({'market_reserve.reserve_date': date})
+            // .groupBy('market_reserve.id')
             .as('mr'),
             {'mr.booth_id': 'mb.id'}
         )
         .whereIn('mb.id', booths)
         .groupBy('mb.id')
-        .orderBy('mb.id');
+        .orderBy('mb.id')
+        .catch(err => console.error(err));
     return result;
 }
 
@@ -461,7 +464,6 @@ async function updateReserve(id, changes) {
 }
 
 async function removeReserve(id) {
-    console.log(id)
     const result = await db('market_reserve')
         .where({id})
         .del()
