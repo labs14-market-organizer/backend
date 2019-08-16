@@ -104,6 +104,7 @@ router.delete('/:id',
         }
       })
       .catch(err => {
+        console.error(err)
         res.status(500)
           .json({knex: err, message: 'The specified market could not be removed from our database.'});
       })

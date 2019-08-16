@@ -250,16 +250,16 @@ function remove(id) {
                   .transacting(t);
                 booths = await db('market_booths')
                     .where({market_id: id})
-                    .returning('*')
                     .orderBy('id')
+                    .pluck('id')
                     .transacting(t);
-                boothIDs = booths.map(booth => booth.id)
+                // boothIDs = booths.map(booth => booth.id)
                 await db('market_reserve')
-                    .whereIn('booth_id', boothIDs)
+                    .whereIn('booth_id', booths)
                     .del()
                     .transacting(t);
                 await db('market_booths')
-                    .whereIn('id', boothIDs)
+                    .whereIn('id', booths)
                     .del()
                     .transacting(t);
                 operation = await db('market_days')
@@ -273,7 +273,6 @@ function remove(id) {
                     .del()
                     .returning('*')
                     .transacting(t);
-                await db('')
             })
             // If no market existed, let route handle 404
             if(!market) { resolve(market) }
@@ -286,25 +285,26 @@ function remove(id) {
 
 // Market_vendors functions
 async function addRequest(request) {
-    const result = await db('market_vendors')
+    const [result] = await db('market_vendors')
         .insert(request)
         .returning('*');
     return result;
 }
 
 async function updateRequest(id, changes) {
-    const result = await db('market_vendors')
+    const [result] = await db('market_vendors')
         .where({id})
         .update(changes)
         .returning('*')
     return result;
 }
 
-function removeRequest(id) {
-    return db('market_vendors')
+async function removeRequest(id) {
+    const [result] = await db('market_vendors')
         .where({id})
         .del()
         .returning('*');
+    return result;
 }
 
 // Booth functions

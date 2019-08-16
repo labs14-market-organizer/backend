@@ -14,6 +14,8 @@ const tkn5 = genToken({id: 5}, 1000*60*60*2);
 describe('/markets', () => {
   beforeAll(async () => {
     // Reset markets table before running tests
+    await knex.raw("TRUNCATE TABLE market_reserve RESTART IDENTITY CASCADE");
+    await knex.raw("TRUNCATE TABLE market_vendors RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE market_days RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE market_booths RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE markets RESTART IDENTITY CASCADE");
@@ -90,9 +92,53 @@ describe('/markets', () => {
     })
   })
   
+  describe('/:id/request POST', () => {
+    it('should return 201 status', async () => {
+      const vendor = {
+        name: "Leigh's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
+      await request.post('/vendors')
+       .send(vendor)
+       .set({authorization: tkn1});
+      return request.post('/markets/3/request')
+        .set({authorization: tkn1})
+        .expect(201);
+    })
+
+    it('should return an object', async () => {
+      const vendor = {
+        name: "Mindy's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
+      await request.post('/vendors')
+       .send(vendor)
+       .set({authorization: tkn2});
+      return request.post('/markets/3/request')
+        .set({authorization: tkn2})
+        .then(res => expect(getType(res.body)).toBe('object'));
+    })
+
+    it('should return an object w/ next ID', async () => {
+      const vendor = {
+        name: "Matt's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
+      await request.post('/vendors')
+       .send(vendor)
+       .set({authorization: tkn3});
+      return request.post('/markets/3/request')
+        .set({authorization: tkn3})
+        .then(res => expect(res.body.id).toBe(3));
+    })
+  })
+  
   describe('/:id/booths POST', () => {
     it('should return 201 status', () => {
-      const booth = { name: "Standard", number: 42 }
+      const booth = { name: "Booth One", number: 42 }
       return request.post('/markets/3/booths')
        .set({authorization: tkn3})
        .send(booth)
@@ -100,21 +146,21 @@ describe('/markets', () => {
     })
     
     it("should return an object w/ 'booths' array", () => {
-      const booth = { name: "Standard", number: 42 }
+      const booth = { name: "Booth Two", number: 42 }
       return request.post('/markets/3/booths')
         .set({authorization: tkn3})
         .send(booth)
         .then(res => expect(getType(res.body.booths)).toBe('array'));
     })
     
-    // it('should return booth w/ next ID', () => {
-    //   const booth = { name: "Standard", number: 42 }
-    //   return request.post('/markets/3/booths')
-    //     .set({authorization: tkn3})
-    //     .send(booth)
-    //     .then(res => expect(res.body.booths[0].id).toBe(3));
-    // })
-  })
+    it('should return booth w/ passed number', () => {
+      const booth = { name: "Booth Three", number: 4242 }
+      return request.post('/markets/3/booths')
+        .set({authorization: tkn3})
+        .send(booth)
+        .then(res => expect(res.body.booths[2].number).toBe(booth.number));
+    })
+  })  
 
   describe('/ GET', () => {
     it('should return 200 status', () => {
@@ -219,7 +265,34 @@ describe('/markets', () => {
     })
   })
 
-  describe('/:id/booths PUT', () => {
+  
+  describe('/:id/request/:rID PUT', () => {
+    it('should return 200 status', () => {
+      const joinMkt = {status: 0};
+      return request.put('/markets/1/request/1')
+        .set({authorization: tkn1})
+        .send(joinMkt)
+        .expect(200);
+    })
+
+    it('should return an object', () => {
+      const joinMkt = {status: 0};
+      return request.put('/markets/1/request/2')
+        .set({authorization: tkn1})
+        .send(joinMkt)
+        .then(res => expect(getType(res.body)).toBe('object'));
+    })
+
+    it('should return an object w/ new status', () => {
+      const joinMkt = {status: 0};
+      return request.put('/markets/1/request/3')
+        .set({authorization: tkn1})
+        .send(joinMkt)
+        .then(res => expect(res.body.status).toBe(joinMkt.status));
+    })
+  })
+
+  describe('/:id/booths/:bID PUT', () => {
     it('should return 200 status', () => {
       const booth = { name: 'TEST 1' }
       return request.put('/markets/3/booths/1')
@@ -229,8 +302,8 @@ describe('/markets', () => {
     })
     
     it("should return a 'booths' array", () => {
-      const booth = { name: 'TEST 1' }
-      return request.put('/markets/3/booths/1')
+      const booth = { name: 'TEST 2' }
+      return request.put('/markets/3/booths/2')
         .send(booth)
         .set({authorization: tkn3})
         .then(res => {
@@ -239,12 +312,12 @@ describe('/markets', () => {
     })
     
     it('should return an object w/ new name', () => {
-      const booth = { name: 'TEST 1' }
-      return request.put('/markets/3/booths/1')
+      const booth = { name: 'TEST 3' }
+      return request.put('/markets/3/booths/3')
         .send(booth)
         .set({authorization: tkn3})
         .then(res => {
-          expect(res.body.booths[0].name).toBe(booth.name);
+          expect(res.body.booths[2].name).toBe(booth.name);
         });
     })
   })
@@ -265,6 +338,27 @@ describe('/markets', () => {
     it('should return 404 status after deleting', () => {
       return request.delete('/markets/1')
         .set({authorization: tkn1})
+        .expect(404);
+    })
+  })
+
+  describe('/:id/request/:rID DELETE', () => {
+    it('should return 200 status', () => {
+      return request.delete('/markets/3/request/1')
+       .set({authorization: tkn3})
+       .then(res => expect(res.body).toBe('object'))
+      //  .expect(200);
+    })
+    
+    it('should return an object', () => {
+      return request.delete('/markets/3/request/2')
+        .set({authorization: tkn3})
+        .then(res => expect(getType(res.body)).toBe('object'));
+    })
+    
+    it('should return 404 status after deleting', () => {
+      return request.delete('/markets/3/request/1')
+        .set({authorization: tkn3})
         .expect(404);
     })
   })

@@ -120,7 +120,7 @@ describe('/vendors', () => {
         });
     })
     
-    it('should return an object', () => {
+    it('should return an object with new name', () => {
       const vendor = { name: "TEST 3" }
       return request.put('/vendors/3')
         .send(vendor)
