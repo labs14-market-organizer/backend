@@ -202,6 +202,39 @@ Market hours of operation, by day
 }
 ```
 
+#### MARKET_VENDORS
+Requests to join a market by vendors who have accepted that market's rules
+
+---
+
+```
+{
+  id: INTEGER, auto-incrementing
+  market_id: INTEGER, foreign key to MARKETS table
+  vendor_id: INTEGER, foreign key to VENDORS table
+  status: INTEGER
+  created_at: TIMESTAMP WITH TIMEZONE
+  updated_at: TIMESTAMP WITH TIMEZONE
+}
+```
+
+#### MARKET_RESERVE
+Reservations of a booth type at a market on a given date
+
+---
+
+```
+{
+  id: INTEGER, auto-incrementing
+  market_id: INTEGER, foreign key to MARKETS table
+  vendor_id: INTEGER, foreign key to VENDORS table
+  reserve_date: TIMESTAMP WITH TIMEZONE
+  paid: INTEGER
+  created_at: TIMESTAMP WITH TIMEZONE
+  updated_at: TIMESTAMP WITH TIMEZONE
+}
+```
+
 ## Actions
 
 ### Auth
