@@ -62,17 +62,26 @@ Express is a fast, assertive, essential, and moderate web framework of Node.js. 
 
 #### Market Routes
 
-| Method | Endpoint                   | Access Control | Description                                  |
-| ------ | -------------------------- | -------------- | -------------------------------------------- |
-| GET    | `/markets`                 | none           | Returns info on all markets.                 |
-| GET    | `/markets/search`          | none           | Returns info on markets matching `?q=` query |
-| GET    | `/markets/:id`             | none           | Returns info on specific market.             |
-| POST   | `/markets/`                | logged in user | Creates new market.                          |
-| PUT    | `/markets/:id`             | market admin   | Updates specific market.                     |
-| DELETE | `/markets/:id`             | market admin   | Deletes specific market.                     |
-| POST   | `/markets/:id/booths`      | market admin   | Creates new booth at an existing market.     |
-| PUT    | `/markets/:id/booths/:bID` | market admin   | Updates a booth at an existing market.       |
-| DELETE | `/markets/:id/booths/:bID` | market admin   | Deletes a booth at an existing market.       |
+| Method | Endpoint                      | Access Control      | Description                                                           |
+| ------ | ----------------------------- | ------------------- | --------------------------------------------------------------------- |
+| GET    | `/markets`                    | none                | Returns info on all markets.                                          |
+| GET    | `/markets/search`             | none                | Returns info on markets matching `?q=` query                          |
+| GET    | `/markets/:id`                | none                | Returns info on specific market.                                      |
+| POST   | `/markets/`                   | logged in user      | Creates new market.                                                   |
+| PUT    | `/markets/:id`                | market admin        | Updates specific market.                                              |
+| DELETE | `/markets/:id`                | market admin        | Deletes specific market.                                              |
+| POST   | `/markets/:id/request`        | vendor admin        | Creates an auto-accepted request to "join" market                     |
+| PUT    | `/markets/:id/request/rqID`   | market admin        | Markets owners can edit vendor status at the market                   |
+| DELETE | `/markets/:id/request/rqID`   | market/vendor admin | Markets or vendors can "ignore" the request by deleting               |
+| POST   | `/markets/:id/booths`         | market admin        | Creates new booth at an existing market.                              |
+| PUT    | `/markets/:id/booths/:bID`    | market admin        | Updates a booth at an existing market.                                |
+| DELETE | `/markets/:id/booths/:bID`    | market admin        | Deletes a booth at an existing market.                                |
+| GET    | `markets/:id/booths/date/:dt` | none                | Returns info on availability of market booth types on a specific date |
+| POST   | `markets/:id/booths/:bID/reserve/`      | vendor admin        | Creates a reservation for a booth type on a specific date   |
+| PUT    | `markets/:id/booths/:bID/reserve/:rsID` | market/vendor admin | Vendors can edit the date, markets whether or not it's paid |
+| DELETE | `markets/:id/booths/:bID/reserve/:rsID` | market/vendor admin | Deletes the reservation                                     |
+| GET    | `markets/:id/vendors`                   | none                | Returns a searchable (`?q=`) list of vendors who have accepted market rules    |
+| GET    | `markets/:id/vendors/date/:dt`          | none                | Returns a searchable (`?q=`) list of vendors reserved for a specific date      |
 
 # Data Model
 
