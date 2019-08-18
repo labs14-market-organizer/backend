@@ -17,7 +17,7 @@ module.exports = {
   reqNestCols,
   onlyCols,
   onlyNestCols,
-  // approvedVendor,
+  approvedVendor,
   futureDate,
   validReserveDate,
   availBooths
@@ -418,6 +418,31 @@ function onlyNestCols(allowObjs) {
     } else {
       next();
     }
+  }
+}
+
+function approvedVendor(mktObj, vdrObj) {
+  return async (req, res, next) => {
+    const result = await db('market_vendors')
+      .where(builder => {
+        if(!!mktObj.param) {
+          builder.where({market_id: req.params[mktObj.param]});
+        } else if(!!mktObj.body) {
+          builder.where({market_id: req.body[mktObj.body]});
+        } else {
+          builder.where({market_id: req[mktObj.req]});
+        }
+        if(!!vdrObj.param) {
+          builder.andWhere({vendor_id: req.params[vdrObj.param]});
+        } else if(!!vdrObj.body) {
+          builder.andWhere({vendor_id: req.body[vdrObj.body]});
+        } else {
+          builder.andWhere({vendor_id: req[vdrObj.req]});
+        }
+      })
+    !result.includes(request => request.status > 0)
+      ? res.status(403).json({message: `Vendors must accept the market's rules and be approved by the market owner before completing this action.`})
+      : next();
   }
 }
 

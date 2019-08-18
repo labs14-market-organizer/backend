@@ -113,9 +113,12 @@ router.delete('/:id',
 
 // Market_vendors endpoints
 const requestReqPost = []
+const approveMkt = {param: 'id'}
+const approveVdr = {req: 'vendor'}
 router.post('/:id/request',
   mw.protect,
   mw.onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
+  // mw.approvedVendor(approveMkt, approveVdr),
   mw.parentExists({markets: 'id'}),
   mw.onlyCols(requestReqPost),
   spec.request, mw.validate,
