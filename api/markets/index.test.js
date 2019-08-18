@@ -29,7 +29,12 @@ describe('/markets', () => {
         phone: "555-555-5555",
         city: "Forest Park",
         state: "GA",
-        zipcode: "30298"
+        zipcode: "30298",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
       }
       return request.post('/markets')
        .send(market)
@@ -44,7 +49,12 @@ describe('/markets', () => {
         phone: "555-555-5555",
         city: "Atlanta",
         state: "GA",
-        zipcode: "30301"
+        zipcode: "30301",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
       }
       return request.post('/markets')
         .send(market)
@@ -59,7 +69,12 @@ describe('/markets', () => {
         phone: "555-555-5555",
         city: "Atlanta",
         state: "GA",
-        zipcode: "30302"
+        zipcode: "30302",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
       }
       return request.post('/markets')
         .send(market)
@@ -71,7 +86,12 @@ describe('/markets', () => {
       const market = {
         name: "Lajawanti's",
         email: "someone@somewhere.com",
-        phone: "555-555-5555"
+        phone: "555-555-5555",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
       }
       return request.post('/markets')
         .send(market)
@@ -83,7 +103,12 @@ describe('/markets', () => {
       const market = {
         name: "Kayla's",
         email: "someone@somewhere.com",
-        phone: "555-555-5555"
+        phone: "555-555-5555",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
       }
       return request.post('/markets')
         .send(market)
@@ -164,24 +189,30 @@ describe('/markets', () => {
 
   describe('markets/:id/booths/:bID/reserve/ POST', () => {
     it('should return 201 status', () => {
-      const reserve = {reserve_date: "9999-01-31"};
-      return request.post('/:id/booths/:bID/reserve/')
+      const reserve = {reserve_date: "9999-12-31"};
+      return request.post('/markets/3/booths/3/reserve/')
+        .set({authorization: tkn3})
         .send(reserve)
         .expect(201);
     })
 
-    it('should return 201 status', () => {
-      const reserve = {reserve_date: "9999-01-31"};
-      return request.post('/:id/booths/:bID/reserve/')
+    it('should return an array', () => {
+      const reserve = {reserve_date: "9999-12-31"};
+      return request.post('/markets/3/booths/3/reserve/')
+        .set({authorization: tkn3})
         .send(reserve)
-        .expect(201);
+        .then(res => expect(getType(res.body)).toBe('array'));
     })
     
-    it('should return 201 status', () => {
-      const reserve = {reserve_date: "9999-01-31"};
-      return request.post('/:id/booths/:bID/reserve/')
+    it('should return an object with passed date', () => {
+      const reserve = {reserve_date: "9999-12-31"};
+      return request.post('/markets/3/booths/3/reserve/')
+        .set({authorization: tkn3})
         .send(reserve)
-        .expect(201);
+        .then(res => {
+          const booth = res.body.find(booth => booth.id === 3);
+          expect(booth.number > Number(booth.available)).toBe(true)
+        });
     })
   })
 
@@ -345,6 +376,35 @@ describe('/markets', () => {
     })
   })
 
+  describe('markets/:id/booths/:bID/reserve/:rsID PUT', () => {
+    it('should return 200 status', () => {
+      const reserve = {reserve_date: "9999-12-24"};
+      return request.put('/markets/3/booths/3/reserve/1')
+        .set({authorization: tkn3})
+        .send(reserve)
+        .expect(200);
+    })
+
+    it('should return an array', () => {
+      const reserve = {reserve_date: "9999-12-17"};
+      return request.put('/markets/3/booths/3/reserve/2')
+        .set({authorization: tkn3})
+        .send(reserve)
+        .then(res => expect(getType(res.body)).toBe('array'));
+    })
+    
+    it('should return an object with passed date', () => {
+      const reserve = {reserve_date: "9999-12-10"};
+      return request.put('/markets/3/booths/3/reserve/3')
+        .set({authorization: tkn3})
+        .send(reserve)
+        .then(res => {
+          const booth = res.body.find(booth => booth.id === 3);
+          expect(Number(booth.reserved)).toBe(1)
+        });
+    })
+  })
+
   describe('/:id DELETE', () => {
     it('should return 200 status', () => {
       return request.delete('/markets/1')
@@ -365,7 +425,7 @@ describe('/markets', () => {
     })
   })
 
-  // describe('/:id/request/:rID DELETE', () => {
+  // describe('/:id/request/:rqID DELETE', () => {
   //   it('should return 200 status', () => {
   //     return request.delete('/markets/3/request/1')
   //      .set({authorization: tkn3})
@@ -375,7 +435,7 @@ describe('/markets', () => {
   //   it('should return an object', () => {
   //     return request.delete('/markets/3/request/2')
   //       .set({authorization: tkn3})
-  //       .then(res => expect(getType(res.body)).toBe('object'));
+  //       .then(res => expect(res.body).toBe('object'));
   //   })
     
   //   it('should return 404 status after deleting', () => {
@@ -405,5 +465,35 @@ describe('/markets', () => {
         .set({authorization: tkn3})
         .expect(404);
     })
+  })
+})
+
+
+describe('/:id/booths/:bID/reserve/:rsID DELETE', () => {
+  it('should return 200 status', () => {
+    return request.delete('/markets/3/booths/3/reserve/1')
+     .set({authorization: tkn3})
+     .expect(200);
+  })
+  
+  it('should return an object', () => {
+    return request.delete('/markets/3/booths/3/reserve/2')
+      .set({authorization: tkn3})
+      .then(res => expect(getType(res.body)).toBe('object'));
+  })
+  
+  it('should return with no reserved booths', () => {
+    return request.delete('/markets/3/booths/3/reserve/3')
+        .set({authorization: tkn3})
+        .then(res => {
+          const booth = res.body.find(booth => booth.id === 3);
+          expect(Number(booth.reserved)).toBe(0)
+        });
+  })
+
+  it('should return 404 status after deleting', () => {
+    return request.delete('/markets/3/booths/3/reserve/1')
+     .set({authorization: tkn3})
+     .expect(404);
   })
 })

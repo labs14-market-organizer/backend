@@ -433,7 +433,7 @@ async function findReserveByDate(marketID, date) {
 }
 
 async function addReserve(reserve) {
-    const result = await db('market_reserve')
+    let result = await db('market_reserve')
         .insert(reserve)
         .returning('*');
     const market = await db('market_booths')
