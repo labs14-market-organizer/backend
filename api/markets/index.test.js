@@ -14,6 +14,8 @@ const tkn5 = genToken({id: 5}, 1000*60*60*2);
 describe('/markets', () => {
   beforeAll(async () => {
     // Reset markets table before running tests
+    await knex.raw("TRUNCATE TABLE market_reserve RESTART IDENTITY CASCADE");
+    await knex.raw("TRUNCATE TABLE market_vendors RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE market_days RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE market_booths RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE markets RESTART IDENTITY CASCADE");
@@ -23,9 +25,16 @@ describe('/markets', () => {
     it('should return 201 status', () => {
       const market = {
         name: "Leigh's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555",
         city: "Forest Park",
         state: "GA",
-        zipcode: "30298"
+        zipcode: "30298",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
       }
       return request.post('/markets')
        .send(market)
@@ -36,9 +45,16 @@ describe('/markets', () => {
     it('should return an object', () => {
       const market = {
         name: "Mindy's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555",
         city: "Atlanta",
         state: "GA",
-        zipcode: "30301"
+        zipcode: "30301",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
       }
       return request.post('/markets')
         .send(market)
@@ -49,9 +65,16 @@ describe('/markets', () => {
     it('should return an object w/ next ID', () => {
       const market = {
         name: "Matt's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555",
         city: "Atlanta",
         state: "GA",
-        zipcode: "30302"
+        zipcode: "30302",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
       }
       return request.post('/markets')
         .send(market)
@@ -60,7 +83,16 @@ describe('/markets', () => {
     })
 
     it("should return an object w/ 'operation' array", () => {
-      const market = { name: "Lajawanti's" }
+      const market = {
+        name: "Lajawanti's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
+      }
       return request.post('/markets')
         .send(market)
         .set({authorization: tkn4})
@@ -68,7 +100,16 @@ describe('/markets', () => {
     })
 
     it("should return an object w/ 'booths' array", () => {
-      const market = { name: "Kayla's" }
+      const market = {
+        name: "Kayla's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555",
+        operation: [{
+          "day": "friday",
+          "start": "08:00",
+          "end": "17:00"
+        }]
+      }
       return request.post('/markets')
         .send(market)
         .set({authorization: tkn5})
@@ -76,9 +117,53 @@ describe('/markets', () => {
     })
   })
   
+  describe('/:id/request POST', () => {
+    it('should return 201 status', async () => {
+      const vendor = {
+        name: "Leigh's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
+      await request.post('/vendors')
+       .send(vendor)
+       .set({authorization: tkn1});
+      return request.post('/markets/3/request')
+        .set({authorization: tkn1})
+        .expect(201);
+    })
+
+    it('should return an object', async () => {
+      const vendor = {
+        name: "Mindy's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
+      await request.post('/vendors')
+       .send(vendor)
+       .set({authorization: tkn2});
+      return request.post('/markets/3/request')
+        .set({authorization: tkn2})
+        .then(res => expect(getType(res.body)).toBe('object'));
+    })
+
+    it('should return an object w/ next ID', async () => {
+      const vendor = {
+        name: "Matt's",
+        email: "someone@somewhere.com",
+        phone: "555-555-5555"
+      }
+      await request.post('/vendors')
+       .send(vendor)
+       .set({authorization: tkn3});
+      return request.post('/markets/3/request')
+        .set({authorization: tkn3})
+        .then(res => expect(res.body.id).toBe(3));
+    })
+  })
+  
   describe('/:id/booths POST', () => {
     it('should return 201 status', () => {
-      const booth = { name: "Standard", number: 42 }
+      const booth = { name: "Booth One", number: 42 }
       return request.post('/markets/3/booths')
        .set({authorization: tkn3})
        .send(booth)
@@ -86,20 +171,49 @@ describe('/markets', () => {
     })
     
     it("should return an object w/ 'booths' array", () => {
-      const booth = { name: "Standard", number: 42 }
+      const booth = { name: "Booth Two", number: 42 }
       return request.post('/markets/3/booths')
         .set({authorization: tkn3})
         .send(booth)
         .then(res => expect(getType(res.body.booths)).toBe('array'));
     })
     
-    // it('should return booth w/ next ID', () => {
-    //   const booth = { name: "Standard", number: 42 }
-    //   return request.post('/markets/3/booths')
-    //     .set({authorization: tkn3})
-    //     .send(booth)
-    //     .then(res => expect(res.body.booths[0].id).toBe(3));
-    // })
+    it('should return booth w/ passed number', () => {
+      const booth = { name: "Booth Three", number: 4242 }
+      return request.post('/markets/3/booths')
+        .set({authorization: tkn3})
+        .send(booth)
+        .then(res => expect(res.body.booths[2].number).toBe(booth.number));
+    })
+  })
+
+  describe('markets/:id/booths/:bID/reserve/ POST', () => {
+    it('should return 201 status', () => {
+      const reserve = {reserve_date: "9999-12-31"};
+      return request.post('/markets/3/booths/3/reserve/')
+        .set({authorization: tkn3})
+        .send(reserve)
+        .expect(201);
+    })
+
+    it('should return an array', () => {
+      const reserve = {reserve_date: "9999-12-31"};
+      return request.post('/markets/3/booths/3/reserve/')
+        .set({authorization: tkn3})
+        .send(reserve)
+        .then(res => expect(getType(res.body)).toBe('array'));
+    })
+    
+    it('should return an object with passed date', () => {
+      const reserve = {reserve_date: "9999-12-31"};
+      return request.post('/markets/3/booths/3/reserve/')
+        .set({authorization: tkn3})
+        .send(reserve)
+        .then(res => {
+          const booth = res.body.find(booth => booth.id === 3);
+          expect(booth.number > Number(booth.available)).toBe(true)
+        });
+    })
   })
 
   describe('/ GET', () => {
@@ -205,7 +319,34 @@ describe('/markets', () => {
     })
   })
 
-  describe('/:id/booths PUT', () => {
+  
+  describe('/:id/request/:rID PUT', () => {
+    it('should return 200 status', () => {
+      const joinMkt = {status: 0};
+      return request.put('/markets/1/request/1')
+        .set({authorization: tkn1})
+        .send(joinMkt)
+        .expect(200);
+    })
+
+    it('should return an object', () => {
+      const joinMkt = {status: 0};
+      return request.put('/markets/1/request/2')
+        .set({authorization: tkn1})
+        .send(joinMkt)
+        .then(res => expect(getType(res.body)).toBe('object'));
+    })
+
+    it('should return an object w/ new status', () => {
+      const joinMkt = {status: 0};
+      return request.put('/markets/1/request/3')
+        .set({authorization: tkn1})
+        .send(joinMkt)
+        .then(res => expect(res.body.status).toBe(joinMkt.status));
+    })
+  })
+
+  describe('/:id/booths/:bID PUT', () => {
     it('should return 200 status', () => {
       const booth = { name: 'TEST 1' }
       return request.put('/markets/3/booths/1')
@@ -215,8 +356,8 @@ describe('/markets', () => {
     })
     
     it("should return a 'booths' array", () => {
-      const booth = { name: 'TEST 1' }
-      return request.put('/markets/3/booths/1')
+      const booth = { name: 'TEST 2' }
+      return request.put('/markets/3/booths/2')
         .send(booth)
         .set({authorization: tkn3})
         .then(res => {
@@ -225,12 +366,41 @@ describe('/markets', () => {
     })
     
     it('should return an object w/ new name', () => {
-      const booth = { name: 'TEST 1' }
-      return request.put('/markets/3/booths/1')
+      const booth = { name: 'TEST 3' }
+      return request.put('/markets/3/booths/3')
         .send(booth)
         .set({authorization: tkn3})
         .then(res => {
-          expect(res.body.booths[0].name).toBe(booth.name);
+          expect(res.body.booths[2].name).toBe(booth.name);
+        });
+    })
+  })
+
+  describe('/:id/booths/:bID/reserve/:rsID PUT', () => {
+    it('should return 200 status', () => {
+      const reserve = {reserve_date: "9999-12-24"};
+      return request.put('/markets/3/booths/3/reserve/1')
+        .set({authorization: tkn3})
+        .send(reserve)
+        .expect(200);
+    })
+
+    it('should return an array', () => {
+      const reserve = {reserve_date: "9999-12-17"};
+      return request.put('/markets/3/booths/3/reserve/2')
+        .set({authorization: tkn3})
+        .send(reserve)
+        .then(res => expect(getType(res.body)).toBe('array'));
+    })
+    
+    it('should return an object with passed date', () => {
+      const reserve = {reserve_date: "9999-12-10"};
+      return request.put('/markets/3/booths/3/reserve/3')
+        .set({authorization: tkn3})
+        .send(reserve)
+        .then(res => {
+          const booth = res.body.find(booth => booth.id === 3);
+          expect(Number(booth.reserved)).toBe(1)
         });
     })
   })
@@ -251,6 +421,26 @@ describe('/markets', () => {
     it('should return 404 status after deleting', () => {
       return request.delete('/markets/1')
         .set({authorization: tkn1})
+        .expect(404);
+    })
+  })
+
+  describe('/:id/request/:rqID DELETE', () => {
+    it('should return 200 status', () => {
+      return request.get('/markets/3/request/1')
+       .set({authorization: tkn3})
+       .expect(200);
+    })
+    
+    it('should return an object', () => {
+      return request.delete('/markets/3/request/2')
+        .set({authorization: tkn3})
+        .then(res => expect(getType(res.body)).toBe('object'));
+    })
+    
+    it('should return 404 status after deleting', () => {
+      return request.delete('/markets/3/request/1')
+        .set({authorization: tkn3})
         .expect(404);
     })
   })
@@ -276,4 +466,34 @@ describe('/markets', () => {
         .expect(404);
     })
   })
+  
+  describe('/:id/booths/:bID/reserve/:rsID DELETE', () => {
+    it('should return 200 status', () => {
+      return request.delete('/markets/3/booths/3/reserve/1')
+       .set({authorization: tkn3})
+       .expect(200);
+    })
+    
+    it('should return an array', () => {
+      return request.delete('/markets/3/booths/3/reserve/2')
+        .set({authorization: tkn3})
+        .then(res => expect(getType(res.body)).toBe('array'));
+    })
+    
+    it('should return with no reserved booths', () => {
+      return request.delete('/markets/3/booths/3/reserve/3')
+          .set({authorization: tkn3})
+          .then(res => {
+            const booth = res.body.find(booth => booth.id === 3);
+            expect(Number(booth.reserved)).toBe(0)
+          });
+    })
+  
+    it('should return 404 status after deleting', () => {
+      return request.delete('/markets/3/booths/3/reserve/1')
+       .set({authorization: tkn3})
+       .expect(404);
+    })
+  })
 })
+

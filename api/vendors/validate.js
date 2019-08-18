@@ -1,7 +1,7 @@
 const { body } = require('express-validator');
 
 module.exports = [
-  body('admin_id').isInt()
+  body('admin_id').isInt({min: 1})
     .withMessage("'admin_id' must be an integer")
     .optional(),
   body('name').isString()

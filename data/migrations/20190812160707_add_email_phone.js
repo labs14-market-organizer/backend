@@ -10,15 +10,12 @@ exports.up = function(knex) {
 };
 
 exports.down = function(knex) {
-    return knex.schema.table("markets", markets => {
-        markets.dropColumn('email')
-        markets.dropColumn('phone')
-    })
-        .table("vendors", vendors => {
-            vendors.dropColumn('email')
-            vendors.dropColumn('phone')
-        })
+  return knex.schema.table("markets", markets => {
+      markets.dropColumn('email')
+      markets.dropColumn('phone')
+  })
+  .table("vendors", vendors => {
+      vendors.dropColumn('email')
+      vendors.dropColumn('phone')
+  })
 };
-
-    
-

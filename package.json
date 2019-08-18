@@ -10,6 +10,7 @@
     "express": "^4.17.1",
     "express-validator": "^6.1.1",
     "helmet": "^3.18.0",
+    "jest-get-type": "^24.8.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.19.1",
     "parse-address-string": "^0.0.3",
@@ -27,7 +28,7 @@
     "supertest": "^4.0.2"
   },
   "scripts": {
-    "test": "cross-env NODE_ENV=testing jest --watch --verbose",
+    "test": "cross-env NODE_ENV=testing jest --runInBand --watch --verbose",
     "start": "node index.js",
     "server": "nodemon index.js"
   },

@@ -62,17 +62,26 @@ Express is a fast, assertive, essential, and moderate web framework of Node.js. 
 
 #### Market Routes
 
-| Method | Endpoint                   | Access Control | Description                                  |
-| ------ | -------------------------- | -------------- | -------------------------------------------- |
-| GET    | `/markets`                 | none           | Returns info on all markets.                 |
-| GET    | `/markets/search`          | none           | Returns info on markets matching `?q=` query |
-| GET    | `/markets/:id`             | none           | Returns info on specific market.             |
-| POST   | `/markets/`                | logged in user | Creates new market.                          |
-| PUT    | `/markets/:id`             | market admin   | Updates specific market.                     |
-| DELETE | `/markets/:id`             | market admin   | Deletes specific market.                     |
-| POST   | `/markets/:id/booths`      | market admin   | Creates new booth at an existing market.     |
-| PUT    | `/markets/:id/booths/:bID` | market admin   | Updates a booth at an existing market.       |
-| DELETE | `/markets/:id/booths/:bID` | market admin   | Deletes a booth at an existing market.       |
+| Method | Endpoint                      | Access Control      | Description                                                           |
+| ------ | ----------------------------- | ------------------- | --------------------------------------------------------------------- |
+| GET    | `/markets`                    | none                | Returns info on all markets.                                          |
+| GET    | `/markets/search`             | none                | Returns info on markets matching `?q=` query                          |
+| GET    | `/markets/:id`                | none                | Returns info on specific market.                                      |
+| POST   | `/markets/`                   | logged in user      | Creates new market.                                                   |
+| PUT    | `/markets/:id`                | market admin        | Updates specific market.                                              |
+| DELETE | `/markets/:id`                | market admin        | Deletes specific market.                                              |
+| POST   | `/markets/:id/request`        | vendor admin        | Creates an auto-accepted request to "join" market                     |
+| PUT    | `/markets/:id/request/rqID`   | market admin        | Markets owners can edit vendor status at the market                   |
+| DELETE | `/markets/:id/request/rqID`   | market/vendor admin | Markets or vendors can "ignore" the request by deleting               |
+| POST   | `/markets/:id/booths`         | market admin        | Creates new booth at an existing market.                              |
+| PUT    | `/markets/:id/booths/:bID`    | market admin        | Updates a booth at an existing market.                                |
+| DELETE | `/markets/:id/booths/:bID`    | market admin        | Deletes a booth at an existing market.                                |
+| GET    | `markets/:id/booths/date/:dt` | none                | Returns info on availability of market booth types on a specific date |
+| POST   | `markets/:id/booths/:bID/reserve/`      | vendor admin        | Creates a reservation for a booth type on a specific date   |
+| PUT    | `markets/:id/booths/:bID/reserve/:rsID` | market/vendor admin | Vendors can edit the date, markets whether or not it's paid |
+| DELETE | `markets/:id/booths/:bID/reserve/:rsID` | market/vendor admin | Deletes the reservation                                     |
+| GET    | `markets/:id/vendors`                   | none                | Returns a searchable (`?q=`) list of vendors who have accepted market rules    |
+| GET    | `markets/:id/vendors/date/:dt`          | none                | Returns a searchable (`?q=`) list of vendors reserved for a specific date      |
 
 # Data Model
 
@@ -116,7 +125,9 @@ Vendor profile data
   id: INTEGER, auto-incrementing
   admin_id: INTEGER, foreign key to USERS table
   name: STRING
-  description: TEXT 
+  description: TEXT
+  email: STRING
+  phone: STRING
   items: ARRAY of STRINGs
   electricity: BOOLEAN
   ventilation: BOOLEAN
@@ -141,7 +152,10 @@ Market profile data
   id: INTEGER, auto-incrementing
   admin_id: INTEGER, foreign key to USERS table
   name: STRING
-  description: TEXT 
+  description: TEXT
+  rules: TEXT
+  email: STRING
+  phone: STRING
   address: STRING
   city: STRING
   state: STRING
@@ -188,6 +202,39 @@ Market hours of operation, by day
 }
 ```
 
+#### MARKET_VENDORS
+Requests to join a market by vendors who have accepted that market's rules
+
+---
+
+```
+{
+  id: INTEGER, auto-incrementing
+  market_id: INTEGER, foreign key to MARKETS table
+  vendor_id: INTEGER, foreign key to VENDORS table
+  status: INTEGER
+  created_at: TIMESTAMP WITH TIMEZONE
+  updated_at: TIMESTAMP WITH TIMEZONE
+}
+```
+
+#### MARKET_RESERVE
+Reservations of a booth type at a market on a given date
+
+---
+
+```
+{
+  id: INTEGER, auto-incrementing
+  market_id: INTEGER, foreign key to MARKETS table
+  vendor_id: INTEGER, foreign key to VENDORS table
+  reserve_date: TIMESTAMP WITH TIMEZONE
+  paid: INTEGER
+  created_at: TIMESTAMP WITH TIMEZONE
+  updated_at: TIMESTAMP WITH TIMEZONE
+}
+```
+
 ## Actions
 
 ### Auth
@@ -215,21 +262,33 @@ Market hours of operation, by day
 - `add()` -> Adds market to `markets` table
 - `update()` -> Updates market with specified ID in the `markets` table
 - `remove()` -> Deletes market with specified ID in the `markets` table
+- `addRequest()` -> Adds request by vendor to join market in `market_vendors` table
+- `updateRequest()` -> Edits request to join market in `market_vendors` table
+- `removeRequest()` -> Deletes request to join market in `market_vendors` table
 - `addBooth()` -> Adds booth to `market_booths` table
 - `updateBooth()` -> Updates market with specified ID in the `market_booths` table
 - `removeBooth()` -> Deletes market with specified ID in the `market_booths` table
+- `findReserveByDate()` -> Returns available booths on a date by joining `market_booths` and `market_reserve` tables
+- `addReserve()` -> Adds reservation to a booth type on the `market_reserve` table
+- `updateReserve()` -> Edits reservation to a booth type on the `market_reserve` table
+- `removeReserve()` -> Deletes reservation to a booth type on the `market_reserve` table
+- `findVendors()` -> Returns vendors who have accepted a market's rules by joining `vendors` and `market_vendors` tables
+- `findVendorsByDate()` -> Returns vendors reserved at a market on a date by joining `market_vendors` and `market_reserve` tables
 
 ### Middleware
 - `verifyJWT()` -> Verifies any JWT passed in the Authorization header of a request and denies invalid tokens
 - `protect()` -> Always used after `verifyJWT`, protects routes by checking if a JWT exists in the Authorization header
 - `parseQueryAddr()` -> Parses a query string passed to the route on `q` as an address, pulling out the city, state, and zipcode into separate variables and placed on the request's `query` object
-- `parentExists(table, param)()` -> Curried function that checks whether the target asset is actually a child of the parent specified in the route's path by checking against the parent's `table` with the specified `param` in the route
-- `onlyOwner(table, tableID, paramID1)(joinTbl, joinID, joinOn, paramID2)()` -> Twice curried function that checks whether the user making the request is the owner of the target asset or its parent, respectively
+- `parentExists()` -> Function that checks whether the target asset is actually a child of the parent specified in the route's path
+- `onlyOwner()` -> Function that checks whether the user making the request is the owner of the target asset or its parent
 - `validate()` -> Immediately following an `express-validator` array of validators (from a `validate.js` file within the router's directory), checks the request body for valid data
-- `reqCols(required, reqID, colID)()` -> Curried function that checks the request body against an array of `required` columns, and can optionally check if one column (`colID`) needs to match the ID of the user making the request by setting `reqID` to true
-- `reqNestCols(reqObjs)()` -> Checks nested fields on the request body against a `reqObjs` object that specifies an array of required fields that should be nested within the parent specified by their key
-- `onlyCols(allowed)()` -> Rejects requests that try to pass any values not whitelisted in the `allowed` array of fields
-- `onlyNestCols(allowObjs)()` -> Rejects requests that try to pass any nested values not whitelisted on the specified parents within the `allowObjs` object
+- `reqCols()` -> Function that checks the request body against an array of `required` columns, and can optionally check if one column (`colID`) needs to match the ID of the user making the request by setting `reqID` to true
+- `reqNestCols()` -> Checks nested fields on the request body for required fields that should be nested within their specified parent
+- `onlyCols()` -> Rejects requests that try to pass any values not whitelisted in the `allowed` array of fields
+- `onlyNestCols()` -> Rejects requests that try to pass any nested values not whitelisted on the specified parents within the `allowObjs` object
+- `futureDate()` -> Verifies that a date passed in the route is in the future, optionally including the current day
+- `validReserveDate()` -> Verifies that a date passed in the route is a day that the specified market is open
+- `availBooths()` -> Verifies that there are available booths for the specified booth type on the specified date
 
 ## Environment Variables
 
@@ -240,6 +299,7 @@ create a .env file that includes the following:
     *  NODE_ENV - specify `development` while in development and `production` in production/staging
     *  BE_URL - the URL of the backend you're using
     *  FE_URL - the URL of the frontend you're using
+    *  TZ - the timezone of the server
     *  JWT_SECRET - the secret used on the JWTs sent back to the frontend
     *  DB_TEST - required in development only, the `postgres://` URL of your test database
     *  DB_DEV - required in development only, the `postgres://` URL of your development database
