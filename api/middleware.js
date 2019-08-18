@@ -17,6 +17,7 @@ module.exports = {
   reqNestCols,
   onlyCols,
   onlyNestCols,
+  // approvedVendor,
   futureDate,
   validReserveDate,
   availBooths

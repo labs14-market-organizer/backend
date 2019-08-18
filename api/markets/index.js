@@ -115,6 +115,7 @@ router.delete('/:id',
 const requestReqPost = []
 router.post('/:id/request',
   mw.protect,
+  mw.onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
   mw.parentExists({markets: 'id'}),
   mw.onlyCols(requestReqPost),
   spec.request, mw.validate,
@@ -168,7 +169,7 @@ router.put('/:id/request/:rqID',
 router.delete('/:id/request/:rqID',
   mw.protect,
   mw.parentExists({markets: 'id'}),
-  mw.onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
+  mw.onlyOwner({markets: {id: 'admin_id', param: 'id'},vendors: {id: 'admin_id', req: 'vendor'}}),
   spec.request, mw.validate,
   (req, res) => {
     Markets.removeRequest(req.params.rqID)
