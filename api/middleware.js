@@ -148,6 +148,20 @@ function onlyOwner(obj) {
     const results = await Promise.all(owners.map(async owner => {
       // Separate joins from target parent data
       const [table, {join, ...tbl}] = owner;
+      if(!!tbl.param) {
+        if(!req.params[tbl.param]) {
+          return {result: null, table, id: tbl.id}
+        }
+      } else if(!!tbl.body) {
+        if(!req.body[tbl.body]) {
+          return {result: null, table, id: tbl.id}
+        }
+      } else {
+        if(!req[tbl.req]) {
+          console.log('FOO')
+          return {result: null, table, id: tbl.id}
+        }
+      }
       // Create select statement without joins
       const select = [`${table}.${tbl.id}`]
       // Declare "last" outside of if/else
@@ -182,6 +196,7 @@ function onlyOwner(obj) {
             } else if(!!tbl.body) {
               builder.where({[`${table}.id`]: req.body[tbl.body]})
             } else {
+              console.log(req.vendor)
               builder.where({[`${table}.id`]: req[tbl.req]})
             }
           } else {
@@ -201,8 +216,8 @@ function onlyOwner(obj) {
       return {result, table, id: tbl.id};
     }))
     // Check if there were no matches
-    if(!results.every(result => !!result.result)) {
-      return next(); // Let route handle 404s
+    if(results.every(result => !result.result)) {
+      return res.status(403).json({message: `Only the admins of the the following associated entries are authorized to make this request: ${Object.keys(obj).join(', ')}`})
     }
     // Attach array of owner matches onto request for other
     //     middleware or the route handler to use later
