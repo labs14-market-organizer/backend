@@ -60,6 +60,8 @@ router.post('/',
     if(!!req.user_id) {
       req.body.admin_id = req.user_id;
     }
+    // Only public markets for the moment
+    req.body = {...req.body, type: 1}
     Markets.add(req.body)
       .then(added => res.status(201).json(added))
       .catch(err => {
