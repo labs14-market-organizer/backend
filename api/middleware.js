@@ -158,7 +158,6 @@ function onlyOwner(obj) {
         }
       } else {
         if(!req[tbl.req]) {
-          console.log('FOO')
           return {result: null, table, id: tbl.id}
         }
       }
@@ -216,13 +215,15 @@ function onlyOwner(obj) {
       return {result, table, id: tbl.id};
     }))
     // Check if there were no matches
-    if(results.every(result => !result.result)) {
-      return res.status(403).json({message: `Only the admins of the the following associated entries are authorized to make this request: ${Object.keys(obj).join(', ')}`})
+    console.log(results)
+    if(!results.every(result => result.result !== undefined)) {
+      return next(); // Let route handle 404s
     }
+    console.log('FOOBAR')
     // Attach array of owner matches onto request for other
     //     middleware or the route handler to use later
     req.owner = await results.reduce((arr, result) => {
-      return result.result[result.id] === user_id
+      return !!result.result && result.result[result.id] === user_id
         ? [...arr, result.table]
         : arr;
     }, []);
@@ -254,25 +255,31 @@ function onlyOwner(obj) {
       // Create object of actual parents whose IDs don't
       //     match those specified in the request
       mismatches = results.reduce((newObj, result) => {
-        const arr = Object.values(matchIDs[result.table]).reduce((newArr, pair) => {
-          // Separate ID from location of identifier
-          const {id, ...loc} = pair;
-          // Grab the place of the identifier and compare to result
-          const place = Object.keys(loc)[0];
-          if(place === 'param') {
-            return `${result.result[id]}` !== req.params[loc[place]]
-              ? [...newArr, id] // Add mismatches
-              : newArr;
-          } else if(place === 'body') {
-            return `${result.result[id]}` !== req.body[loc[place]]
-              ? [...newArr, id] // Add mismatches
-              : newArr;
-          } else {
-            return `${result.result[id]}` !== req[loc[place]]
-              ? [...newArr, id] // Add mismatches
-              : newArr;
-          }
-        }, [])
+        let arr;
+        console.log(result)
+        if(!!result.result) {
+          arr = Object.values(matchIDs[result.table]).reduce((newArr, pair) => {
+            // Separate ID from location of identifier
+            const {id, ...loc} = pair;
+            // Grab the place of the identifier and compare to result
+            const place = Object.keys(loc)[0];
+            if(place === 'param') {
+              return `${result.result[id]}` !== req.params[loc[place]]
+                ? [...newArr, id] // Add mismatches
+                : newArr;
+            } else if(place === 'body') {
+              return `${result.result[id]}` !== req.body[loc[place]]
+                ? [...newArr, id] // Add mismatches
+                : newArr;
+            } else {
+              return `${result.result[id]}` !== req[loc[place]]
+                ? [...newArr, id] // Add mismatches
+                : newArr;
+            }
+          }, [])
+        } else {
+          arr = [];
+        }
         // Name the array with owner table name
         return {...newObj, [result.table]: arr}
       }, {})
@@ -364,6 +371,7 @@ function onlyCols(allowed) {
     if(getType(allowed) === 'object') {
       // Grab user owner types placed on request in "onlyOwner()"
       const {owner} = req;
+      console.log(owner)
       if(owner === undefined) {
         return next(); // Let route handle 404s
       }
