@@ -421,10 +421,15 @@ function onlyNestCols(allowObjs) {
   }
 }
 
+// "mktObj" = object with one key identifying where to find
+//     the market ID and a value of its key in that place
+// "vdrObj" = object with one key identifying where to find
+//     the vendor ID and a value of its key in that place
 function approvedVendor(mktObj, vdrObj) {
   return async (req, res, next) => {
     const result = await db('market_vendors')
       .where(builder => {
+        // Find and use the market ID
         if(!!mktObj.param) {
           builder.where({market_id: req.params[mktObj.param]});
         } else if(!!mktObj.body) {
@@ -432,6 +437,7 @@ function approvedVendor(mktObj, vdrObj) {
         } else {
           builder.where({market_id: req[mktObj.req]});
         }
+        // Find and use the vendor ID
         if(!!vdrObj.param) {
           builder.andWhere({vendor_id: req.params[vdrObj.param]});
         } else if(!!vdrObj.body) {
@@ -440,9 +446,15 @@ function approvedVendor(mktObj, vdrObj) {
           builder.andWhere({vendor_id: req[vdrObj.req]});
         }
       })
-    !result.includes(request => request.status > 0)
-      ? res.status(403).json({message: `Vendors must accept the market's rules and be approved by the market owner before completing this action.`})
-      : next();
+    // Check if the vendor has applied to join the market
+    if(!result.length) {
+      res.status(403).json({message: "The vendor must accept this market's rules before completing this action."})
+    // Check if any of this vendor's requests have been accepted
+    } else if(!result.includes(request => request.status > 0)) {
+      res.status(403).json({message: "Vendors must be approved by the market owner before completing this action."})
+    } else {
+      next();
+    }
   }
 }
 
