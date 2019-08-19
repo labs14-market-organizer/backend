@@ -8,9 +8,18 @@ module.exports = {
     add,
     update,
     remove,
+    addRequest,
+    updateRequest,
+    removeRequest,
     addBooth,
     updateBooth,
     removeBooth,
+    findReserveByDate,
+    addReserve,
+    updateReserve,
+    removeReserve,
+    findVendors,
+    findVendorsByDate
 };
 
 async function find() {
@@ -33,10 +42,11 @@ async function find() {
 
 //searches city, state and zipcode by search query
 async function search(query) {
+    let {q, ...queries} = query;
     // Filter out unspecified fields
-    query = Object.entries(query).filter(pair => pair[1] !== null);
+    queries = Object.entries(queries).filter(pair => pair[1] !== null);
     // Create similarity scores to order by
-    const similar = query.map(pair => {
+    const similar = queries.map(pair => {
             // Coalesce null values to 0.01
             const basic = `coalesce(word_similarity(${pair[0]}, '${pair[1]}'), 0.01)`;
             // Weigh columns differently
@@ -54,13 +64,13 @@ async function search(query) {
     const markets = await db('markets')
         .where(builder => {
             // Create query builder on available fields
-            query.forEach(pair => {
+            queries.forEach(pair => {
                 // Compare case-insensitive values set in parseQueryAddr middleware
                 builder.orWhereRaw(`'${pair[1]}' <% ${pair[0]}`)
             })
         })
         .returning('*')
-        .orderByRaw(`${similar} DESC, id`);
+        .orderByRaw(`${similar} DESC, id`)
     // Map hours of operation and booths onto markets
     const final = await markets.map(async market => {
         const operation = await db('market_days')
@@ -235,11 +245,23 @@ function remove(id) {
             let booths, operation, market;
             // Wrap deletions in a transaction to avoid partial creation
             await db.transaction(async t => {
+                await db('market_vendors')
+                  .where({'market_id': id})
+                  .del()
+                  .transacting(t);
                 booths = await db('market_booths')
                     .where({market_id: id})
-                    .del()
-                    .returning('*')
                     .orderBy('id')
+                    .pluck('id')
+                    .transacting(t);
+                // boothIDs = booths.map(booth => booth.id)
+                await db('market_reserve')
+                    .whereIn('booth_id', booths)
+                    .del()
+                    .transacting(t);
+                await db('market_booths')
+                    .whereIn('id', booths)
+                    .del()
                     .transacting(t);
                 operation = await db('market_days')
                     .where({market_id: id})
@@ -262,6 +284,31 @@ function remove(id) {
     });
 }
 
+// Market_vendors functions
+async function addRequest(request) {
+    const [result] = await db('market_vendors')
+        .insert(request)
+        .returning('*');
+    return result;
+}
+
+async function updateRequest(id, changes) {
+    const [result] = await db('market_vendors')
+        .where({id})
+        .update(changes)
+        .returning('*')
+    return result;
+}
+
+async function removeRequest(id) {
+    const [result] = await db('market_vendors')
+        .where({id})
+        .del()
+        .returning('*');
+    return result;
+}
+
+// Booth functions
 async function addBooth(booth) {
     return new Promise(async (resolve, reject) => {
         try{
@@ -333,6 +380,10 @@ async function removeBooth(id) {
             let deleted;
             // Wrap delete and update in a transaction to prevent partial insert
             await db.transaction(async t => {
+                await db('market_reserve')
+                    .where({'booth_id': id})
+                    .del()
+                    .transacting(t);
                 deleted = await db('market_booths')
                     .where({id})
                     .del()
@@ -359,4 +410,106 @@ async function removeBooth(id) {
             reject(err)
         }
     })
+}
+
+// Market_reserve functions
+async function findReserveByDate(marketID, date) {
+    const booths = await db('market_booths')
+        .where({market_id: marketID})
+        .pluck('id');
+    const result = await db('market_booths as mb')
+        .select('mb.id', 'mb.number', db.raw('(mb.number - count(mr.id)) as available'), db.raw('array_remove(array_agg(mr.vendor_id ORDER BY mr.vendor_id), NULL) as user_vdrs'))
+        .count({reserved: 'mr.id'})
+        .leftJoin(db('market_reserve')
+            .select('id', 'booth_id', 'vendor_id')
+            .where({'market_reserve.reserve_date': date})
+            .as('mr'),
+            {'mr.booth_id': 'mb.id'}
+        )
+        .whereIn('mb.id', booths)
+        .groupBy('mb.id')
+        .orderBy('mb.id')
+    return result;
+}
+
+async function addReserve(reserve) {
+    let result = await db('market_reserve')
+        .insert(reserve)
+        .returning('*');
+    const market = await db('market_booths')
+        .select('market_id')
+        .where({id: result[0].booth_id})
+        .first();
+    const available = await findReserveByDate(market.market_id, result[0].reserve_date);
+    return {result, available}
+}
+
+async function updateReserve(id, changes) {
+    let result = await db('market_reserve')
+        .where({id})
+        .update(changes)
+        .returning('*');
+    [result] = result;
+    if(!result) {
+        return {result}
+    }
+    const market = await db('market_booths')
+        .select('market_id')
+        .where({id: result.booth_id})
+        .first();
+    const available = await findReserveByDate(market.market_id, result.reserve_date);
+    return {result, available}
+}
+
+async function removeReserve(id) {
+    const result = await db('market_reserve')
+        .where({id})
+        .del()
+        .returning('*');
+    if(!result.length) {
+        return {result}
+    }
+    const market = await db('market_booths')
+        .select('market_id')
+        .where({id: result[0].booth_id})
+        .first();
+    const available = await findReserveByDate(market.market_id, result[0].reserve_date);
+    return {result, available}
+}
+
+function findVendors(marketID, query=null) {
+    return db('market_vendors as mv')
+        .select('*')
+        .join('vendors as v', {'mv.vendor_id': 'v.id'})
+        .where(builder => {
+            builder.where({'mv.market_id':marketID})
+            if(!!query) {
+                builder.andWhereRaw(`'${query}' <% v.name`)
+            }
+        })
+        .modify(builder => {
+            if(!query) {
+                return builder.orderBy('v.name', 'v.id')
+            } else {
+                return builder.orderByRaw(`word_similarity(v.name, '${query}')`)
+            }
+        })
+}
+
+function findVendorsByDate(marketID, date, query=null) {
+    return db('market_reserve as mr')
+        .select('mr.id','mr.vendor_id','v.name','mr.booth_id','mr.paid')
+        .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
+        .join('vendors as v', {'mr.vendor_id': 'v.id'})
+        .where(builder => {
+            builder.where({'mr.reserve_date': date, 'mb.market_id':marketID})
+            if(!!query) {
+                builder.andWhereRaw(`'${query}' <% v.name`)
+            }
+        })
+        .modify(builder => {
+            !query
+                ? builder.orderBy('v.name', 'v.id')
+                : builder.orderByRaw(`word_similarity(v.name, '${query}')`)
+        })
 }
