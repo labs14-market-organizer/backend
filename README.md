@@ -286,6 +286,7 @@ Reservations of a booth type at a market on a given date
 - `reqNestCols()` -> Checks nested fields on the request body for required fields that should be nested within their specified parent
 - `onlyCols()` -> Rejects requests that try to pass any values not whitelisted in the `allowed` array of fields
 - `onlyNestCols()` -> Rejects requests that try to pass any nested values not whitelisted on the specified parents within the `allowObjs` object
+- `approvedVendor()` -> Rejects requests made by vendors that haven't been approved at the specified market
 - `futureDate()` -> Verifies that a date passed in the route is in the future, optionally including the current day
 - `validReserveDate()` -> Verifies that a date passed in the route is a day that the specified market is open
 - `availBooths()` -> Verifies that there are available booths for the specified booth type on the specified date
