@@ -374,7 +374,6 @@ router.put('/:id/booths/:bID/reserve/:rsID',
         }
       })
       .catch(err => {
-        console.error(err)
         res.status(500).json({knex: err, message: 'The specified market could not be updated in our database.'});
       })
   }
@@ -397,7 +396,6 @@ router.delete('/:id/booths/:bID/reserve/:rsID',
         }
       })
       .catch(err => {
-        console.error(err)
         res.status(500)
           .json({knex: err, message: 'The specified reservation could not be removed from our database.'});
       })
@@ -435,7 +433,7 @@ router.get('/:id/vendors/date/:dt',
     Markets.findVendorsByDate(...args)
     .then(vendors => {
       !vendors.length
-        ? res.status(404).json({ message: 'No vendors could be found in our database for that date.' })
+        ? res.status(200).json(['No vendors are reserved for this date.'])
         : res.status(200).json(vendors);
     })
     .catch(err => {
