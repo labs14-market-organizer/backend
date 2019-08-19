@@ -429,6 +429,7 @@ async function findReserveByDate(marketID, date) {
         .whereIn('mb.id', booths)
         .groupBy('mb.id')
         .orderBy('mb.id')
+        .catch(err => console.error(err))
     return result;
 }
 
