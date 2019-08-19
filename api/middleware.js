@@ -17,6 +17,7 @@ module.exports = {
   reqNestCols,
   onlyCols,
   onlyNestCols,
+  approvedVendor,
   futureDate,
   validReserveDate,
   availBooths
@@ -147,6 +148,19 @@ function onlyOwner(obj) {
     const results = await Promise.all(owners.map(async owner => {
       // Separate joins from target parent data
       const [table, {join, ...tbl}] = owner;
+      if(!!tbl.param) {
+        if(!req.params[tbl.param]) {
+          return {result: null, table, id: tbl.id}
+        }
+      } else if(!!tbl.body) {
+        if(!req.body[tbl.body]) {
+          return {result: null, table, id: tbl.id}
+        }
+      } else {
+        if(!req[tbl.req]) {
+          return {result: null, table, id: tbl.id}
+        }
+      }
       // Create select statement without joins
       const select = [`${table}.${tbl.id}`]
       // Declare "last" outside of if/else
@@ -200,13 +214,13 @@ function onlyOwner(obj) {
       return {result, table, id: tbl.id};
     }))
     // Check if there were no matches
-    if(!results.every(result => !!result.result)) {
+    if(!results.every(result => result.result !== undefined)) {
       return next(); // Let route handle 404s
     }
     // Attach array of owner matches onto request for other
     //     middleware or the route handler to use later
     req.owner = await results.reduce((arr, result) => {
-      return result.result[result.id] === user_id
+      return !!result.result && result.result[result.id] === user_id
         ? [...arr, result.table]
         : arr;
     }, []);
@@ -238,25 +252,30 @@ function onlyOwner(obj) {
       // Create object of actual parents whose IDs don't
       //     match those specified in the request
       mismatches = results.reduce((newObj, result) => {
-        const arr = Object.values(matchIDs[result.table]).reduce((newArr, pair) => {
-          // Separate ID from location of identifier
-          const {id, ...loc} = pair;
-          // Grab the place of the identifier and compare to result
-          const place = Object.keys(loc)[0];
-          if(place === 'param') {
-            return `${result.result[id]}` !== req.params[loc[place]]
-              ? [...newArr, id] // Add mismatches
-              : newArr;
-          } else if(place === 'body') {
-            return `${result.result[id]}` !== req.body[loc[place]]
-              ? [...newArr, id] // Add mismatches
-              : newArr;
-          } else {
-            return `${result.result[id]}` !== req[loc[place]]
-              ? [...newArr, id] // Add mismatches
-              : newArr;
-          }
-        }, [])
+        let arr;
+        if(!!result.result) {
+          arr = Object.values(matchIDs[result.table]).reduce((newArr, pair) => {
+            // Separate ID from location of identifier
+            const {id, ...loc} = pair;
+            // Grab the place of the identifier and compare to result
+            const place = Object.keys(loc)[0];
+            if(place === 'param') {
+              return `${result.result[id]}` !== req.params[loc[place]]
+                ? [...newArr, id] // Add mismatches
+                : newArr;
+            } else if(place === 'body') {
+              return `${result.result[id]}` !== req.body[loc[place]]
+                ? [...newArr, id] // Add mismatches
+                : newArr;
+            } else {
+              return `${result.result[id]}` !== req[loc[place]]
+                ? [...newArr, id] // Add mismatches
+                : newArr;
+            }
+          }, [])
+        } else {
+          arr = [];
+        }
         // Name the array with owner table name
         return {...newObj, [result.table]: arr}
       }, {})
@@ -344,6 +363,7 @@ function reqNestCols(reqObjs) {
 //     that that owner is allowed to pass
 function onlyCols(allowed) {
   return (req, res, next) => {
+    let finalAllowed = allowed;
     // Check if "allowed" is an object and coerce to array
     if(getType(allowed) === 'object') {
       // Grab user owner types placed on request in "onlyOwner()"
@@ -353,7 +373,7 @@ function onlyCols(allowed) {
       }
       // Create an array of allowed columns for all owner
       //     types relevant to the user
-      allowed = Object.entries(allowed)
+      finalAllowed = Object.entries(allowed)
         .reduce((arr, table) => {
           // Grab owner table and allowed columns
           const [tbl, cols] = table;
@@ -371,7 +391,7 @@ function onlyCols(allowed) {
     // Filters through array of allowed columns to flag
     //     any that are included that shouldn't be
     const flagged = Object.keys(req.body)
-      .filter(prop => !allowed.includes(prop));
+      .filter(prop => !finalAllowed.includes(prop));
     // Rejects request if there are any unallowed columns
     if (!!flagged.length) {
       return res.status(400).json({
@@ -414,6 +434,43 @@ function onlyNestCols(allowObjs) {
       return res.status(400).json({
         error: `You are not permitted to submit any of the following subfields in the body of this request: ${flagged.join(', ')}`
       })
+    } else {
+      next();
+    }
+  }
+}
+
+// "mktObj" = object with one key identifying where to find
+//     the market ID and a value of its key in that place
+// "vdrObj" = object with one key identifying where to find
+//     the vendor ID and a value of its key in that place
+function approvedVendor(mktObj, vdrObj) {
+  return async (req, res, next) => {
+    const result = await db('market_vendors')
+      .where(builder => {
+        // Find and use the market ID
+        if(!!mktObj.param) {
+          builder.where({market_id: req.params[mktObj.param]});
+        } else if(!!mktObj.body) {
+          builder.where({market_id: req.body[mktObj.body]});
+        } else {
+          builder.where({market_id: req[mktObj.req]});
+        }
+        // Find and use the vendor ID
+        if(!!vdrObj.param) {
+          builder.andWhere({vendor_id: req.params[vdrObj.param]});
+        } else if(!!vdrObj.body) {
+          builder.andWhere({vendor_id: req.body[vdrObj.body]});
+        } else {
+          builder.andWhere({vendor_id: req[vdrObj.req]});
+        }
+      })
+    // Check if the vendor has applied to join the market
+    if(!result.length) {
+      res.status(403).json({message: "The vendor must accept this market's rules before completing this action."})
+    // Check if any of this vendor's requests have been accepted
+    } else if(result.every(request => request.status <= 0)) {
+      res.status(403).json({message: "Vendors must be approved by the market owner before completing this action."})
     } else {
       next();
     }

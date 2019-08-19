@@ -60,6 +60,8 @@ router.post('/',
     if(!!req.user_id) {
       req.body.admin_id = req.user_id;
     }
+    // Only public markets for the moment
+    req.body = {...req.body, type: 1}
     Markets.add(req.body)
       .then(added => res.status(201).json(added))
       .catch(err => {
@@ -115,6 +117,7 @@ router.delete('/:id',
 const requestReqPost = []
 router.post('/:id/request',
   mw.protect,
+  mw.onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
   mw.parentExists({markets: 'id'}),
   mw.onlyCols(requestReqPost),
   spec.request, mw.validate,
@@ -168,7 +171,7 @@ router.put('/:id/request/:rqID',
 router.delete('/:id/request/:rqID',
   mw.protect,
   mw.parentExists({markets: 'id'}),
-  mw.onlyOwner({markets: {id: 'admin_id', param: 'id'}}),
+  mw.onlyOwner({markets: {id: 'admin_id', param: 'id'},vendors: {id: 'admin_id', req: 'vendor'}}),
   spec.request, mw.validate,
   (req, res) => {
     Markets.removeRequest(req.params.rqID)
@@ -233,7 +236,7 @@ router.put('/:id/booths/:bID',
     Markets.updateBooth(req.params.bID, req.body)
     .then(booth => {
       if (!!booth.updated) {
-      res.status(200).json(booth.market);
+        res.status(200).json(booth.market);
       } else {
         res.status(404).json({ message: 'We do not have a booth type with the specified ID in our database.' });
       }
@@ -283,12 +286,15 @@ router.get('/:id/booths/date/:dt',
   }
 )
 
+const approveMkt = {param: 'id'}
+const approveVdr = {req: 'vendor'}
 const reserveReqPost = ['reserve_date']
 const reserveOnlyPost = ['reserve_date']
 router.post('/:id/booths/:bID/reserve/',
   mw.protect,
   mw.parentExists({markets: 'id', market_booths: 'bID'}),
   mw.onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
+  mw.approvedVendor(approveMkt, approveVdr),
   mw.reqCols(reserveReqPost),
   mw.onlyCols(reserveOnlyPost),
   mw.futureDate({body: 'reserve_date'}, true),
@@ -370,7 +376,6 @@ router.put('/:id/booths/:bID/reserve/:rsID',
         }
       })
       .catch(err => {
-        console.error(err)
         res.status(500).json({knex: err, message: 'The specified market could not be updated in our database.'});
       })
   }
@@ -393,7 +398,6 @@ router.delete('/:id/booths/:bID/reserve/:rsID',
         }
       })
       .catch(err => {
-        console.error(err)
         res.status(500)
           .json({knex: err, message: 'The specified reservation could not be removed from our database.'});
       })
@@ -431,7 +435,7 @@ router.get('/:id/vendors/date/:dt',
     Markets.findVendorsByDate(...args)
     .then(vendors => {
       !vendors.length
-        ? res.status(404).json({ message: 'No vendors could be found in our database for that date.' })
+        ? res.status(200).json(['No vendors are reserved for this date.'])
         : res.status(200).json(vendors);
     })
     .catch(err => {
