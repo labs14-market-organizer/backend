@@ -52,7 +52,14 @@ module.exports = {
       .optional({nullable: true}),
     body('instagram').isString()
       .withMessage("'instagram' must be a string")
-      .optional({nullable: true}),
+      .optional({ nullable: true }),
+    body('email').isEmail()
+      .withMessage("'email' must be a vaild email")
+      .optional(),
+    body('phone').isString()
+      .matches(`^[0-9]{3}-[0-9]{3}-[0-9]{4}$`)
+      .withMessage("'phone' must be in the format '###-###-####'")
+      .optional(),
   ],
   booth: [
     body('name').isString()
