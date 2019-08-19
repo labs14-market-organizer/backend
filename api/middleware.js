@@ -363,6 +363,7 @@ function reqNestCols(reqObjs) {
 //     that that owner is allowed to pass
 function onlyCols(allowed) {
   return (req, res, next) => {
+    let finalAllowed = allowed;
     // Check if "allowed" is an object and coerce to array
     if(getType(allowed) === 'object') {
       // Grab user owner types placed on request in "onlyOwner()"
@@ -372,7 +373,7 @@ function onlyCols(allowed) {
       }
       // Create an array of allowed columns for all owner
       //     types relevant to the user
-      allowed = Object.entries(allowed)
+      finalAllowed = Object.entries(allowed)
         .reduce((arr, table) => {
           // Grab owner table and allowed columns
           const [tbl, cols] = table;
@@ -390,7 +391,7 @@ function onlyCols(allowed) {
     // Filters through array of allowed columns to flag
     //     any that are included that shouldn't be
     const flagged = Object.keys(req.body)
-      .filter(prop => !allowed.includes(prop));
+      .filter(prop => !finalAllowed.includes(prop));
     // Rejects request if there are any unallowed columns
     if (!!flagged.length) {
       return res.status(400).json({
