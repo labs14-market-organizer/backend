@@ -236,7 +236,7 @@ router.put('/:id/booths/:bID',
     Markets.updateBooth(req.params.bID, req.body)
     .then(booth => {
       if (!!booth.updated) {
-      res.status(200).json(booth.market);
+        res.status(200).json(booth.market);
       } else {
         res.status(404).json({ message: 'We do not have a booth type with the specified ID in our database.' });
       }
