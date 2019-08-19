@@ -113,12 +113,9 @@ router.delete('/:id',
 
 // Market_vendors endpoints
 const requestReqPost = []
-const approveMkt = {param: 'id'}
-const approveVdr = {req: 'vendor'}
 router.post('/:id/request',
   mw.protect,
   mw.onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
-  // mw.approvedVendor(approveMkt, approveVdr),
   mw.parentExists({markets: 'id'}),
   mw.onlyCols(requestReqPost),
   spec.request, mw.validate,
@@ -287,12 +284,15 @@ router.get('/:id/booths/date/:dt',
   }
 )
 
+const approveMkt = {param: 'id'}
+const approveVdr = {req: 'vendor'}
 const reserveReqPost = ['reserve_date']
 const reserveOnlyPost = ['reserve_date']
 router.post('/:id/booths/:bID/reserve/',
   mw.protect,
   mw.parentExists({markets: 'id', market_booths: 'bID'}),
   mw.onlyOwner({vendors: {id: 'admin_id', req: 'vendor'}}),
+  // mw.approvedVendor(approveMkt, approveVdr),
   mw.reqCols(reserveReqPost),
   mw.onlyCols(reserveOnlyPost),
   mw.futureDate({body: 'reserve_date'}, true),
