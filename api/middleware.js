@@ -195,7 +195,6 @@ function onlyOwner(obj) {
             } else if(!!tbl.body) {
               builder.where({[`${table}.id`]: req.body[tbl.body]})
             } else {
-              console.log(req.vendor)
               builder.where({[`${table}.id`]: req[tbl.req]})
             }
           } else {
@@ -215,11 +214,9 @@ function onlyOwner(obj) {
       return {result, table, id: tbl.id};
     }))
     // Check if there were no matches
-    console.log(results)
     if(!results.every(result => result.result !== undefined)) {
       return next(); // Let route handle 404s
     }
-    console.log('FOOBAR')
     // Attach array of owner matches onto request for other
     //     middleware or the route handler to use later
     req.owner = await results.reduce((arr, result) => {
@@ -256,7 +253,6 @@ function onlyOwner(obj) {
       //     match those specified in the request
       mismatches = results.reduce((newObj, result) => {
         let arr;
-        console.log(result)
         if(!!result.result) {
           arr = Object.values(matchIDs[result.table]).reduce((newArr, pair) => {
             // Separate ID from location of identifier
@@ -371,7 +367,6 @@ function onlyCols(allowed) {
     if(getType(allowed) === 'object') {
       // Grab user owner types placed on request in "onlyOwner()"
       const {owner} = req;
-      console.log(owner)
       if(owner === undefined) {
         return next(); // Let route handle 404s
       }
