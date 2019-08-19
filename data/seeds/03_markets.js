@@ -1,5 +1,5 @@
 exports.seed = function(knex) {
-  const rules = "<p>I. VENDOR ELIGIBILITY INFORMATION & REQUIREMENTS</p><p>A. Producer-Only Market:</p><p>• The Lafayette Market is a producer-only market.</p><p>• All products sold must be grown or otherwise produced by the vendor. No resale is permitted.</p><p>• A vendor may not sell products grown or produced by others.</p><p>RULES & REGULATIONS</p><p>Updated March, 2019</p><p>• Vendors warrant the quality of all his/her products when they are offered to the public.</p><p>• Produce grown or products produced at a location not listed in the application are not eligible to be sold - except by cooperatives, as noted below.</p>"
+  const rules = "I. VENDOR ELIGIBILITY INFORMATION & REQUIREMENTS A. Producer-Only Market: • The Lafayette Market is a producer-only market. • All products sold must be grown or otherwise produced by the vendor. No resale is permitted. • A vendor may not sell products grown or produced by others. RULES & REGULATIONS Updated March, 2019 • Vendors warrant the quality of all his/her products when they are offered to the public. • Produce grown or products produced at a location not listed in the application are not eligible to be sold - except by cooperatives, as noted below."
   const markets = [
     {
       admin_id: 1,
