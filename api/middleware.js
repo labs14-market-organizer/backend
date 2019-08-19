@@ -451,7 +451,6 @@ function approvedVendor(mktObj, vdrObj) {
       res.status(403).json({message: "The vendor must accept this market's rules before completing this action."})
     // Check if any of this vendor's requests have been accepted
     } else if(!result.includes(request => request.status > 0)) {
-      console.log(result)
       res.status(403).json({message: "Vendors must be approved by the market owner before completing this action."})
     } else {
       next();

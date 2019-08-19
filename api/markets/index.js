@@ -383,7 +383,7 @@ router.put('/:id/booths/:bID/reserve/:rsID',
 router.delete('/:id/booths/:bID/reserve/:rsID',
   mw.protect,
   mw.parentExists({markets: 'id', market_booths: 'bID'}),
-  // mw.onlyOwner(reserveOwner),
+  mw.onlyOwner(reserveOwner),
   spec.reserve, mw.validate,
   (req, res) => {
     Markets.removeReserve(req.params.rsID)
