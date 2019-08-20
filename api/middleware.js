@@ -49,7 +49,7 @@ function verifyJWT(req, res, next) {
         req.vendor = req.vendor[0];
         // Create new JWT that can be refreshed on frontend
         const user = {id: req.user_id};
-        const exp = Date.now() + 1000*60*60*2;; // 2 hours
+        const exp = Date.now() + 1000*60*60*2; // 2 hours
         req.token = {token: genToken(user, exp), exp}
         next();
       } else {
