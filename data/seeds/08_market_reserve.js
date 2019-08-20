@@ -1,6 +1,6 @@
 exports.seed = function(knex) {
-  const date1 = "2019-09-24";
-  const date2 = "2019-09-25";
+  const date1 = "2019-08-24";
+  const date2 = "2019-08-25";
   const reserve = [
     {
       reserve_date: date1,
