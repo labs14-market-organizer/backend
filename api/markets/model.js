@@ -309,7 +309,7 @@ async function removeRequest(id) {
 }
 
 // Booth functions
-async function addBooth(booth) {
+async function addBooth(booth, user_id) {
     return new Promise(async (resolve, reject) => {
         try{
             let added;
@@ -341,7 +341,7 @@ async function addBooth(booth) {
     })
 }
 
-async function updateBooth(id, changes) {
+async function updateBooth(id, changes, user_id) {
     return new Promise(async (resolve, reject) => {
         try{
             let updated;
@@ -374,7 +374,7 @@ async function updateBooth(id, changes) {
     })
 }
 
-async function removeBooth(id) {
+async function removeBooth(id, user_id) {
     return new Promise(async (resolve, reject) => {
         try{
             let deleted;
@@ -435,7 +435,7 @@ async function findReserveByDate(marketID, date, user_id) {
     return result;
 }
 
-async function addReserve(reserve) {
+async function addReserve(reserve, user_id) {
     let result = await db('market_reserve')
         .insert(reserve)
         .returning('*');
@@ -443,11 +443,11 @@ async function addReserve(reserve) {
         .select('market_id')
         .where({id: result[0].booth_id})
         .first();
-    const available = await findReserveByDate(market.market_id, result[0].reserve_date);
+    const available = await findReserveByDate(market.market_id, result[0].reserve_date, user_id);
     return {result, available}
 }
 
-async function updateReserve(id, changes) {
+async function updateReserve(id, changes, user_id) {
     let result = await db('market_reserve')
         .where({id})
         .update(changes)
@@ -460,11 +460,11 @@ async function updateReserve(id, changes) {
         .select('market_id')
         .where({id: result.booth_id})
         .first();
-    const available = await findReserveByDate(market.market_id, result.reserve_date);
+    const available = await findReserveByDate(market.market_id, result.reserve_date, user_id);
     return {result, available}
 }
 
-async function removeReserve(id) {
+async function removeReserve(id, user_id) {
     const result = await db('market_reserve')
         .where({id})
         .del()
@@ -476,7 +476,7 @@ async function removeReserve(id) {
         .select('market_id')
         .where({id: result[0].booth_id})
         .first();
-    const available = await findReserveByDate(market.market_id, result[0].reserve_date);
+    const available = await findReserveByDate(market.market_id, result[0].reserve_date, user_id);
     return {result, available}
 }
 
