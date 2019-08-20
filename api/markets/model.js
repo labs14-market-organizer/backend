@@ -413,15 +413,18 @@ async function removeBooth(id) {
 }
 
 // Market_reserve functions
-async function findReserveByDate(marketID, date) {
+async function findReserveByDate(marketID, date, user_id) {
     const booths = await db('market_booths')
         .where({market_id: marketID})
         .pluck('id');
     const result = await db('market_booths as mb')
-        .select('mb.id', 'mb.number', db.raw('(mb.number - count(mr.id)) as available'), db.raw('array_remove(array_agg(mr.vendor_id ORDER BY mr.vendor_id), NULL) as user_vdrs'))
+        // "available" = available booths
+        // "user_vdrs" = array of the user's vendor IDs that have reserved that booth
+        .select('mb.id', 'mb.number', db.raw('(mb.number - count(mr.id)) as available'), db.raw(`ARRAY_REMOVE(ARRAY_AGG(mr.vendor_id ORDER BY mr.vendor_id) FILTER(WHERE mr.user_vdr = ${user_id}), NULL) as user_vdrs`))
         .count({reserved: 'mr.id'})
         .leftJoin(db('market_reserve')
-            .select('id', 'booth_id', 'vendor_id')
+            .select('market_reserve.id', 'market_reserve.booth_id', 'market_reserve.vendor_id', 'v.admin_id as user_vdr')
+            .join('vendors as v', {'v.id': 'market_reserve.vendor_id'})
             .where({'market_reserve.reserve_date': date})
             .as('mr'),
             {'mr.booth_id': 'mb.id'}

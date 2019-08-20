@@ -274,7 +274,7 @@ router.get('/:id/booths/date/:dt',
   mw.parentExists({markets: 'id'}),
   mw.validReserveDate({param: 'dt'},{param: 'id'}),
   (req, res) => {
-    Markets.findReserveByDate(req.params.id, req.params.dt)
+    Markets.findReserveByDate(req.params.id, req.params.dt, req.user_id)
     .then(booths => {
       !booths.length
         ? res.status(404).json({ message: 'No booths could be found in our database for that date.' })
