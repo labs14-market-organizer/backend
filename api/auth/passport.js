@@ -3,10 +3,12 @@ const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 const {
   BE_URL,
+  SQUARE_SB, SQUARE_SB_ID, SQUARE_SB_SECRET,
   SQUARE_ID, SQUARE_SECRET,
   GOOGLE_ID, GOOGLE_SECRET,
   FACEBOOK_ID, FACEBOOK_SECRET,
 } = process.env;
+
 module.exports = (passport) => {
   // passport.serializeUser((user, done)=>{
     //   console.log('SERIALIZE')
@@ -17,14 +19,20 @@ module.exports = (passport) => {
       //   done(null, id);
       // });
   // ^^^ SERIALIZE/DESERIALIZE ONLY SEEMS TO BE USED W/ SESSIONS
-  // passport.use(new SquareStrategy({
-  //   clientID: SQUARE_ID,
-  //   clientSecret: SQUARE_SECRET,
-  //   callbackURL: `${BE_URL}/auth/square/callback`
-  // },
-  // function(accessToken, refreshToken, profile, done) {
-  //   return done(null, profile);
-  // }));
+
+  passport.use(new SquareStrategy({
+    clientID: SQUARE_SB === 'sandbox'
+      ? SQUARE_SB_ID
+      : SQUARE_ID,
+    clientSecret: SQUARE_SB === 'sandbox'
+      ? SQUARE_SB_SECRET
+      : SQUARE_SECRET,
+    callbackURL: `${BE_URL}/auth/square/callback`
+  },
+  function(accessToken, refreshToken, profile, done) {
+    return done(null, profile);
+  }));
+
   passport.use(
     new GoogleStrategy(
       {
@@ -40,6 +48,7 @@ module.exports = (passport) => {
       }
     )
   );
+
   passport.use(
     new FacebookStrategy(
       {
