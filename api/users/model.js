@@ -45,8 +45,9 @@ async function findById(id) {
     // Grab vendor IDs to populate upcoming vendor schedule
     const vdrIDs = vendors.map(vdr => vdr.id);
     const upcoming_vdr = await db('market_reserve as mr')
-        .select('mr.*', 'mb.market_id')
+        .select('mr.*', 'mb.market_id', 'm.name as market_name')
         .join('market_booths as mb', {'mb.id': 'mr.booth_id'})
+        .join('markets as m', {'m.id': 'mb.market_id'})
         .whereIn('mr.vendor_id', vdrIDs)
         .andWhere('mr.reserve_date', '>=', db.raw('current_date'))
     // Grab market IDs to populate upcoming market schedule
