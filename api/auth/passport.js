@@ -29,9 +29,13 @@ module.exports = (passport) => {
       : SQUARE_SECRET,
     callbackURL: `${BE_URL}/auth/square/callback`
   },
-  function(accessToken, refreshToken, profile, done) {
-    return done(null, profile);
-  }));
+      function(accessToken, refreshToken, profile, done) {
+        // console.log(profile)
+        const { provider, id, email } = profile;
+        const user = { provider, prov_user: id, email };
+        return done(null, user); // pass user data to callback
+      }
+  ));
 
   passport.use(
     new GoogleStrategy(
