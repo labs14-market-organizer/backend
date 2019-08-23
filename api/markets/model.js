@@ -501,7 +501,7 @@ function findVendors(marketID, query=null) {
 
 function findVendorsByDate(marketID, date, query=null) {
     return db('market_reserve as mr')
-        .select('mr.id','mr.vendor_id','v.name','mr.booth_id','mr.paid')
+        .select('mr.id','mr.vendor_id','v.name','mr.booth_id', 'mb.name as booth_name', 'mr.paid')
         .join('market_booths as mb', {'mr.booth_id': 'mb.id'})
         .join('vendors as v', {'mr.vendor_id': 'v.id'})
         .where(builder => {
