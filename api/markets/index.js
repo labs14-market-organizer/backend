@@ -425,6 +425,22 @@ router.put('/:id/booths/:bID/reserve/:rsID',
     Markets.updateReserve(req.params.rsID, req.body)
       .then(updated => {
         if (!!updated.result) {
+          if(req.body.paid) {
+            let subject, html;
+            if(update.result.paid === 1) {
+              subject = `${updated.vendor.name}'s payment for ${updated.result.reserve_date} has been processed by ${updated.market.name}`;
+              html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view the reservation in your upcoming schedule.</p>`
+            } else if(update.result.paid === 0) {
+              subject = `${updated.vendor.name}'s payment for ${updated.result.reserve_date} has been processed by ${updated.market.name}`;
+              html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view the reservation in your upcoming schedule.</p>`
+            }
+            const vdrMsg = [
+              updated.vendor.email,
+              subject,
+              html
+            ]
+            sg(...vdrMsg);
+          }
           res.status(200).json(updated.available, req.user_id);
         } else {
           res.status(404).json({ message: 'We do not have a reservation with the specified ID in our database.' });
