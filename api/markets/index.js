@@ -350,6 +350,20 @@ router.post('/:id/booths/:bID/reserve/',
     }
     Markets.addReserve(req.body, req.user_id)
       .then(reserve =>  {
+        // Send an email to the market owner
+        const mktMsg = [
+          reserve.market.email,
+          `${reserve.vendor.name} has reserved a ${reserve.market.booth_name} at ${reserve.market.name} on ${reserve.result.reserve_date}`,
+          `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view the reservation in your upcoming schedule.</p>`
+        ]
+        sg(...mktMsg);
+        // Send an email to the vendor
+        const vdrMsg = [
+          reserve.vendor.email,
+          `${reserve.vendor.name} has reserved a ${reserve.market.booth_name} at ${reserve.market.name} on ${reserve.result.reserve_date}`,
+          `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view your reservation in your upcoming schedule.</p>`
+        ]
+        sg(...vdrMsg);
         res.status(201).json(reserve.available)
       })
       .catch(err => {
