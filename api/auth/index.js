@@ -4,26 +4,38 @@ require("./passport.js")(passport);
 const db = require('./model');
 const genToken = require('./genToken');
 const { FE_URL } = process.env;
+
 // *** Sets common expiration for JWT and FE in ms ***
 const expire = 1000*60*60*2; // 2 hours
-// router.get("/square",
-//   passport.authenticate("square", {
-//     session: false,
-//     scope: ["MERCHANT_PROFILE_READ"]
-//   })
-// );
-// router.get("/square/callback",
-//   passport.authenticate("square", {
-//     failureRedirect: `${FE_URL}`,
-//     session: false
-//   }),
-//   (req, res) => {
-//     console.log('CALLBACK')
-//     const redirectURL =
-//       `${FE_URL}?jwt=${jwt}`;
-//     res.redirect(redirectURL);
-//   }
-// );
+
+router.get("/square",
+  passport.authenticate("square", {
+    session: false,
+    scope: ["MERCHANT_PROFILE_READ"]
+  })
+);
+router.get("/square/callback",
+  passport.authenticate("square", {
+    failureRedirect: `${FE_URL}`,
+    session: false
+  }),
+  async (req, res) => {
+    return db.square(req.user)
+      .then(user => {
+        const jwt = genToken(user, expire);
+        const exp = Date.now() + expire; // provides parallel to JWT exp
+        const redirectURL = `${FE_URL}/auth/token?jwt=${jwt}&exp=${exp}`;
+        res.redirect(redirectURL);
+      })
+      .catch(err => {
+        console.error(err);
+        // Handle auth failure w/ our user DB
+        const redirectURL = `${FE_URL}/auth/token?err=500`;
+        res.redirect(redirectURL);
+      });
+  }
+);
+
 // FE endpoint for redirect to Google
 router.get("/google",
   passport.authenticate("google", {
@@ -52,6 +64,7 @@ router.get("/google/callback",
       });
   }
 );
+
 // FE endpoint for redirect to Facebook
 router.get("/facebook",
   passport.authenticate("facebook", {
@@ -80,4 +93,5 @@ router.get("/facebook/callback",
       });
   }
 );
+
 module.exports = router;

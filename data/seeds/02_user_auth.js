@@ -27,6 +27,11 @@ exports.seed = async function(knex, Promise) {
       user_id: 2,
       provider: "facebook",
       prov_user: "106978290647581"
+    },
+    {
+      user_id: 3,
+      provider: "square",
+      prov_user: "NPA8J7QE35NJ0"
     }
   ]
 
