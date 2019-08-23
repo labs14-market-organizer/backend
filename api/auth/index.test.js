@@ -2,6 +2,19 @@ const server = require('../server');
 const request = require('supertest')(server);
 
 describe('/auth', () => {
+  describe('/square GET', () => {
+    it('should return 302 status', () => {
+      return request.get('/auth/square')
+        .expect(302);
+    })
+
+    it('should redirect to Square OAuth 2.0', () => {
+      const expected = "https://connect.squareup.com/oauth2/authorize";
+      return request.get('/auth/square')
+        .then(res => expect(res.header.location.split('?')[0]).toBe(expected));
+    })
+  })
+
   describe('/google GET', () => {
     it('should return 302 status', () => {
       return request.get('/auth/google')
@@ -14,9 +27,7 @@ describe('/auth', () => {
         .then(res => expect(res.header.location.split('?')[0]).toBe(expected));
     })
   })
-})
 
-describe('/auth', () => {
   describe('/facebook GET', () => {
     it('should return 302 status', () => {
       return request.get('/auth/facebook')
