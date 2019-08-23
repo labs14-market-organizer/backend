@@ -19,6 +19,9 @@
       {
         email: "cloudstandsapp@gmail.com"
       },
+      {
+        email: "cloudstandsapp@gmail.com"
+      },
     ]
   
     return (
