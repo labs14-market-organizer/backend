@@ -22,7 +22,7 @@ async function google(provided) {
             .insert({ ...auth, user_id: user.id })
             .transacting(t);
         });
-        resolve(user)
+        resolve({...user, newAcct: !id.length})
       } catch(err) {
         reject(err);
       }
@@ -32,7 +32,7 @@ async function google(provided) {
       .select('u.*')
       .where(auth)
       .join('user_auth as ua', {'u.id': 'ua.user_id'});
-    return rtrn[0];
+    return {...rtrn[0], newAcct: !id.length};
   }
 }
 async function facebook(provided) {
@@ -54,7 +54,7 @@ async function facebook(provided) {
             .insert({ ...auth, user_id: user.id })
             .transacting(t);
         });
-        resolve(user)
+        resolve({...user, newAcct: !id.length})
       } catch(err) {
         reject(err);
       }
@@ -64,6 +64,6 @@ async function facebook(provided) {
       .select('u.*')
       .where(auth)
       .join('user_auth as ua', {'u.id': 'ua.user_id'});
-    return rtrn[0];
+    return {...rtrn[0], newAcct: !id.length};
   }
 }
