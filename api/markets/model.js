@@ -289,7 +289,15 @@ async function addRequest(request) {
     const [result] = await db('market_vendors')
         .insert(request)
         .returning('*');
-    return result;
+    const [market] = await db('markets as m')
+        .select('u.email', 'm.name')
+        .join('users as u', {'u.id': 'm.admin_id'})
+        .where({'m.id': result.market_id});
+    const [vendor] = await db('vendors as v')
+        .select('u.email', 'v.name')
+        .join('users as u', {'u.id': 'v.admin_id'})
+        .where({'m.id': result.vendor_id});
+    return {market, vendor, result};
 }
 
 async function updateRequest(id, changes) {
@@ -297,7 +305,15 @@ async function updateRequest(id, changes) {
         .where({id})
         .update(changes)
         .returning('*')
-    return result;
+    const [market] = await db('markets as m')
+        .select('u.email', 'm.name')
+        .join('users as u', {'u.id': 'm.admin_id'})
+        .where({'m.id': result.market_id});
+    const [vendor] = await db('vendors as v')
+        .select('u.email', 'v.name')
+        .join('users as u', {'u.id': 'v.admin_id'})
+        .where({'m.id': result.vendor_id});
+    return {market, vendor, result};
 }
 
 async function removeRequest(id) {
@@ -305,7 +321,15 @@ async function removeRequest(id) {
         .where({id})
         .del()
         .returning('*');
-    return result;
+    const [market] = await db('markets as m')
+        .select('u.email', 'm.name')
+        .join('users as u', {'u.id': 'm.admin_id'})
+        .where({'m.id': result.market_id});
+    const [vendor] = await db('vendors as v')
+        .select('u.email', 'v.name')
+        .join('users as u', {'u.id': 'v.admin_id'})
+        .where({'m.id': result.vendor_id});
+    return {market, vendor, result};
 }
 
 // Booth functions

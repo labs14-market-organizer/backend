@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Markets = require("./model");
 const mw = require('../middleware');
 const spec = require('./validate');
+const sg = require('../sendgrid');
 
 router.get('/', (req, res ) => {
    Markets.find()
@@ -130,7 +131,13 @@ router.post('/:id/request',
     }
     Markets.addRequest(req.body)
       .then(added => {
-        res.status(201).json(added);
+        const mktMsg = [
+          added.market.email,
+          `${added.vendor.name} has joined ${added.market.name}`,
+          `<p>Please log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view their vendor profile for contact information and other details.</p>`
+        ]
+        sg(...mktMsg);
+        res.status(201).json(added.result);
       })
       .catch(err => {
         res.status(500).json({knex: err, message: 'The request could not be added to our database.'})
@@ -156,8 +163,27 @@ router.put('/:id/request/:rqID',
     }
     Markets.updateRequest(req.params.rqID, req.body)
       .then(updated => {
-        if (!!updated) {
-          res.status(200).json(updated);
+        if (!!updated.result) {
+          if(req.body.status) {
+            let subject, html;
+            if(update.result.status === 1) {
+              subject = `${updated.vendor.name} has been approved by ${updated.market.name}`;
+              html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and reserve a booth at ${updated.market.name}.</p>`;
+            } else if(update.result.status === -1) {
+              subject = `${updated.vendor.name} has been rejected by ${updated.market.name}`;
+              html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and search for other markets to join.</p>`;
+            } else if(update.result.status === 0) {
+              subject = `${updated.vendor.name}'s status at ${updated.market.name} has been changed to pending`;
+              html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> to contact ${updated.market.name} or search for other markets to join.</p>`;
+            }
+            const vdrMsg = [
+              updated.vendor.email,
+              subject,
+              html
+            ]
+            sg(...vdrMsg);
+          }
+          res.status(200).json(updated.result);
         } else {
           res.status(404).json({ message: 'We do not have a request with the specified ID in our database.' });
         }
@@ -177,6 +203,12 @@ router.delete('/:id/request/:rqID',
     Markets.removeRequest(req.params.rqID)
       .then(deleted => {
         if (!!deleted) {
+          const mktMsg = [
+            [deleted.market.email, deleted.vendor.email],
+            `${deleted.vendor.name}'s request to join ${deleted.market.name} has been deleted`,
+            `<p>If you believe this was in error, please log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view their profile for contact information and other details.</p>`
+          ]
+          sg(...mktMsg);
           res.status(200).json(deleted);
         } else {
           res.status(404).json({
