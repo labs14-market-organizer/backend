@@ -131,12 +131,20 @@ router.post('/:id/request',
     }
     Markets.addRequest(req.body)
       .then(added => {
+        // Send an email to the market owner
         const mktMsg = [
           added.market.email,
-          `${added.vendor.name} has joined ${added.market.name}`,
+          `${added.vendor.name} has joined ${added.market.name}!`,
           `<p>Please log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view their vendor profile for contact information and other details.</p>`
         ]
         sg(...mktMsg);
+        // Send an email to the vendor
+        const vdrMsg = [
+          added.vendor.email,
+          `${added.vendor.name} has joined ${added.market.name}!`,
+          `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and reserve a booth at ${updated.market.name}.</p>`
+        ]
+        sg(...vdrMsg);
         res.status(201).json(added.result);
       })
       .catch(err => {
