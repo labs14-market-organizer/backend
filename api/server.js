@@ -23,7 +23,7 @@ server.use("/markets", verifyJWT, marketsRouter);
 
 //Server Test Message
 server.get('/', (req, res) => {
-    res.status(200).send({ message: 'Hello from CloudStands.'})
+    res.status(200).send({ message: 'Hello from Cloud Stands.'})
 });
 
 module.exports = server; 
