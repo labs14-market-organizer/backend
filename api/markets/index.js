@@ -174,13 +174,13 @@ router.put('/:id/request/:rqID',
         if (!!updated.result) {
           if(req.body.status) {
             let subject, html;
-            if(update.result.status === 1) {
+            if(updated.result.status === 1) {
               subject = `${updated.vendor.name} has been approved by ${updated.market.name}`;
               html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and reserve a booth at ${updated.market.name}.</p>`;
-            } else if(update.result.status === -1) {
+            } else if(updated.result.status === -1) {
               subject = `${updated.vendor.name} has been rejected by ${updated.market.name}`;
               html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and search for other markets to join.</p>`;
-            } else if(update.result.status === 0) {
+            } else if(updated.result.status === 0) {
               subject = `${updated.vendor.name}'s status at ${updated.market.name} has been changed to pending`;
               html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> to contact ${updated.market.name} or search for other markets to join.</p>`;
             }
@@ -427,12 +427,12 @@ router.put('/:id/booths/:bID/reserve/:rsID',
         if (!!updated.result) {
           if(req.body.paid) {
             let subject, html;
-            if(update.result.paid === 1) {
+            if(updated.result.paid === 1) {
               subject = `${updated.vendor.name}'s payment for ${updated.result.reserve_date} has been processed by ${updated.market.name}`;
               html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view the reservation in your upcoming schedule.</p>`
-            } else if(update.result.paid === 0) {
-              subject = `${updated.vendor.name}'s payment for ${updated.result.reserve_date} has been processed by ${updated.market.name}`;
-              html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view the reservation in your upcoming schedule.</p>`
+            } else if(updated.result.paid === 0) {
+              subject = `${updated.vendor.name}'s payment for ${updated.result.reserve_date} has been marked as unpaid by ${updated.market.name}`;
+              html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view the market's contact information.</p>`
             }
             const vdrMsg = [
               updated.vendor.email,
