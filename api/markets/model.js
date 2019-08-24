@@ -289,6 +289,9 @@ async function addRequest(request) {
     const [result] = await db('market_vendors')
         .insert(request)
         .returning('*');
+    if(!result) {
+        return {result}
+    }
     const [market] = await db('markets as m')
         .select('u.email', 'm.name')
         .join('users as u', {'u.id': 'm.admin_id'})
@@ -296,7 +299,7 @@ async function addRequest(request) {
     const [vendor] = await db('vendors as v')
         .select('u.email', 'v.name')
         .join('users as u', {'u.id': 'v.admin_id'})
-        .where({'m.id': result.vendor_id});
+        .where({'v.id': result.vendor_id});
     return {market, vendor, result};
 }
 
@@ -305,6 +308,9 @@ async function updateRequest(id, changes) {
         .where({id})
         .update(changes)
         .returning('*')
+    if(!result) {
+        return {result}
+    }
     const [market] = await db('markets as m')
         .select('u.email', 'm.name')
         .join('users as u', {'u.id': 'm.admin_id'})
@@ -312,7 +318,7 @@ async function updateRequest(id, changes) {
     const [vendor] = await db('vendors as v')
         .select('u.email', 'v.name')
         .join('users as u', {'u.id': 'v.admin_id'})
-        .where({'m.id': result.vendor_id});
+        .where({'v.id': result.vendor_id});
     return {market, vendor, result};
 }
 
@@ -321,6 +327,9 @@ async function removeRequest(id) {
         .where({id})
         .del()
         .returning('*');
+    if(!result) {
+        return {result}
+    }
     const [market] = await db('markets as m')
         .select('u.email', 'm.name')
         .join('users as u', {'u.id': 'm.admin_id'})
@@ -328,7 +337,7 @@ async function removeRequest(id) {
     const [vendor] = await db('vendors as v')
         .select('u.email', 'v.name')
         .join('users as u', {'u.id': 'v.admin_id'})
-        .where({'m.id': result.vendor_id});
+        .where({'v.id': result.vendor_id});
     return {market, vendor, result};
 }
 
@@ -460,30 +469,9 @@ async function findReserveByDate(marketID, date, user_id) {
 }
 
 async function addReserve(reserve, user_id) {
-    let result = await db('market_reserve')
+    let [result] = await db('market_reserve')
         .insert(reserve)
         .returning('*');
-    const market = await db('market_booths as mb')
-        .select('mb.market_id','m.name','mb.name as booth_name','u.email')
-        .join('markets as m', {'m.id': 'mb.market_id'})
-        .join('users as u', {'u.id': 'm.admin_id'})
-        .where({'mb.id': result[0].booth_id})
-        .first();
-    const vendor = await db('vendors as v')
-        .select('v.name','u.email')
-        .join('users as u', {'u.id': 'v.admin_id'})
-        .where({'v.id': result[0].vendor_id})
-        .first();
-    const available = await findReserveByDate(market.market_id, result[0].reserve_date, user_id);
-    return {market, vendor, result, available}
-}
-
-async function updateReserve(id, changes, user_id) {
-    let result = await db('market_reserve')
-        .where({id})
-        .update(changes)
-        .returning('*');
-    [result] = result;
     if(!result) {
         return {result}
     }
@@ -491,30 +479,56 @@ async function updateReserve(id, changes, user_id) {
         .select('mb.market_id','m.name','mb.name as booth_name','u.email')
         .join('markets as m', {'m.id': 'mb.market_id'})
         .join('users as u', {'u.id': 'm.admin_id'})
-        .where({'mb.id': result[0].booth_id})
+        .where({'mb.id': result.booth_id})
         .first();
     const vendor = await db('vendors as v')
         .select('v.name','u.email')
         .join('users as u', {'u.id': 'v.admin_id'})
-        .where({'v.id': result[0].vendor_id})
+        .where({'v.id': result.vendor_id})
         .first();
-    const available = await findReserveByDate(market.market_id, result[0].reserve_date, user_id);
+    const available = await findReserveByDate(market.market_id, result.reserve_date, user_id);
+    return {market, vendor, result, available}
+}
+
+async function updateReserve(id, changes, user_id) {
+    console.log(id)
+    console.log(changes)
+    console.log(user_id)
+    let [result] = await db('market_reserve')
+        .where({id})
+        .update(changes)
+        .returning('*');
+    if(!result) {
+        return {result}
+    }
+    const market = await db('market_booths as mb')
+        .select('mb.market_id','m.name','mb.name as booth_name','u.email')
+        .join('markets as m', {'m.id': 'mb.market_id'})
+        .join('users as u', {'u.id': 'm.admin_id'})
+        .where({'mb.id': result.booth_id})
+        .first();
+    const vendor = await db('vendors as v')
+        .select('v.name','u.email')
+        .join('users as u', {'u.id': 'v.admin_id'})
+        .where({'v.id': result.vendor_id})
+        .first();
+    const available = await findReserveByDate(market.market_id, result.reserve_date, user_id);
     return {market, vendor, result, available}
 }
 
 async function removeReserve(id, user_id) {
-    const result = await db('market_reserve')
+    const [result] = await db('market_reserve')
         .where({id})
         .del()
         .returning('*');
-    if(!result.length) {
+    if(!result) {
         return {result}
     }
     const market = await db('market_booths')
         .select('market_id')
-        .where({id: result[0].booth_id})
+        .where({id: result.booth_id})
         .first();
-    const available = await findReserveByDate(market.market_id, result[0].reserve_date, user_id);
+    const available = await findReserveByDate(market.market_id, result.reserve_date, user_id);
     return {result, available}
 }
 

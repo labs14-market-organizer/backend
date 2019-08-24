@@ -27,7 +27,6 @@ router.get('/search',
         : res.status(200).json(markets);
     })
     .catch(err => {
-      console.error(err)
         res.status(500).json({knex: err, message: 'This is a error message' });
     });
   }
@@ -108,7 +107,6 @@ router.delete('/:id',
         }
       })
       .catch(err => {
-        console.error(err)
         res.status(500)
           .json({knex: err, message: 'The specified market could not be removed from our database.'});
       })
@@ -142,7 +140,7 @@ router.post('/:id/request',
         const vdrMsg = [
           added.vendor.email,
           `${added.vendor.name} has joined ${added.market.name}!`,
-          `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and reserve a booth at ${updated.market.name}.</p>`
+          `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and reserve a booth at ${added.market.name}.</p>`
         ]
         sg(...vdrMsg);
         res.status(201).json(added.result);
@@ -166,7 +164,6 @@ router.put('/:id/request/:rqID',
     req.body = {
       ...req.body,
       market_id: req.params.id,
-      vendor_id: req.vendor,
       updated_at: new Date()
     }
     Markets.updateRequest(req.params.rqID, req.body)
@@ -210,14 +207,20 @@ router.delete('/:id/request/:rqID',
   (req, res) => {
     Markets.removeRequest(req.params.rqID)
       .then(deleted => {
-        if (!!deleted) {
+        if (!!deleted.result) {
           const mktMsg = [
-            [deleted.market.email, deleted.vendor.email],
+            deleted.market.email,
             `${deleted.vendor.name}'s request to join ${deleted.market.name} has been deleted`,
             `<p>If you believe this was in error, please log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view their profile for contact information and other details.</p>`
           ]
           sg(...mktMsg);
-          res.status(200).json(deleted);
+          const vdrMsg = [
+            deleted.vendor.email,
+            `${deleted.vendor.name}'s request to join ${deleted.market.name} has been deleted`,
+            `<p>If you believe this was in error, please log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view their profile for contact information and other details.</p>`
+          ]
+          sg(...vdrMsg);
+          res.status(200).json(deleted.result);
         } else {
           res.status(404).json({
             message: 'We do not have a request with the specified ID in our database.',
@@ -350,17 +353,18 @@ router.post('/:id/booths/:bID/reserve/',
     }
     Markets.addReserve(req.body, req.user_id)
       .then(reserve =>  {
+        const date = reserve.result.reserve_date.toUTCString().slice(0,16);
         // Send an email to the market owner
         const mktMsg = [
           reserve.market.email,
-          `${reserve.vendor.name} has reserved a ${reserve.market.booth_name} at ${reserve.market.name} on ${reserve.result.reserve_date}`,
+          `${reserve.vendor.name} has reserved a ${reserve.market.booth_name} at ${reserve.market.name} on ${date}`,
           `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view the reservation in your upcoming schedule.</p>`
         ]
         sg(...mktMsg);
         // Send an email to the vendor
         const vdrMsg = [
           reserve.vendor.email,
-          `${reserve.vendor.name} has reserved a ${reserve.market.booth_name} at ${reserve.market.name} on ${reserve.result.reserve_date}`,
+          `${reserve.vendor.name} has reserved a ${reserve.market.booth_name} at ${reserve.market.name} on ${date}`,
           `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view your reservation in your upcoming schedule.</p>`
         ]
         sg(...vdrMsg);
@@ -422,16 +426,17 @@ router.put('/:id/booths/:bID/reserve/:rsID',
       vendor_id: req.vendor,
       updated_at: new Date()
     }
-    Markets.updateReserve(req.params.rsID, req.body)
+    Markets.updateReserve(req.params.rsID, req.body, req.user_id)
       .then(updated => {
         if (!!updated.result) {
           if(req.body.paid) {
+            const date = updated.result.reserve_date.toUTCString().slice(0,16);
             let subject, html;
             if(updated.result.paid === 1) {
-              subject = `${updated.vendor.name}'s payment for ${updated.result.reserve_date} has been processed by ${updated.market.name}`;
+              subject = `${updated.vendor.name}'s payment for ${date} has been processed by ${updated.market.name}`;
               html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view the reservation in your upcoming schedule.</p>`
             } else if(updated.result.paid === 0) {
-              subject = `${updated.vendor.name}'s payment for ${updated.result.reserve_date} has been marked as unpaid by ${updated.market.name}`;
+              subject = `${updated.vendor.name}'s payment for ${date} has been marked as unpaid by ${updated.market.name}`;
               html = `<p>You may now log in to your account on our website at <a href="https://www.cloudstands.com">cloudstands.com</a> and view the market's contact information.</p>`
             }
             const vdrMsg = [
@@ -441,12 +446,13 @@ router.put('/:id/booths/:bID/reserve/:rsID',
             ]
             sg(...vdrMsg);
           }
-          res.status(200).json(updated.available, req.user_id);
+          res.status(200).json(updated.available);
         } else {
           res.status(404).json({ message: 'We do not have a reservation with the specified ID in our database.' });
         }
       })
       .catch(err => {
+        console.error(err)
         res.status(500).json({knex: err, message: 'The specified market could not be updated in our database.'});
       })
   }
@@ -460,7 +466,7 @@ router.delete('/:id/booths/:bID/reserve/:rsID',
   (req, res) => {
     Markets.removeReserve(req.params.rsID, req.user_id)
       .then(deleted => {
-        if (!!deleted.result.length) {
+        if (!!deleted.result) {
           res.status(200).json(deleted.available);
         } else {
           res.status(404).json({
@@ -469,6 +475,7 @@ router.delete('/:id/booths/:bID/reserve/:rsID',
         }
       })
       .catch(err => {
+        console.error(err)
         res.status(500)
           .json({knex: err, message: 'The specified reservation could not be removed from our database.'});
       })

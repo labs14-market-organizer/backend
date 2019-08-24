@@ -39,7 +39,6 @@ router.get("/square/callback",
         res.redirect(redirectURL);
       })
       .catch(err => {
-        console.error(err);
         // Handle auth failure w/ our user DB
         const redirectURL = `${FE_URL}/auth/token?err=500`;
         res.redirect(redirectURL);
@@ -72,7 +71,6 @@ router.get("/google/callback",
         res.redirect(redirectURL);
       })
       .catch(err => {
-        console.error(err)
         // Handle auth failure w/ our user DB
         const redirectURL = `${FE_URL}/auth/token?err=500`;
         res.redirect(redirectURL);
