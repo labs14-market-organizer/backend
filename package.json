@@ -14,6 +14,7 @@
     "jest-get-type": "^24.8.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.19.1",
+    "knex-migrate": "^1.7.2",
     "parse-address-string": "^0.0.3",
     "passport": "^0.4.0",
     "passport-facebook": "^3.0.0",
