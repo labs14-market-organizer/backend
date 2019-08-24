@@ -1,7 +1,9 @@
 const db = require('../../db/config');
+
 module.exports = {
   findOrCreate,
 }
+
 async function findOrCreate(provided) {
   const { email, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
@@ -27,10 +29,11 @@ async function findOrCreate(provided) {
       }
     })
   } else { // If user already exists, return user
-    const rtrn = await db('users as u')
+    const result = await db('users as u')
       .select('u.*')
       .where(auth)
-      .join('user_auth as ua', {'u.id': 'ua.user_id'});
-    return rtrn[0];
+      .join('user_auth as ua', {'u.id': 'ua.user_id'})
+      .first();
+    return result;
   }
 }

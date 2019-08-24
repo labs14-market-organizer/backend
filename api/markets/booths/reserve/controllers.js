@@ -1,4 +1,4 @@
-const Markets = require('../../model');
+const Markets = require('./model');
 const sg = require('../../../sendgrid');
 
 module.exports = {
