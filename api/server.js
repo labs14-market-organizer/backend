@@ -1,25 +1,17 @@
 const express = require('express');
 const helmet = require('helmet');
-const cors = require('cors');
-const passport = require("passport");
-const {verifyJWT} = require('./middleware');
+const {originCORS, verifyJWT} = require('./middleware');
 
 const server = express();
 
-const userRouter = require('./users');
-const authRouter = require('./auth');
-const vendorRouter = require('./vendors');
-const marketsRouter = require('./markets/index');
-
 server.use(helmet());
 server.use(express.json());
-server.use(cors());
-server.use(passport.initialize());
+server.use("/auth", verifyJWT, require('./auth'));
 
-server.use("/auth", verifyJWT, authRouter);
-server.use("/user", verifyJWT, userRouter);
-server.use("/vendors", verifyJWT, vendorRouter);
-server.use("/markets", verifyJWT, marketsRouter);
+server.use(originCORS());
+server.use("/user", verifyJWT, require('./users'));
+server.use("/vendors", verifyJWT, require('./vendors'));
+server.use("/markets", verifyJWT, require('./markets'));
 
 //Server Test Message
 server.get('/', (req, res) => {

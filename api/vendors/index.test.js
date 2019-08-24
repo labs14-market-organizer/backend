@@ -2,13 +2,13 @@ const server = require('../server');
 const request = require('supertest')(server);
 const getType = require('jest-get-type');
 // const db = require('./model');
-const knex = require('../../data/dbConfig');
-const genToken = require('../auth/genToken');
+const knex = require('../../db/config');
+const genToken = require('../genToken');
 
-const tkn1 = genToken({id: 1}, 1000*60*60*2);
-const tkn2 = genToken({id: 2}, 1000*60*60*2);
-const tkn3 = genToken({id: 3}, 1000*60*60*2);
-const tkn4 = genToken({id: 4}, 1000*60*60*2);
+const tkn1 = genToken({id: 1}).token;
+const tkn2 = genToken({id: 2}).token;
+const tkn3 = genToken({id: 3}).token;
+const tkn4 = genToken({id: 4}).token;
 
 describe('/vendors', () => {
   beforeAll(async () => {

@@ -1,0 +1,23 @@
+const Auth = require('./model');
+const email = require('./email');
+const genToken = require('../genToken');
+
+module.exports = {
+  login,
+}
+
+async function login(req, res) {
+  return Auth.findOrCreate(req.user)
+    .then(user => {
+      if(user.newAcct && user.email) {
+        email.welcome(user.email);
+      }
+      const redirectURL = genToken(user, true);
+      res.redirect(redirectURL);
+    })
+    .catch(err => {
+      // Handle auth failure w/ our user DB
+      const redirectURL = `${FE_URL}/auth/token?err=500`;
+      res.redirect(redirectURL);
+    });
+}
