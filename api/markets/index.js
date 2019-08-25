@@ -1,4 +1,4 @@
-const router = require('express').Router();
+const router = require('express').Router({mergeParams: true});
 const Markets = require("./model");
 const mw = require('../middleware');
 const spec = require('./validate');

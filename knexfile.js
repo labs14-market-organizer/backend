@@ -13,10 +13,10 @@ const dbSettings = (connection) => ({
   },
   useNullAsDefault: true,
   migrations: {
-    directory: './data/migrations'
+    directory: './db/migrations'
   },
   seeds: {
-    directory: `./data/seeds${process.env.NODE_ENV === 'testing' && '/testing'}`
+    directory: `./db/seeds${process.env.NODE_ENV === 'testing' && '/testing'}`
   }
 });
 

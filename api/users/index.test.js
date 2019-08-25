@@ -2,8 +2,8 @@ const server = require('../server');
 const request = require('supertest')(server);
 const getType = require('jest-get-type');
 const db = require('./model');
-const knex = require('../../data/dbConfig');
-const genToken = require('../auth/genToken');
+const knex = require('../../db/config');
+const genToken = require('../genToken');
 
 const tkn1 = genToken({id: 1}).token;
 

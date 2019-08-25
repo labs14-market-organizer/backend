@@ -1,4 +1,4 @@
-const router = require('express').Router();
+const router = require('express').Router({mergeParams: true});
 const {originCORS} = require('../../middleware');
 const passport = require('passport');
 require('../passport')(passport);
