@@ -19,6 +19,7 @@ describe('/markets', () => {
     await knex.raw("TRUNCATE TABLE market_days RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE market_booths RESTART IDENTITY CASCADE");
     await knex.raw("TRUNCATE TABLE markets RESTART IDENTITY CASCADE");
+    await knex.seed.run();
   })
 
   describe('/ POST', () => {

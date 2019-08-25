@@ -2,11 +2,16 @@ const server = require('../server');
 const request = require('supertest')(server);
 const getType = require('jest-get-type');
 const db = require('./model');
-const genToken = require('../genToken');
+const knex = require('../../data/dbConfig');
+const genToken = require('../auth/genToken');
 
 const tkn1 = genToken({id: 1}).token;
 
 describe('/user', () => {
+  beforeAll(async () => {
+    await knex.seed.run();
+  })
+
   describe('/ GET', () => {
     it('should return 200 status', () => {
       return request.get('/user')
