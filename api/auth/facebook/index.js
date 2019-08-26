@@ -16,6 +16,10 @@ router.get("/",
 
 // Facebook endpoint for redirect to FE
 router.get("/callback",
+  (req, res, next) => {
+    console.log('FOOBAR');
+    next();
+  },
   originCORS(['https://www.facebook.com']),
   passport.authenticate("facebook", {
     failureRedirect: `${FE_URL}`, // Handle auth failure on Facebook's side
