@@ -8,7 +8,6 @@ module.exports = {
 }
 
 async function login(req, res) {
-  console.log('CTRL')
   return Auth.findOrCreate(req.user)
     .then(user => {
       if(user.newAcct && user.email) {
