@@ -29,7 +29,7 @@ const defWL = [
   process.env.FE_URL,
   'https://www.cloudstands.com',
   'https://mystifying-jones-f3d668.netlify.com',
-  'http://localhost:3000'
+  /localhost:3[0-9]{3}/
 ];
 function originCORS(whitelist = defWL) {
   const opt = {
