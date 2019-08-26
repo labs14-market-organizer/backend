@@ -9,6 +9,7 @@ module.exports = (to, subject, html) => {
     subject,
     html
   }
+  console.log(process.env.NODE_ENV)
   return process.env.NODE_ENV !== 'testing'
     ? sgMail.send(msg)
     : null;
