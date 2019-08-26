@@ -7,7 +7,7 @@ const ctrl = require('../controllers');
 
 // FE endpoint for redirect to Google
 router.get("/",
-  originCORS(),
+  // originCORS(),
   passport.authenticate("google", {
     session: false, // using JWT instead of sessions
     scope: ["openid email profile"]
@@ -16,7 +16,7 @@ router.get("/",
 
 // Google endpoint for redirect to FE
 router.get("/callback",
-  originCORS(['https://www.google.com']),
+  // originCORS(['https://www.google.com']),
   passport.authenticate("google", {
     failureRedirect: `${FE_URL}`, // Handle auth failure on Google's side
     session: false // using JWT instead of sessions

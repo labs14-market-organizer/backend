@@ -7,7 +7,7 @@ const ctrl = require('../controllers');
 
 // FE endpoint for redirect to Square
 router.get("/",
-  originCORS(),
+  // originCORS(),
   passport.authenticate("square", {
     session: false,
     scope: ["MERCHANT_PROFILE_READ"]
@@ -16,7 +16,7 @@ router.get("/",
 
 // Square endpoint for redirect to FE
 router.get("/callback",
-  originCORS(['https://www.squareup.com']),
+  // originCORS(['https://www.squareup.com']),
   passport.authenticate("square", {
     failureRedirect: `${FE_URL}`,
     session: false
