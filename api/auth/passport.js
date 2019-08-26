@@ -21,12 +21,9 @@ module.exports = (passport) => {
   // ^^^ SERIALIZE/DESERIALIZE ONLY SEEMS TO BE USED W/ SESSIONS
 
   passport.use(new SquareStrategy({
-    clientID: SQUARE_SB === 'sandbox'
-      ? SQUARE_SB_ID
-      : SQUARE_ID,
-    clientSecret: SQUARE_SB === 'sandbox'
-      ? SQUARE_SB_SECRET
-      : SQUARE_SECRET,
+    // Square OAuth apparently doesn't support their own sandbox
+    clientID: SQUARE_ID || 'test',
+    clientSecret: SQUARE_SECRET,
     callbackURL: `${BE_URL}/auth/square/callback`
   },
       function(accessToken, refreshToken, profile, done) {
