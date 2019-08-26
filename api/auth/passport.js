@@ -42,6 +42,7 @@ module.exports = (passport) => {
         callbackURL: `${BE_URL}/auth/google/callback` // BE endpoint that Google redirects to
       },
       function(accessToken, refreshToken, profile, done) {
+        console.log(profile)
         const { provider, id, emails } = profile;
         const email = emails[0].value;
         const user = { provider, prov_user: id, email };
@@ -60,6 +61,7 @@ module.exports = (passport) => {
         enableProof: true
       },
       function(accessToken, refreshToken, profile, done) {
+        console.log(profile)
         const { provider, id, emails } = profile;
         const email = emails[0].value; 
         const user = { provider, prov_user: id, email };
