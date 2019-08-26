@@ -12,7 +12,14 @@ const tkn4 = genToken({id: 4}).token;
 const tkn5 = genToken({id: 5}).token;
 
 describe('/markets', () => {
-  beforeAll(async () => await knex.seed.run());
+  beforeAll(async () => {
+    await knex.seed.run();
+    await knex.raw("TRUNCATE TABLE market_reserve RESTART IDENTITY CASCADE");
+    await knex.raw("TRUNCATE TABLE market_vendors RESTART IDENTITY CASCADE");
+    await knex.raw("TRUNCATE TABLE market_days RESTART IDENTITY CASCADE");
+    await knex.raw("TRUNCATE TABLE market_booths RESTART IDENTITY CASCADE");
+    await knex.raw("TRUNCATE TABLE markets RESTART IDENTITY CASCADE");
+  });
 
   describe('/ POST', () => {
     it('should return 201 status', () => {

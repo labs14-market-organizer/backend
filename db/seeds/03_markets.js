@@ -121,8 +121,8 @@ rules    },
     knex
       // Deletes ALL existing entries for users table
       .raw("TRUNCATE TABLE markets RESTART IDENTITY CASCADE")
-      .then(function() {
-        return knex("markets").insert(markets);
-      })
+      // .then(function() {
+      //   return knex("markets").insert(markets);
+      // })
   );
 };
