@@ -16,7 +16,7 @@ const dbSettings = (connection) => ({
     directory: './db/migrations'
   },
   seeds: {
-    directory: `./db/seeds${process.env.NODE_ENV === 'testing' && '/testing'}`
+    directory: `./db/seeds${process.env.NODE_ENV === 'testing' ? '/testing' : ''}`
   }
 });
 
