@@ -7,7 +7,7 @@ const ctrl = require('../controllers');
 
 // FE endpoint for redirect to Facebook
 router.get("/",
-  originCORS(),
+  // originCORS(),
   passport.authenticate("facebook", {
     session: false, // using JWT instead of sessions
     scope: ["email"]
@@ -16,7 +16,7 @@ router.get("/",
 
 // Facebook endpoint for redirect to FE
 router.get("/callback",
-  originCORS(['https://www.facebook.com']),
+  // originCORS(['https://www.facebook.com']),
   passport.authenticate("facebook", {
     failureRedirect: `${FE_URL}`, // Handle auth failure on Facebook's side
     session: false // using JWT instead of sessions
