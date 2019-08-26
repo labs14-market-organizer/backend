@@ -58,7 +58,7 @@ module.exports = (passport) => {
         clientID: FACEBOOK_ID || 'test', // Fallback to prevent tests from failing
         clientSecret: FACEBOOK_SECRET,
         callbackURL: `${BE_URL}/auth/facebook/callback`, // BE endpoint that Facebook redirects to
-        profileFields: ['id', 'email'],
+        profileFields: ['id', 'email', 'picture.type(large)'],
         enableProof: true
       },
       function(accessToken, refreshToken, profile, done) {
