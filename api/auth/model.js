@@ -1,16 +1,17 @@
-const db = require('../../data/dbConfig');
+const db = require('../../db/config');
+
 module.exports = {
-  square,
-  google,
-  facebook
+  findOrCreate,
 }
-async function square(provided) {
+
+async function findOrCreate(provided) {
   const { email, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
     .where(auth)
     .returning('id');
   let user;
-  if(!id.length) { // Check if a user doesn't exist w/ specified auth data
+  const new_acct = !id.length;
+  if(new_acct) { // Check if a user doesn't exist w/ specified auth data
     // Use a transaction to prevent partial inserts
     return new Promise(async (resolve, reject) => {
       try{
@@ -23,80 +24,17 @@ async function square(provided) {
             .insert({ ...auth, user_id: user.id })
             .transacting(t);
         });
-        resolve(user)
+        resolve({...user, new_acct})
       } catch(err) {
         reject(err);
       }
     })
   } else { // If user already exists, return user
-    const rtrn = await db('users as u')
+    const result = await db('users as u')
       .select('u.*')
       .where(auth)
-      .join('user_auth as ua', {'u.id': 'ua.user_id'});
-    return rtrn[0];
-  }
-}
-async function google(provided) {
-  const { email, ...auth } = provided; // separate email from user_auth data
-  let id = await db('user_auth')
-    .where(auth)
-    .returning('id');
-  let user;
-  if(!id.length) { // Check if a user doesn't exist w/ specified auth data
-    // Use a transaction to prevent partial inserts
-    return new Promise(async (resolve, reject) => {
-      try{
-        await db.transaction(async t => {
-          [user] = await db('users')
-            .insert({email})
-            .returning('*')
-            .transacting(t);
-          await db('user_auth')
-            .insert({ ...auth, user_id: user.id })
-            .transacting(t);
-        });
-        resolve({...user, newAcct: !id.length})
-      } catch(err) {
-        reject(err);
-      }
-    })
-  } else { // If user already exists, return user
-    const rtrn = await db('users as u')
-      .select('u.*')
-      .where(auth)
-      .join('user_auth as ua', {'u.id': 'ua.user_id'});
-    return {...rtrn[0], newAcct: !id.length};
-  }
-}
-async function facebook(provided) {
-  const { email, ...auth } = provided; // separate email from user_auth data
-  let id = await db('user_auth')
-    .where(auth)
-    .returning('id');
-  let user;
-  if(!id.length) { // Check if a user doesn't exist w/ specified auth data
-    // Use a transaction to prevent partial inserts
-    return new Promise(async (resolve, reject) => {
-      try{
-        await db.transaction(async t => {
-          [user] = await db('users')
-            .insert({email})
-            .returning('*')
-            .transacting(t);
-          await db('user_auth')
-            .insert({ ...auth, user_id: user.id })
-            .transacting(t);
-        });
-        resolve({...user, newAcct: !id.length})
-      } catch(err) {
-        reject(err);
-      }
-    })
-  } else { // If user already exists, return user
-    const rtrn = await db('users as u')
-      .select('u.*')
-      .where(auth)
-      .join('user_auth as ua', {'u.id': 'ua.user_id'});
-    return {...rtrn[0], newAcct: !id.length};
+      .join('user_auth as ua', {'u.id': 'ua.user_id'})
+      .first();
+    return {...result, new_acct};
   }
 }

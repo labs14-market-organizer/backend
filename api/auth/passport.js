@@ -21,16 +21,12 @@ module.exports = (passport) => {
   // ^^^ SERIALIZE/DESERIALIZE ONLY SEEMS TO BE USED W/ SESSIONS
 
   passport.use(new SquareStrategy({
-    clientID: SQUARE_SB === 'sandbox'
-      ? SQUARE_SB_ID
-      : SQUARE_ID,
-    clientSecret: SQUARE_SB === 'sandbox'
-      ? SQUARE_SB_SECRET
-      : SQUARE_SECRET,
+    // Square OAuth apparently doesn't support their own sandbox
+    clientID: SQUARE_ID || 'test',
+    clientSecret: SQUARE_SECRET,
     callbackURL: `${BE_URL}/auth/square/callback`
   },
       function(accessToken, refreshToken, profile, done) {
-        // console.log(profile)
         const { provider, id, email } = profile;
         const user = { provider, prov_user: id, email };
         return done(null, user); // pass user data to callback
@@ -45,8 +41,9 @@ module.exports = (passport) => {
         callbackURL: `${BE_URL}/auth/google/callback` // BE endpoint that Google redirects to
       },
       function(accessToken, refreshToken, profile, done) {
-        const { provider, id, emails } = profile;
+        const { provider, id, emails, photos } = profile;
         const email = emails[0].value;
+        const profile_pic = photos[0].value;
         const user = { provider, prov_user: id, email };
         return done(null, user); // pass user data to callback
       }
@@ -59,7 +56,7 @@ module.exports = (passport) => {
         clientID: FACEBOOK_ID || 'test', // Fallback to prevent tests from failing
         clientSecret: FACEBOOK_SECRET,
         callbackURL: `${BE_URL}/auth/facebook/callback`, // BE endpoint that Facebook redirects to
-        profileFields: ['id', 'email'],
+        profileFields: ['id', 'email', 'picture.type(large)'],
         enableProof: true
       },
       function(accessToken, refreshToken, profile, done) {
