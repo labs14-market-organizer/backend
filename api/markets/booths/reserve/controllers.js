@@ -43,7 +43,6 @@ function putReserve(req, res) {
   req.body = {
     ...req.body,
     booth_id: req.params.bID,
-    vendor_id: req.vendor,
     updated_at: new Date()
   }
   Markets.updateReserve(req.params.rsID, req.body, req.user_id)

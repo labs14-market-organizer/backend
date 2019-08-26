@@ -45,8 +45,8 @@ exports.seed = function(knex) {
     knex
       // Deletes ALL existing entries for users table
       .raw("TRUNCATE TABLE vendors RESTART IDENTITY CASCADE")
-      .then(function() {
-        return knex("vendors").insert(vendors);
-      })
+      // .then(function() {
+      //   return knex("vendors").insert(vendors);
+      // })
   );
 };

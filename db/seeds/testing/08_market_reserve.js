@@ -13,8 +13,8 @@ exports.seed = function(knex) {
     knex
       // Deletes ALL existing entries for users table
       .raw("TRUNCATE TABLE market_reserve RESTART IDENTITY CASCADE")
-      .then(function() {
-        return knex("market_reserve").insert(reserve);
-      })
+      // .then(function() {
+      //   return knex("market_reserve").insert(reserve);
+      // })
   );
 };

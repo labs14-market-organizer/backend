@@ -26,6 +26,7 @@ async function addReserve(reserve, user_id) {
       .where({'v.id': result.vendor_id})
       .first();
   const available = await findReserveByDate(market.market_id, result.reserve_date, user_id);
+  console.log({market, vendor, result, available})
   return {market, vendor, result, available}
 }
 
