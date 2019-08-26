@@ -9,5 +9,8 @@ module.exports = (to, subject, html) => {
     subject,
     html
   }
-  return sgMail.send(msg);
+  // Switch to prevent SendGrid from failing tests or sending email
+  return process.env.NODE_ENV !== 'testing'
+    ? sgMail.send(msg)
+    : null;
 };
