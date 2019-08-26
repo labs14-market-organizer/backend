@@ -1,8 +1,8 @@
 const server = require('../server');
 const request = require('supertest')(server);
+const knex = require('../../db/config');
 const getType = require('jest-get-type');
 // const db = require('./index');
-const knex = require('../../db/config');
 const genToken = require('../genToken');
 
 const tkn1 = genToken({id: 1}).token;
@@ -12,15 +12,7 @@ const tkn4 = genToken({id: 4}).token;
 const tkn5 = genToken({id: 5}).token;
 
 describe('/markets', () => {
-  beforeAll(async () => {
-    // Reset markets table before running tests
-    await knex.raw("TRUNCATE TABLE market_reserve RESTART IDENTITY CASCADE");
-    await knex.raw("TRUNCATE TABLE market_vendors RESTART IDENTITY CASCADE");
-    await knex.raw("TRUNCATE TABLE market_days RESTART IDENTITY CASCADE");
-    await knex.raw("TRUNCATE TABLE market_booths RESTART IDENTITY CASCADE");
-    await knex.raw("TRUNCATE TABLE markets RESTART IDENTITY CASCADE");
-    await knex.seed.run();
-  })
+  beforeAll(async () => await knex.seed.run());
 
   describe('/ POST', () => {
     it('should return 201 status', () => {

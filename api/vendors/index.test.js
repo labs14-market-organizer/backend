@@ -1,8 +1,8 @@
 const server = require('../server');
 const request = require('supertest')(server);
+const knex = require('../../db/config');
 const getType = require('jest-get-type');
 // const db = require('./model');
-const knex = require('../../db/config');
 const genToken = require('../genToken');
 
 const tkn1 = genToken({id: 1}).token;
@@ -11,11 +11,7 @@ const tkn3 = genToken({id: 3}).token;
 const tkn4 = genToken({id: 4}).token;
 
 describe('/vendors', () => {
-  beforeAll(async () => {
-    // Reset vendors table before running tests
-    await knex.raw("TRUNCATE TABLE vendors RESTART IDENTITY CASCADE");
-    await knex.seed.run();
-  })
+  beforeAll(async () => await knex.seed.run());
 
   describe('/ POST', () => {
     it('should return 201 status', () => {

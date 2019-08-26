@@ -1,5 +1,5 @@
 const generateSeeds = () => {
-  const numOfUsers = 500;
+  const numOfUsers = 10;
   let arr = [];
   for (let i = 0; i < numOfUsers; i++) {
     arr.push({
