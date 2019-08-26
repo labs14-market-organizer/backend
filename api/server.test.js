@@ -15,7 +15,7 @@ describe('server', () => {
     })
 
     it('should return provided welcome message', () => {
-      const expected = {"message": "Hello from CloudStands."};
+      const expected = {"message": "Hello from Cloud Stands."};
       return request.get('/')
         .then(res => expect(res.body).toEqual(expected));
     })

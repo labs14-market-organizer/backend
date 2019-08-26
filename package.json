@@ -4,6 +4,7 @@
   "description": ":no_entry_sign: Note: All lines that start with :no_entry_sign: are instructions and should be deleted before this is posted to your portfolio. This is intended to be a guideline. Feel free to add your own flare to it.",
   "main": "index.js",
   "dependencies": {
+    "@sendgrid/mail": "^6.4.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^8.0.0",
@@ -13,6 +14,7 @@
     "jest-get-type": "^24.8.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.19.1",
+    "knex-migrate": "^1.7.2",
     "parse-address-string": "^0.0.3",
     "passport": "^0.4.0",
     "passport-facebook": "^3.0.0",
