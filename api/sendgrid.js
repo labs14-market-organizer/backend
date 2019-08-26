@@ -10,6 +10,7 @@ module.exports = (to, subject, html) => {
     html
   }
   // Switch to prevent SendGrid from failing tests or sending email
+  console.log(process.env.NODE_ENV)
   return process.env.NODE_ENV !== 'testing'
     ? sgMail.send(msg)
     : null;
