@@ -10,7 +10,8 @@ module.exports = {
 async function login(req, res) {
   return Auth.findOrCreate(req.user)
     .then(user => {
-      if(user.newAcct && user.email) {
+      console.log(user.new_acct, user.email)
+      if(user.new_acct && user.email) {
         email.welcome(user.email);
       }
       const redirectURL = genToken(user, true);

@@ -10,7 +10,8 @@ async function findOrCreate(provided) {
     .where(auth)
     .returning('id');
   let user;
-  if(!id.length) { // Check if a user doesn't exist w/ specified auth data
+  const new_acct = !id.length
+  if(!new_acct) { // Check if a user doesn't exist w/ specified auth data
     // Use a transaction to prevent partial inserts
     return new Promise(async (resolve, reject) => {
       try{
@@ -34,6 +35,6 @@ async function findOrCreate(provided) {
       .where(auth)
       .join('user_auth as ua', {'u.id': 'ua.user_id'})
       .first();
-    return result;
+    return {...result, new_acct};
   }
 }
