@@ -10,20 +10,19 @@ module.exports = {
 }
 
 async function login(req, res) {
-  if(req.user.tkn_refresh === undefined) {
-    const {tkn_refresh, ...rest} = req.user;
-    req.user = {...rest};
-  }
   if(req.user.provider === 'facebook') {
     const {tkn_access} = req.user;
     const proof = crypto.hmacsha256(tkn_access, process.env.FACEBOOK_SECRET);
-    await axios.get(`
-    https://graph.facebook.com/me/picture?redirect&access_token=${tkn_access}&appsecret_proof=${proof}`)
+    await axios.get(`https://graph.facebook.com/me/picture?redirect&access_token=${req.tkn_access}`)
       .then(user => {
         console.log('LOGIN', user)
         req.user.profile_pic = user.data.url;
       })
       .catch(err => console.error(err))
+  }
+  if(!!req.user.tkn_refresh) {
+    const {tkn_refresh, ...rest} = req.user;
+    req.user = {...rest};
   }
   console.log('CTRL',req.user);
   return Auth.findOrCreate(req.user)
