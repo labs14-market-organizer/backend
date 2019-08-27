@@ -1,4 +1,5 @@
 const axios = require('axios');
+const crypto = require('crypto');
 const Auth = require('./model');
 const email = require('./email');
 const genToken = require('../genToken');
@@ -14,13 +15,15 @@ async function login(req, res) {
     req.user = {...rest};
   }
   if(req.user.provider === 'facebook') {
+    const {tkn_access} = req.user;
+    const proof = crypto.hmacsha256(tkn_access, process.env.FACEBOOK_SECRET);
     await axios.get(`
-    https://graph.facebook.com/me/picture?redirect&access_token=${req.user.tkn_access}`)
+    https://graph.facebook.com/me/picture?redirect&access_token=${tkn_access}&appsecret_proof=${proof}`)
       .then(user => {
         console.log('LOGIN', user)
         req.user.profile_pic = user.data.url;
       })
-      .catch(err => console.error(err));
+      .catch(err => console.error(err))
   }
   console.log('CTRL',req.user);
   return Auth.findOrCreate(req.user)
