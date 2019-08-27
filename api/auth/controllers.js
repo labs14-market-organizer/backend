@@ -19,11 +19,11 @@ async function login(req, res) {
     const proof = crypto.createHmac('sha256', process.env.FACEBOOK_SECRET).update(tkn_access).digest('hex');
     await axios.get(`https://graph.facebook.com/me/picture?redirect&access_token=${tkn_access}&appsecret_proof=${proof}`)
       .then(user => {
+        console.log(user);
         req.user.profile_pic = user.data.url;
       })
       .catch(err => console.error(err))
   }
-  console.log('CTRL',req.user);
   return Auth.findOrCreate(req.user)
     .then(user => {
       if(user.new_acct && user.email) {
