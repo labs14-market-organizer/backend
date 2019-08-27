@@ -9,15 +9,15 @@ module.exports = {
 }
 
 async function login(req, res) {
-  if(req.body.provider === 'facebook') {
-    req.body.profile_pic = await axios.get(`
+  if(req.user.provider === 'facebook') {
+    req.user.profile_pic = await axios.get(`
     https://graph.facebook.com/me/picture?redirect&access_token=${req.tkn_access}`);
   }
-  if(!!req.body.tkn_refresh) {
-    const {tkn_refresh, ...rest} = req.body;
-    req.body = {...rest};
+  if(!!req.user.tkn_refresh) {
+    const {tkn_refresh, ...rest} = req.user;
+    req.user = {...rest};
   }
-  console.log('CTRL',req.body);
+  console.log('CTRL',req.user);
   return Auth.findOrCreate(req.user)
     .then(user => {
       if(user.new_acct && user.email) {
