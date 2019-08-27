@@ -10,6 +10,7 @@ module.exports = {
 }
 
 async function login(req, res) {
+  console.log(req.user)
   if(req.user.tkn_refresh === undefined) {
     const {tkn_refresh, ...rest} = req.user;
     req.user = {...rest};
@@ -19,7 +20,6 @@ async function login(req, res) {
     const proof = crypto.createHmac('sha256', process.env.FACEBOOK_SECRET).update(tkn_access).digest('hex');
     await axios.get(`https://graph.facebook.com/me/picture?redirect&access_token=${tkn_access}&appsecret_proof=${proof}`)
       .then(user => {
-        console.log(user);
         req.user.profile_pic = user.data.url;
       })
       .catch(err => console.error(err))
