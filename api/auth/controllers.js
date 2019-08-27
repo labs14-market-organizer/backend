@@ -10,8 +10,13 @@ module.exports = {
 
 async function login(req, res) {
   if(req.user.provider === 'facebook') {
-    req.user.profile_pic = await axios.get(`
-    https://graph.facebook.com/me/picture?redirect&access_token=${req.tkn_access}`);
+    await axios.get(`
+    https://graph.facebook.com/me/picture?redirect&access_token=${req.tkn_access}`)
+      .then(user => {
+        console.log('LOGIN', user)
+        req.user.profile_pic = user.data.url;
+      })
+      .catch(err => console.error(err));
   }
   if(!!req.user.tkn_refresh) {
     const {tkn_refresh, ...rest} = req.user;
