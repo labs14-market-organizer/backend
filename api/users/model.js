@@ -50,6 +50,7 @@ async function findById(id) {
         .join('markets as m', {'m.id': 'mb.market_id'})
         .whereIn('mr.vendor_id', vdrIDs)
         .andWhere('mr.reserve_date', '>=', db.raw('current_date'))
+        .orderByRaw('mr.reserve_date ASC')
     // Grab market IDs to populate upcoming market schedule
     const mktIDs = markets.map(mkt => mkt.id);
     // Join two subqueries, the first delivering total number of all booths at a market
@@ -75,7 +76,7 @@ async function findById(id) {
                 .as('mb2'),
             'mb1.market_id','mb2.market_id'
         )
-        .orderBy(['mb2.reserve_date', 'mb1.market_id'])
+        .orderByRaw('mb2.reserve_date ASC, mb1.market_id ASC')
     return {
         ...user,
         vendors,
