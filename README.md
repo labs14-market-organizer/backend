@@ -1,4 +1,5 @@
 # Cloud Stands | Backend
+
 Backend for labs14-market-organizer.
 
 # API Documentation
@@ -7,7 +8,7 @@ Backend for labs14-market-organizer.
 
 ## Getting started
 
-The complete application is build with Node.js, Express.js 
+The complete application is build with Node.js, Express.js
 <br>
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -38,6 +39,8 @@ Express is a fast, assertive, essential, and moderate web framework of Node.js. 
 
 | Method | Endpoint                 | Access Control | Description                                  |
 | ------ | ------------------------ | -------------- | -------------------------------------------- |
+| GET    | `/auth/square`           | none           | Redirects user to Square for secure login    |
+| GET    | `/auth/square/callback`  | Square         | Handles redirects from Square & updates DB   |
 | GET    | `/auth/google`           | none           | Redirects user to Google for secure login    |
 | GET    | `/auth/google/callback`  | Google         | Handles redirects from Google & updates DB   |
 | GET    | `/auth/facebook`         | none           | Redirects user to Facebook for secure login  |
@@ -119,7 +122,6 @@ Top-level information on user accounts
 Vendor profile data
 
 ---
-
 ```
 {
   id: INTEGER, auto-incrementing
@@ -146,7 +148,6 @@ Vendor profile data
 Market profile data
 
 ---
-
 ```
 {
   id: INTEGER, auto-incrementing
@@ -174,7 +175,6 @@ Market profile data
 Market booth types, per market
 
 ---
-
 ```
 {
   id: INTEGER, auto-incrementing
@@ -186,12 +186,9 @@ Market booth types, per market
   description: TEXT
 }
 ```
-
 #### MARKET_DAYS
 Market hours of operation, by day
-
 ---
-
 ```
 {
   id: INTEGER, auto-incrementing
@@ -206,7 +203,6 @@ Market hours of operation, by day
 Requests to join a market by vendors who have accepted that market's rules
 
 ---
-
 ```
 {
   id: INTEGER, auto-incrementing
@@ -222,7 +218,6 @@ Requests to join a market by vendors who have accepted that market's rules
 Reservations of a booth type at a market on a given date
 
 ---
-
 ```
 {
   id: INTEGER, auto-incrementing
@@ -239,6 +234,7 @@ Reservations of a booth type at a market on a given date
 
 ### Auth
 
+- `square()` -> Determines if a Square user already has an account, creates an account (if needed), and returns the user
 - `google()` -> Determines if a Google user already has an account, creates an account (if needed), and returns the user
 - `facebook()` -> Determines if a Facebook user already has an account, creates an account (if needed), and returns the user
 
@@ -276,6 +272,7 @@ Reservations of a booth type at a market on a given date
 - `findVendorsByDate()` -> Returns vendors reserved at a market on a date by joining `market_vendors` and `market_reserve` tables
 
 ### Middleware
+
 - `verifyJWT()` -> Verifies any JWT passed in the Authorization header of a request and denies invalid tokens
 - `protect()` -> Always used after `verifyJWT`, protects routes by checking if a JWT exists in the Authorization header
 - `parseQueryAddr()` -> Parses a query string passed to the route on `q` as an address, pulling out the city, state, and zipcode into separate variables and placed on the request's `query` object
@@ -295,8 +292,7 @@ Reservations of a booth type at a market on a given date
 
 In order for the app to function correctly, the user must set up their own environment variables.
 
-create a .env file that includes the following:
-
+Create a .env file that includes the following:
     *  NODE_ENV - specify `development` while in development and `production` in production/staging
     *  BE_URL - the URL of the backend you're using
     *  FE_URL - the URL of the frontend you're using
@@ -304,6 +300,13 @@ create a .env file that includes the following:
     *  JWT_SECRET - the secret used on the JWTs sent back to the frontend
     *  DB_TEST - required in development only, the `postgres://` URL of your test database
     *  DB_DEV - required in development only, the `postgres://` URL of your development database
+    *  SQUARE_SB - Set to "sandbox" if you wish to use sandbox
+    *  SQUARE_ID - This is provided in the Credentials section of the Square Developer Portal while switched to "Production"
+    *  SQUARE_TOKEN - This is provided in the Credentials section of the Square Developer Portal while switched to "Production"
+    *  SQUARE_SECRET - This is provided in the OAuth section of the Square Developer Portal while switched to "Production"
+    *  SQUARE_SB_ID - This is provided in the Credentials section of the Square Developer Portal while switched to "Sandbox"
+    *  SQUARE_SB_TOKEN - This is provided in the Credentials section of the Square Developer Portal while switched to "Sandbox"
+    *  SQUARE_SB_SECRET - This is provided in the OAuth section of the Square Developer Portal while switched to "Sandbox"
     *  GOOGLE_ID - This is provided in the Credentials section of the Google Developer Console
     *  GOOGLE_SECRET - This is also provided in the Credentials section of the Google Developer Console
     *  FACEBOOK_ID - This is provided in the Basic Settings section of the Facebook Developers dashboard
@@ -330,7 +333,6 @@ We would love to hear from you about new features which would improve this app a
 ### Pull Requests
 
 If you have developed a patch, bug fix, or new feature that would improve this app, please submit a pull request. It is best to communicate your ideas with the developers first before investing a great deal of time into a pull request to ensure that it will mesh smoothly with the project.
-
 Remember that this project is licensed under the MIT license, and by submitting a pull request, you agree that your work will be, too.
 
 #### Pull Request Guidelines
