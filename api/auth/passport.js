@@ -44,7 +44,8 @@ module.exports = (passport) => {
         const { provider, id, emails, photos } = profile;
         const email = emails[0].value;
         const profile_pic = photos[0].value;
-        const user = { provider, prov_user: id, email };
+        console.log(profile_pic)
+        const user = { provider, prov_user: id, email, profile_pic };
         return done(null, user); // pass user data to callback
       }
     )
@@ -60,6 +61,7 @@ module.exports = (passport) => {
         enableProof: true
       },
       function(accessToken, refreshToken, profile, done) {
+        console.log(profile)
         const { provider, id, emails } = profile;
         const email = emails[0].value; 
         const user = { provider, prov_user: id, email };

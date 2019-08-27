@@ -5,7 +5,7 @@ module.exports = {
 }
 
 async function findOrCreate(provided) {
-  const { email, ...auth } = provided; // separate email from user_auth data
+  const { email, profile_pic, ...auth } = provided; // separate email from user_auth data
   let id = await db('user_auth')
     .where(auth)
     .returning('id');
@@ -17,7 +17,7 @@ async function findOrCreate(provided) {
       try{
         await db.transaction(async t => {
           [user] = await db('users')
-            .insert({email})
+            .insert({email, profile_pic})
             .returning('*')
             .transacting(t);
           await db('user_auth')
