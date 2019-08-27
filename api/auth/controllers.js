@@ -17,7 +17,7 @@ async function login(req, res) {
   if(req.user.provider === 'facebook') {
     const {tkn_access} = req.user;
     const proof = crypto.createHmac('sha256', process.env.FACEBOOK_SECRET).update(tkn_access).digest('hex');
-    await axios.get(`https://graph.facebook.com/me/picture?redirect&access_token=${req.tkn_access}&appsecret_proof=${proof}`)
+    await axios.get(`https://graph.facebook.com/me/picture?redirect&access_token=${tkn_access}&appsecret_proof=${proof}`)
       .then(user => {
         req.user.profile_pic = user.data.url;
       })
