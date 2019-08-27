@@ -67,7 +67,7 @@ module.exports = (passport) => {
         enableProof: true
       },
       function(tkn_access, tkn_refresh, profile, done) {
-        // console.log(profile._json)
+        console.log('FOOBAR')
         const { provider, id, emails } = profile;
         const email = emails[0].value; 
         const user = { 
