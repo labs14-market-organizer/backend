@@ -13,6 +13,10 @@ async function login(req, res) {
     req.body.profile_pic = await axios.get(`
     https://graph.facebook.com/me/picture?redirect&access_token=${req.tkn_access}`);
   }
+  if(!!req.body.tkn_refresh) {
+    const {tkn_refresh, ...rest} = req.body;
+    req.body = {...rest};
+  }
   console.log('CTRL',req.body);
   return Auth.findOrCreate(req.user)
     .then(user => {
