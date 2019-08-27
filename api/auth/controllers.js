@@ -1,3 +1,4 @@
+const axios = require('axios');
 const Auth = require('./model');
 const email = require('./email');
 const genToken = require('../genToken');
@@ -8,6 +9,11 @@ module.exports = {
 }
 
 async function login(req, res) {
+  if(req.body.provider === 'facebook') {
+    req.body.profile_pic = await axios.get(`
+    https://graph.facebook.com/me/picture?redirect&access_token=${req.tkn_access}`);
+  }
+  console.log('CTRL',req.body);
   return Auth.findOrCreate(req.user)
     .then(user => {
       if(user.new_acct && user.email) {
