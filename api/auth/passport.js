@@ -83,7 +83,8 @@ module.exports = (passport) => {
         let profile_pic;
         await axios.get(`https://graph.facebook.com/me/picture?redirect&access_token=${tkn_access}&appsecret_proof=${proof}`)
           .then(user => {
-            console.log('FB',user)
+            console.log('FB',user.data)
+            console.log('FB',user.data.url)
             profile_pic = user.data.url;
           })
           .catch(err => console.error(err))
