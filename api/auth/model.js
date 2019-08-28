@@ -9,7 +9,7 @@ async function findOrCreate(provided) {
   const {tkn_access, tkn_refresh, ...rest} = auth;
   let [id] = await db('user_auth')
     .where(rest)
-    .returning('id');
+    .pluck('id');
   let user;
   const new_acct = !id;
   if(new_acct) { // Check if a user doesn't exist w/ specified auth data

@@ -57,8 +57,7 @@ module.exports = (passport) => {
           profile_pic,
           provider,
           prov_user: id,
-          tkn_access,
-          tkn_refresh
+          tkn_access
         };
         return done(null, user); // pass user data to callback
       }
