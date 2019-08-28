@@ -7,10 +7,10 @@ module.exports = {
   login,
 }
 
-async function login(req, res) {
+function login(req, res) {
+  console.log(req.user)
   return Auth.findOrCreate(req.user)
     .then(user => {
-      console.log(user)
       if(user.new_acct && user.email) {
         email.welcome(user.email);
       }
