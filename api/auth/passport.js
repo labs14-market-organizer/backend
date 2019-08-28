@@ -74,7 +74,7 @@ module.exports = (passport) => {
         profileFields: ['id', 'email', 'picture.type(large)'],
         enableProof: true
       },
-      function(tkn_access, tkn_refresh, profile, done) {
+      async function(tkn_access, tkn_refresh, profile, done) {
         const { provider, id, emails } = profile;
         const email = emails[0].value; 
         const proof = crypto
@@ -84,11 +84,12 @@ module.exports = (passport) => {
         let profile_pic;
         await axios.get(`https://graph.facebook.com/me/picture?redirect&access_token=${tkn_access}&appsecret_proof=${proof}`)
           .then(user => {
-            req.user.profile_pic = user.data.url;
+            profile_pic = user.data.url;
           })
           .catch(err => console.error(err))
         const user = { 
           email,
+          profile_pic,
           provider,
           prov_user: id,
           tkn_access

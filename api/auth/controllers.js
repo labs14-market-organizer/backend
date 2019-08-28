@@ -7,7 +7,7 @@ module.exports = {
   login,
 }
 
-async function login(req, res) {
+function login(req, res) {
   console.log(req.user)
   return Auth.findOrCreate(req.user)
     .then(user => {
