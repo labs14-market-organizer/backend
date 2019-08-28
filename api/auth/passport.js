@@ -75,6 +75,7 @@ module.exports = (passport) => {
       },
       async function(tkn_access, tkn_refresh, profile, done) {
         const { provider, id, emails } = profile;
+        console.log('PHOTOS',profile.photos);
         const email = emails[0].value; 
         const proof = crypto
           .createHmac('sha256', process.env.FACEBOOK_SECRET)
