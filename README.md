@@ -234,9 +234,7 @@ Reservations of a booth type at a market on a given date
 
 ### Auth
 
-- `square()` -> Determines if a Square user already has an account, creates an account (if needed), and returns the user
-- `google()` -> Determines if a Google user already has an account, creates an account (if needed), and returns the user
-- `facebook()` -> Determines if a Facebook user already has an account, creates an account (if needed), and returns the user
+- `findOrCreate()` -> Determines if a Facebook/Google/Square user already has an account, creates an account (if needed), and returns the user
 
 ### Users
 
@@ -273,6 +271,7 @@ Reservations of a booth type at a market on a given date
 
 ### Middleware
 
+- `originCORS()` -> Currently unused wrapper over Express's `cors` middleware that should whitelist any origin(s) of your choosing
 - `verifyJWT()` -> Verifies any JWT passed in the Authorization header of a request and denies invalid tokens
 - `protect()` -> Always used after `verifyJWT`, protects routes by checking if a JWT exists in the Authorization header
 - `parseQueryAddr()` -> Parses a query string passed to the route on `q` as an address, pulling out the city, state, and zipcode into separate variables and placed on the request's `query` object
@@ -311,6 +310,7 @@ Create a .env file that includes the following:
     *  GOOGLE_SECRET - This is also provided in the Credentials section of the Google Developer Console
     *  FACEBOOK_ID - This is provided in the Basic Settings section of the Facebook Developers dashboard
     *  FACEBOOK_SECRET - This is also provided in the Basic Settings section of the Facebook Developers dashboard
+    *  SENDGRID_KEY - This is provided in the Basic Settings section of the Facebook Developers dashboard
     
 ## Contributing
 
