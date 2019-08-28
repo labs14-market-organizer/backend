@@ -1,5 +1,3 @@
-const axios = require('axios');
-const crypto = require('crypto');
 const Auth = require('./model');
 const email = require('./email');
 const genToken = require('../genToken');
@@ -11,19 +9,6 @@ module.exports = {
 
 async function login(req, res) {
   console.log(req.user)
-  if(req.user.tkn_refresh === undefined) {
-    const {tkn_refresh, ...rest} = req.user;
-    req.user = {...rest};
-  }
-  if(req.user.provider === 'facebook') {
-    const {tkn_access} = req.user;
-    const proof = crypto.createHmac('sha256', process.env.FACEBOOK_SECRET).update(tkn_access).digest('hex');
-    await axios.get(`https://graph.facebook.com/me/picture?redirect&access_token=${tkn_access}&appsecret_proof=${proof}`)
-      .then(user => {
-        req.user.profile_pic = user.data.url;
-      })
-      .catch(err => console.error(err))
-  }
   return Auth.findOrCreate(req.user)
     .then(user => {
       if(user.new_acct && user.email) {
