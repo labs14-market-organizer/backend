@@ -6,6 +6,7 @@ module.exports = {
 
 async function findOrCreate(provided) {
   const { email, profile_pic, ...auth } = provided; // separate email from user_auth data
+  const {tkn_access, tkn_refresh, ...rest} = auth;
   let [id] = await db('user_auth')
     .where(rest)
     .returning('id');
