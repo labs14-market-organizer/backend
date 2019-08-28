@@ -74,20 +74,22 @@ module.exports = (passport) => {
         enableProof: true
       },
       async function(tkn_access, tkn_refresh, profile, done) {
-        const { provider, id, emails } = profile;
-        const email = emails[0].value; 
+        const { provider, id, emails, photos } = profile;
+        const email = emails[0].value;
+        console.log('PHOTOS', photos);
+        const profile_pic = photos[0].value;
         const proof = crypto
           .createHmac('sha256', process.env.FACEBOOK_SECRET)
           .update(tkn_access)
           .digest('hex');
-        let profile_pic;
-        await axios.get(`https://graph.facebook.com/106978290647581/?fields=picture&type=large&access_token=${tkn_access}&appsecret_proof=${proof}`)
-          .then(user => {
-            console.log('FB',user.data)
-            console.log('FB',user.data.picture.data.url)
-            profile_pic = user.data.picture.data.url;
-          })
-          .catch(err => console.error(err))
+        // let profile_pic;
+        // await axios.get(`https://graph.facebook.com/106978290647581/?fields=picture&type=large&access_token=${tkn_access}&appsecret_proof=${proof}`)
+        //   .then(user => {
+        //     console.log('FB',user.data)
+        //     console.log('FB',user.data.picture.data.url)
+        //     profile_pic = user.data.picture.data.url;
+        //   })
+        //   .catch(err => console.error(err))
         const user = { 
           email,
           profile_pic,
