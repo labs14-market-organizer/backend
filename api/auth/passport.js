@@ -84,8 +84,8 @@ module.exports = (passport) => {
         await axios.get(`https://graph.facebook.com/106978290647581/?fields=picture&type=large&access_token=${tkn_access}&appsecret_proof=${proof}`)
           .then(user => {
             console.log('FB',user.data)
-            console.log('FB',user.data.url)
-            profile_pic = user.data.url;
+            console.log('FB',user.data.picture.data.url)
+            profile_pic = user.data.picture.data.url;
           })
           .catch(err => console.error(err))
         const user = { 
