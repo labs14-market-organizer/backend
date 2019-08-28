@@ -75,7 +75,6 @@ module.exports = (passport) => {
       },
       async function(tkn_access, tkn_refresh, profile, done) {
         const { provider, id, emails } = profile;
-        console.log('PHOTOS',profile.photos);
         const email = emails[0].value; 
         const proof = crypto
           .createHmac('sha256', process.env.FACEBOOK_SECRET)
@@ -84,6 +83,7 @@ module.exports = (passport) => {
         let profile_pic;
         await axios.get(`https://graph.facebook.com/me/picture?redirect&access_token=${tkn_access}&appsecret_proof=${proof}`)
           .then(user => {
+            console.log('FB',user)
             profile_pic = user.data.url;
           })
           .catch(err => console.error(err))
