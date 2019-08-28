@@ -311,7 +311,7 @@ Create a .env file that includes the following:
     *  GOOGLE_SECRET - This is also provided in the Credentials section of the Google Developer Console
     *  FACEBOOK_ID - This is provided in the Basic Settings section of the Facebook Developers dashboard
     *  FACEBOOK_SECRET - This is also provided in the Basic Settings section of the Facebook Developers dashboard
-    *  SENDGRID_KEY - This is provided in the Basic Settings section of the Facebook Developers dashboard
+    *  SENDGRID_KEY - A new key can be created in the API Keys section of the SendGrid Settings (delete unknown keys to prevent unauthorized use)
     
 ## Contributing
 
