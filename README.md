@@ -292,6 +292,7 @@ Reservations of a booth type at a market on a given date
 In order for the app to function correctly, the user must set up their own environment variables.
 
 Create a .env file that includes the following:
+
     *  NODE_ENV - specify `development` while in development and `production` in production/staging
     *  BE_URL - the URL of the backend you're using
     *  FE_URL - the URL of the frontend you're using
