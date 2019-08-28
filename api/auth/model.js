@@ -49,12 +49,6 @@ async function findOrCreate(provided) {
       } catch(err) {
         reject(err);
       }
-    // If user already exists, return user
-    // const result = await db('users as u')
-    //   .select('u.*')
-    //   .where(auth)
-    //   .join('user_auth as ua', {'u.id': 'ua.user_id'})
-    //   .first();
-    // return {...result, new_acct};
+    })
   }
 }
