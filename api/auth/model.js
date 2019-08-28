@@ -34,14 +34,15 @@ async function findOrCreate(provided) {
     // Use a transaction to prevent partial inserts
     return new Promise(async (resolve, reject) => {
       try{
+        const updated_at = new Date();
         await db.transaction(async t => {
           [result] = await db('user_auth')
-            .update(auth)
+            .update({...auth, updated_at})
             .where({user_id: id})
             .returning('*')
             .transacting(t);
           [user] = await db('users')
-            .update({email, profile_pic})
+            .update({email, profile_pic, updated_at})
             .where({id})
             .returning('*')
             .transacting(t);
