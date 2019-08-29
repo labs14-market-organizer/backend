@@ -1,8 +1,6 @@
 const SquareStrategy = require("passport-square").Strategy;
 const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
-const axios = require('axios');
-const crypto = require('crypto');
 const {
   BE_URL,
   SQUARE_SB, SQUARE_SB_ID, SQUARE_SB_SECRET,
