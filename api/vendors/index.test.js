@@ -1,20 +1,20 @@
 const server = require('../server');
 const request = require('supertest')(server);
+const knex = require('../../db/config');
 const getType = require('jest-get-type');
 // const db = require('./model');
-const knex = require('../../data/dbConfig');
-const genToken = require('../auth/genToken');
+const genToken = require('../genToken');
 
-const tkn1 = genToken({id: 1}, 1000*60*60*2);
-const tkn2 = genToken({id: 2}, 1000*60*60*2);
-const tkn3 = genToken({id: 3}, 1000*60*60*2);
-const tkn4 = genToken({id: 4}, 1000*60*60*2);
+const tkn1 = genToken({id: 1}).token;
+const tkn2 = genToken({id: 2}).token;
+const tkn3 = genToken({id: 3}).token;
+const tkn4 = genToken({id: 4}).token;
 
 describe('/vendors', () => {
   beforeAll(async () => {
-    // Reset vendors table before running tests
+    await knex.seed.run()
     await knex.raw("TRUNCATE TABLE vendors RESTART IDENTITY CASCADE");
-  })
+  });
 
   describe('/ POST', () => {
     it('should return 201 status', () => {
@@ -41,7 +41,7 @@ describe('/vendors', () => {
         .then(res => expect(getType(res.body)).toBe('object'));
     })
     
-    it('should return an object w/ next ID', () => {
+    it('should return an object w/ passed name', () => {
       const vendor = {
         name: "Matt's",
         email: "someone@somewhere.com",
@@ -50,7 +50,7 @@ describe('/vendors', () => {
       return request.post('/vendors')
         .send(vendor)
         .set({authorization: tkn3})
-        .then(res => expect(res.body.id).toBe(3));
+        .then(res => expect(res.body.name).toBe(vendor.name));
     })
     
     it('should return an object w/ items array', () => {
@@ -78,10 +78,10 @@ describe('/vendors', () => {
         .then(res => expect(getType(res.body)).toBe('array'));
     })
     
-    it('should return an array w/ next ID', () => {
-      return request.get('/vendors')
-        .then(res => expect(res.body).toHaveLength(4));
-    })
+    // it('should return an array w/ next ID', () => {
+    //   return request.get('/vendors')
+    //     .then(res => expect(res.body).toHaveLength(4));
+    // })
   })
 
   describe('/:id GET', () => {

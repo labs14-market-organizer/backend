@@ -1,12 +1,14 @@
+const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const db = require('../data/dbConfig');
+const db = require('../../db/config');
 const parseAddr = require("parse-address-string");
 const getType = require('jest-get-type');
-const genToken = require('./auth/genToken');
+const genToken = require('../genToken');
 const {getStateCodeByStateName: stateCode} = require("us-state-codes");
 const {validationResult} = require('express-validator');
 
 module.exports = {
+  originCORS,
   verifyJWT,
   protect,
   parseQueryAddr,
@@ -21,6 +23,25 @@ module.exports = {
   futureDate,
   validReserveDate,
   availBooths
+}
+
+const defWL = [
+  process.env.FE_URL,
+  'https://www.cloudstands.com',
+  'https://mystifying-jones-f3d668.netlify.com',
+  /localhost:3[0-9]{3}/
+];
+function originCORS(whitelist = defWL) {
+  const opt = {
+    origin: function (origin, cb) {
+      if (whitelist.includes(origin) || !origin) {
+        cb(null, true)
+      } else {
+        cb(new Error(`${origin} is not a valid CORS origin.`))
+      }
+    }
+  }
+  return cors(opt);
 }
 
 // Verifies JWT and stores subject on request as "user_id"
@@ -49,8 +70,7 @@ function verifyJWT(req, res, next) {
         req.vendor = req.vendor[0];
         // Create new JWT that can be refreshed on frontend
         const user = {id: req.user_id};
-        const exp = Date.now() + 1000*60*60*2; // 2 hours
-        req.token = {token: genToken(user, exp), exp}
+        req.token = genToken(user);
         next();
       } else {
         res.status(403).json({ message: 'Invalid authorization token.' })
