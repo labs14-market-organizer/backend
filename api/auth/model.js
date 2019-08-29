@@ -29,12 +29,27 @@ async function findOrCreate(provided) {
         reject(err);
       }
     })
-  } else { // If user already exists, return user
-    const result = await db('users as u')
-      .select('u.*')
-      .where(auth)
-      .join('user_auth as ua', {'u.id': 'ua.user_id'})
-      .first();
-    return {...result, new_acct};
+  } else {
+    // Use a transaction to prevent partial inserts
+    return new Promise(async (resolve, reject) => {
+      try{
+        const updated_at = new Date();
+        await db.transaction(async t => {
+          [result] = await db('user_auth')
+            .update({...auth, updated_at})
+            .where(rest)
+            .returning('*')
+            .transacting(t);
+          [user] = await db('users')
+            .update({email, profile_pic, updated_at})
+            .where({id})
+            .returning('*')
+            .transacting(t);
+        });
+        resolve({...user, new_acct})
+      } catch(err) {
+        reject(err);
+      }
+    })
   }
 }
