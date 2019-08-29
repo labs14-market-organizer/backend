@@ -38,11 +38,7 @@ async function findOrCreate(provided) {
         await db.transaction(async t => {
           [result] = await db('user_auth')
             .update({...auth, updated_at})
-<<<<<<< HEAD
             .where(rest)
-=======
-            .where({user_id: id})
->>>>>>> 307890ba9a447f16bbb8ffe23a1448848a04ce70
             .returning('*')
             .transacting(t);
           [user] = await db('users')
