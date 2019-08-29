@@ -5,19 +5,20 @@ module.exports = {
 }
 
 async function findOrCreate(provided) {
-  const { email, ...auth } = provided; // separate email from user_auth data
-  let id = await db('user_auth')
-    .where(auth)
-    .returning('id');
+  const { email, profile_pic, ...auth } = provided; // separate email from user_auth data
+  const {tkn_access, tkn_refresh, ...rest} = auth;
+  let [id] = await db('user_auth')
+    .where(rest)
+    .pluck('id');
   let user;
-  const new_acct = !id.length;
+  const new_acct = !id;
   if(new_acct) { // Check if a user doesn't exist w/ specified auth data
     // Use a transaction to prevent partial inserts
     return new Promise(async (resolve, reject) => {
       try{
         await db.transaction(async t => {
           [user] = await db('users')
-            .insert({email})
+            .insert({email, profile_pic})
             .returning('*')
             .transacting(t);
           await db('user_auth')
@@ -37,7 +38,11 @@ async function findOrCreate(provided) {
         await db.transaction(async t => {
           [result] = await db('user_auth')
             .update({...auth, updated_at})
+<<<<<<< HEAD
             .where(rest)
+=======
+            .where({user_id: id})
+>>>>>>> 307890ba9a447f16bbb8ffe23a1448848a04ce70
             .returning('*')
             .transacting(t);
           [user] = await db('users')
