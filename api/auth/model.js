@@ -43,7 +43,7 @@ async function findOrCreate(provided) {
             .transacting(t);
           [user] = await db('users')
             .update({email, profile_pic, updated_at})
-            .where({id})
+            .where({id: result.user_id})
             .returning('*')
             .transacting(t);
         });
