@@ -14,7 +14,7 @@
     "express-validator": "^6.1.1",
     "helmet": "^3.18.0",
     "jest-get-type": "^24.8.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "knex": "^0.19.1",
     "knex-migrate": "^1.7.2",
     "parse-address-string": "^0.0.3",
